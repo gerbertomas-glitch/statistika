@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIEW - Statistiky Google Moje Firma</title>
+    
+    <!-- Scripts & Styles -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Prop-Types must be loaded before Recharts -->
+    <script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/recharts@2.1.16/umd/Recharts.js"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;700&family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --google-font: 'Google Sans', 'Product Sans', 'Open Sans', 'Roboto', Arial, sans-serif;
+        }
+        * {
+            font-family: var(--google-font) !important;
+        }
+        body {
+            background-color: #F8F9FA;
+            color: #3C4043;
+        }
+        h1, h2, h3, h4, .font-bold {
+            letter-spacing: -0.01em;
+        }
+        /* Custom transitions for Recharts and Modals */
+        .recharts-cartesian-grid-horizontal line, .recharts-cartesian-grid-vertical line {
+            stroke: #f1f3f4;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { 
+            AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
+            BarChart, Bar
+        } = window.Recharts;
+
+        // --- MANUÁLNÍ IKONY (SVG) PRO MAXIMÁLNÍ KOMPATIBILITU ---
+        const Icon = ({ name, className = "w-5 h-5", strokeWidth = 2 }) => {
+            const icons = {
+                users: <><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></>,
+                eye: <><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></>,
+                star: <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>,
+                globe: <><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10z"/></>,
+                search: <><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></>,
+                trendingUp: <><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></>,
+                trendingDown: <><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></>,
+                barChart: <><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></>,
+                alert: <><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></>,
+                info: <><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></>,
+                check: <polyline points="20 6 9 17 4 12"/>,
+                x: <><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></>,
+                chevronRight: <polyline points="9 18 15 12 9 6"/>,
+                arrowRight: <><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></>
+            };
+            return (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
+                    {icons[name]}
+                </svg>
+            );
+        };
+
+        // --- MOCK DATA ---
+        const generateData = () => {
+            const months = ['Led', 'Úno', 'Bře', 'Dub', 'Kvě', 'Čer', 'Čec', 'Srp', 'Zář', 'Říj', 'Lis', 'Pro'];
+            return months.map(m => ({
+                name: m,
+                interakce: Math.floor(Math.random() * 300) + 200,
+                prevInterakce: Math.floor(Math.random() * 250) + 150,
+                zobrazeni: Math.floor(Math.random() * 1000) + 800,
+                recenze: Math.floor(Math.random() * 10) + 2,
+                streetView: Math.floor(Math.random() * 2000) + 5000
+            }));
+        };
+
+        const welcomeStats = [
+            { id: 'interakce', title: 'Interakce celkem', total: 124580, periodValue: 3412, periodTrend: 12.5, icon: 'users', color: '#34A853', description: 'Hovory, navigace a prokliky na web.' },
+            { id: 'streetview', title: 'Zobrazení prohlídky', total: 842105, periodValue: 12840, periodTrend: -4.2, icon: 'globe', color: '#FBBC05', description: 'Zhlédnutí 360° prohlídek a fotek.' },
+            { id: 'zobrazeni', title: 'Zobrazení profilu', total: 2154300, periodValue: 84200, periodTrend: 5.2, icon: 'eye', color: '#4285F4', description: 'Lidé, kteří viděli váš profil na Googlu.' },
+            { id: 'vyhledavani', title: 'Nalezení vyhledáváním', total: 1542000, periodValue: 56120, periodTrend: 8.9, icon: 'search', color: '#EA4335', description: 'Dotazy vedoucí k vašemu profilu.' }
+        ];
+
+        // --- MODAL ---
+        const RecommendationsModal = ({ isOpen, onClose }) => {
+            if (!isOpen) return null;
+            return (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm text-sm" onClick={onClose}>
+                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl border border-[#DADCE0] overflow-hidden" onClick={e => e.stopPropagation()}>
+                        <div className="px-8 py-5 border-b border-[#DADCE0] flex justify-between items-center bg-[#F8F9FA]">
+                            <div className="flex items-center gap-3 text-[#EA4335]">
+                                <Icon name="alert" className="w-6 h-6" />
+                                <h2 className="font-bold text-gray-900 text-lg">Strategie pro obnovení růstu</h2>
+                            </div>
+                            <button onClick={onClose} className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-500"><Icon name="x" className="w-5 h-5" /></button>
+                        </div>
+                        <div className="p-8 space-y-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="p-5 bg-white border border-[#DADCE0] rounded-xl shadow-sm">
+                                    <h3 className="text-xs font-bold text-gray-400 uppercase mb-3">Analýza Sezónnosti</h3>
+                                    <p className="text-gray-600 leading-relaxed text-xs">Pokles může být přirozený. Prověřujeme historické trendy na trhu.</p>
+                                </div>
+                                <div className="p-5 bg-white border border-[#DADCE0] rounded-xl shadow-sm">
+                                    <h3 className="text-xs font-bold text-gray-400 uppercase mb-3">Kvalita obsahu</h3>
+                                    <p className="text-gray-600 leading-relaxed text-xs">Google upřednostňuje profily s novými fotkami. Přidejte 3–5 snímků měsíčně.</p>
+                                </div>
+                            </div>
+                            <div className="p-5 bg-[#F8F9FA] rounded-xl border border-[#DADCE0]">
+                                <h4 className="text-[10px] font-bold uppercase text-gray-400 mb-4 tracking-widest">Rychlý kontrolní seznam</h4>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-gray-700">
+                                    <div className="flex items-center gap-2"><Icon name="check" className="w-4 h-4 text-[#34A853]" /> Aktualizovat otevírací dobu</div>
+                                    <div className="flex items-center gap-2"><Icon name="check" className="w-4 h-4 text-[#34A853]" /> Nahrát 3 nové fotky</div>
+                                    <div className="flex items-center gap-2"><Icon name="check" className="w-4 h-4 text-[#34A853]" /> Vytvořit příspěvek</div>
+                                    <div className="flex items-center gap-2"><Icon name="check" className="w-4 h-4 text-[#34A853]" /> Odpovědět na recenze</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="p-6 border-t border-[#DADCE0] flex justify-center bg-[#F8F9FA]">
+                            <button onClick={onClose} className="bg-gray-900 text-white px-10 py-3 rounded-full text-sm font-bold hover:bg-black transition-all flex items-center gap-3 shadow-lg">
+                                Rozumím, zavřít <Icon name="arrowRight" className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- KPI CARD ---
+        const WelcomeKpiCard = ({ stat }) => {
+            const isNegative = stat.periodTrend < 0;
+            return (
+                <div className="bg-white border border-[#DADCE0] p-6 rounded-xl shadow-sm hover:shadow-md transition-all group">
+                    <div className="flex justify-between items-start mb-5">
+                        <div className="text-gray-300 group-hover:text-[#34A853] transition-colors">
+                            <Icon name={stat.icon} className="w-6 h-6" />
+                        </div>
+                        <div className="text-right">
+                            <div className={`flex items-center font-bold text-sm ${isNegative ? 'text-[#EA4335]' : 'text-[#34A853]'}`}>
+                                <Icon name={isNegative ? 'trendingDown' : 'trendingUp'} className="w-4 h-4 mr-1" />
+                                {Math.abs(stat.periodTrend)}%
+                            </div>
+                            <div className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">vs loni</div>
+                        </div>
+                    </div>
+                    <div className="mb-5">
+                        <h3 className="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1.5 leading-none">{stat.title}</h3>
+                        <div className="text-3xl font-black text-gray-900 tracking-tighter leading-none">{stat.periodValue.toLocaleString()}</div>
+                    </div>
+                    <div className="pt-5 border-t border-[#F1F3F4] flex justify-between items-center">
+                        <div className="leading-tight">
+                            <p className="text-[9px] text-gray-400 font-bold uppercase mb-0.5 tracking-tighter">Historický součet</p>
+                            <p className="text-base font-light text-gray-500 tracking-tight">{stat.total.toLocaleString()}</p>
+                        </div>
+                        <div className="group/info relative cursor-help">
+                            <Icon name="info" className="w-3.5 h-3.5 text-gray-200 hover:text-gray-400" />
+                            <div className="absolute bottom-full right-0 mb-3 w-48 p-3 bg-gray-900 text-white text-[10px] rounded-lg shadow-2xl opacity-0 invisible group-hover/info:opacity-100 group-hover/info:visible transition-all z-20 leading-relaxed">
+                                {stat.description}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- APP ---
+        function App() {
+            const [isModalOpen, setModalOpen] = React.useState(false);
+            const [viewType, setViewType] = React.useState('měsíc');
+            const data = React.useMemo(() => generateData(), [viewType]);
+            const hasNegativeTrend = React.useMemo(() => welcomeStats.some(s => s.periodTrend < 0), []);
+
+            return (
+                <div className="min-h-screen pb-20">
+                    <RecommendationsModal isOpen={isModalOpen} onClose={() => setModalOpen(false)} />
+
+                    {/* HEADER */}
+                    <header className="sticky top-0 z-50 bg-white border-b border-[#DADCE0] shadow-sm">
+                        {/* VIEW Logo - zmenšené */}
+                        <div className="py-3 px-4 md:px-10 border-b border-gray-100 flex items-center justify-start">
+                            <div className="h-7 md:h-8">
+                                <img src="https://viewcz.com/images/svg/head-logo.svg" alt="VIEW" className="h-full w-auto object-contain block opacity-90" />
+                            </div>
+                        </div>
+                        {/* Subheader - Statistiky + Google Moje Firma */}
+                        <div className="py-2.5 px-4 md:px-10 flex items-center justify-start bg-white/50">
+                            <div className="flex items-center gap-3">
+                                {/* Zviditelněná ikona statistik */}
+                                <div className="text-[#34A853]"><Icon name="barChart" className="w-5 h-5" strokeWidth={2.5} /></div>
+                                <div className="flex items-center gap-2 text-sm md:text-base font-normal text-gray-700">
+                                    <span className="font-medium text-gray-600">Statistiky</span>
+                                    <div className="flex items-center h-5 border-l border-gray-300 ml-1 pl-3">
+                                        {/* Větší Google logo + text */}
+                                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/3840px-Google_2015_logo.svg.png" alt="Google" className="h-4 md:h-5 w-auto block object-contain" />
+                                        <span className="font-light text-gray-500 ml-2 whitespace-nowrap">Moje Firma</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    <main className="max-w-7xl mx-auto px-4 md:px-10 pt-10">
+                        {/* WELCOME */}
+                        <div className="bg-white border border-[#DADCE0] p-8 md:p-12 rounded-2xl mb-12 shadow-sm">
+                            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-10 mb-12">
+                                <div className="max-w-3xl text-gray-500 text-lg md:text-xl leading-relaxed font-light">
+                                    <div className="inline-flex items-center gap-2 bg-[#E6F4EA] text-[#34A853] px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest mb-6">Souhrnný přehled firemní prezentace</div>
+                                    <p>Tento dashboard zobrazuje aktuální výsledky a efektivitu vaší prezentace na Googlu spravované v systému <strong className="text-gray-900 font-bold">VIEW</strong>. Data reprezentují souhrnnou aktivitu uživatelů napříč lokalitami.</p>
+                                    {hasNegativeTrend && (
+                                        <button onClick={() => setModalOpen(true)} className="flex items-center gap-3 bg-[#FCE8E6] hover:bg-[#FAD2CF] text-[#C5221F] px-6 py-3 rounded-xl text-sm font-bold mt-8 transition-all border border-[#FAD2CF] group shadow-sm">
+                                            <Icon name="alert" className="w-5 h-5 animate-pulse" /> Zobrazit doporučení pro růst <Icon name="chevronRight" className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                        </button>
+                                    )}
+                                </div>
+                                <div className="bg-[#F8F9FA] border border-[#DADCE0] p-6 rounded-xl text-center min-w-[240px]">
+                                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-2">Aktuálně zobrazeno</p>
+                                    <p className="text-xl font-black text-gray-800 tracking-tight">Posledních 30 dní</p>
+                                    <div className="my-4 h-[1px] bg-gray-200 w-full opacity-50"></div>
+                                    <p className="text-[10px] text-[#34A853] font-bold uppercase tracking-wider">Vs stejné období 2024</p>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                                {welcomeStats.map(stat => <WelcomeKpiCard key={stat.id} stat={stat} />)}
+                            </div>
+                        </div>
+
+                        {/* CHART SECTION */}
+                        <div className="mt-20">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-10">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-3 bg-white border border-[#DADCE0] text-[#34A853] rounded-xl shadow-sm"><Icon name="users" className="w-6 h-6" /></div>
+                                    <h2 className="text-2xl font-black text-gray-800 tracking-tight italic uppercase">Detailní vývoj interakcí</h2>
+                                </div>
+                                <div className="flex gap-1 p-1 bg-white border border-[#DADCE0] rounded-full shadow-sm overflow-hidden">
+                                    {['týden', 'měsíc', 'rok'].map(type => (
+                                        <button key={type} onClick={() => setViewType(type)} className={`px-5 py-2 text-[10px] font-bold uppercase tracking-widest rounded-full transition-all ${viewType === type ? 'bg-[#34A853] text-white' : 'text-gray-400 hover:text-gray-600'}`}>
+                                            {type}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="bg-white p-10 md:p-14 border border-[#DADCE0] rounded-2xl shadow-sm">
+                                <div className="flex justify-between items-center mb-12 text-xs font-bold text-gray-400 uppercase tracking-widest">
+                                    <p>Meziroční srovnání aktivity</p>
+                                    <div className="flex gap-6">
+                                        <span className="flex items-center gap-2.5 text-[#34A853]"><div className="w-3 h-3 rounded-full bg-[#34A853]" /> Aktuální</span>
+                                        <span className="flex items-center gap-2.5"><div className="w-3 h-0.5 bg-gray-300" /> Loni</span>
+                                    </div>
+                                </div>
+                                <div className="h-[420px] w-full">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <AreaChart data={data}>
+                                            <defs>
+                                                <linearGradient id="colorInt" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor="#34A853" stopOpacity={0.1}/>
+                                                    <stop offset="95%" stopColor="#34A853" stopOpacity={0}/>
+                                                </linearGradient>
+                                            </defs>
+                                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#70757a', fontSize: 11, fontWeight: 900}} dy={15} />
+                                            <YAxis axisLine={false} tickLine={false} tick={{fill: '#70757a', fontSize: 11, fontWeight: 900}} />
+                                            <Tooltip contentStyle={{borderRadius: '12px', border: '1px solid #DADCE0', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)'}} />
+                                            <Area type="monotone" dataKey="prevInterakce" stroke="#cbd5e1" fill="transparent" strokeDasharray="5 5" strokeWidth={2} />
+                                            <Area type="monotone" dataKey="interakce" stroke="#34A853" fill="url(#colorInt)" strokeWidth={4} />
+                                        </AreaChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            </div>
+                        </div>
+
+                        <footer className="mt-32 pt-12 border-t border-[#DADCE0] flex flex-col md:flex-row justify-between items-center text-gray-400 text-[10px] font-bold uppercase tracking-[0.3em] gap-8">
+                            <p>© 2024 VIEW - Autorizovaný partner Google</p>
+                            <div className="flex gap-8 items-center">
+                                <span>Google My Business API</span>
+                                <span className="text-gray-200">|</span>
+                                <span className="text-gray-800 font-bold">v2.9.0-GITHUB</span>
+                            </div>
+                        </footer>
+                    </main>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
