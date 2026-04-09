@@ -86,7 +86,9 @@
                 mouse: <><rect x="5" y="2" width="14" height="20" rx="7"/><line x1="12" y1="6" x2="12" y2="10"/></>,
                 target: <><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></>,
                 camera: <><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></>,
-                award: <><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></>
+                award: <><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></>,
+                message: <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>,
+                user: <><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></>
             };
             return (
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -156,11 +158,17 @@
             }
         };
 
-        // Jednotný formát pro kroky z virtuální prohlídky s reálnými URL a pořadím
         const topSteps = [
             { id: 1, rank: "1. místo", color: "#FFD700", title: 'Krok z virtuální prohlídky', views: 24500, embedUrl: 'https://www.google.com/maps/embed?pb=!4v1775715361745!6m8!1m7!1sCAoSF0NJSE0wb2dLRUlDQWdJQzN3LW53akFF!2m2!1d50.04255807996196!2d15.77225026634575!3f66.97761681063815!4f-2.331028279394502!5f0.7820865974627469' },
             { id: 2, rank: "2. místo", color: "#C0C0C0", title: 'Krok z virtuální prohlídky', views: 18200, embedUrl: 'https://www.google.com/maps/embed?pb=!4v1775715399654!6m8!1m7!1sCAoSFkNJSE0wb2dLRUlDQWdJQzN3NlhfUUE.!2m2!1d50.0426206116332!2d15.77216330488757!3f347.8940540545073!4f-12.537977008895155!5f0.4000000000000002' },
             { id: 3, rank: "3. místo", color: "#CD7F32", title: 'Krok z virtuální prohlídky', views: 12400, embedUrl: 'https://www.google.com/maps/embed?pb=!4v1775715417837!6m8!1m7!1sCAoSFkNJSE0wb2dLRUlDQWdJQzN3X24zU3c.!2m2!1d50.04269573454846!2d15.7725293643046!3f248.9847873713557!4f-1.5409597818569694!5f0.4000000000000002' }
+        ];
+
+        // Data pro recenze
+        const featuredReviews = [
+            { id: 'new', type: 'Nejnovější', author: 'Jan Novák', rating: 5, text: 'Vynikající přístup a profesionální jednání. Virtuální prohlídka mi velmi pomohla se zorientovat ještě před návštěvou.', date: 'před 2 dny', color: '#4285F4' },
+            { id: 'best', type: 'Nejlepší', author: 'Marie Svobodová', rating: 5, text: 'Nejlepší servis v okolí, vracím se sem pravidelně už roky. Vždy čisté prostředí a milý personál.', date: 'před měsícem', color: '#34A853' },
+            { id: 'worst', type: 'Nejslabší', author: 'Petr Marek', rating: 2, text: 'Dlouhá čekací doba na odpověď přes chat, jinak v pořádku.', date: 'před 2 měsíci', color: '#EA4335' }
         ];
 
         // --- MODAL ---
@@ -546,12 +554,107 @@
                             </div>
                         </div>
 
-                        <footer className="mt-32 pt-12 border-t border-[#DADCE0] flex flex-col md:flex-row justify-between items-center text-gray-400 text-[10px] font-bold uppercase tracking-[0.3em] gap-8 text-center md:text-left">
+                        {/* NOVÁ SEKCE: PŘEHLED RECENZÍ (Žlutá a Zelená) */}
+                        <div className="mt-24">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-10">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-3 bg-white border border-[#DADCE0] text-[#FBBC05] rounded-xl shadow-sm"><Icon name="star" className="w-6 h-6" strokeWidth={2.5} /></div>
+                                    <div>
+                                        <h2 className="text-2xl font-black text-gray-800 tracking-tight italic uppercase">Zákaznické recenze</h2>
+                                        <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Vaše reputace ve vyhledávání Google</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                                {/* Celkové hodnocení a počet */}
+                                <div className="lg:col-span-1 space-y-6">
+                                    <div className="bg-white border border-[#DADCE0] p-8 rounded-2xl shadow-sm text-center">
+                                        <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Průměrné hodnocení</h3>
+                                        <div className="flex justify-center items-end gap-1 mb-4">
+                                            <span className="text-6xl font-black text-gray-900 leading-none">4.8</span>
+                                            <span className="text-xl font-bold text-gray-400 mb-1">/ 5</span>
+                                        </div>
+                                        <div className="flex justify-center gap-1 mb-6">
+                                            {[1, 2, 3, 4, 5].map((s) => (
+                                                <div key={s} className="text-[#FBBC05]">
+                                                    <Icon name="star" className="w-6 h-6 fill-[#FBBC05]" />
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <div className="bg-[#FFF8E1] text-[#A67C00] text-[11px] font-black px-4 py-2 rounded-full uppercase">
+                                            Vynikající reputace
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-white border border-[#DADCE0] p-8 rounded-2xl shadow-sm text-center">
+                                        <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Recenzí celkem</h3>
+                                        <div className="text-4xl font-black text-[#34A853] mb-4">1 248</div>
+                                        <div className="flex items-center justify-center gap-2 text-xs font-bold text-[#34A853] bg-[#E6F4EA] py-2 rounded-full">
+                                            <Icon name="trendingUp" className="w-4 h-4" />
+                                            <span>+12 nových tento měsíc</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Výběr recenzí */}
+                                <div className="lg:col-span-3">
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full">
+                                        {featuredReviews.map((review) => (
+                                            <div key={review.id} className="bg-white border border-[#DADCE0] p-6 rounded-2xl shadow-sm flex flex-col relative group hover:border-gray-300 transition-all">
+                                                <div className="flex items-center gap-2 mb-6">
+                                                    <div className="p-2 rounded-lg" style={{ backgroundColor: `${review.color}15`, color: review.color }}>
+                                                        <Icon name={review.id === 'worst' ? 'alert' : 'award'} className="w-4 h-4" strokeWidth={3} />
+                                                    </div>
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">{review.type}</span>
+                                                </div>
+
+                                                <div className="flex items-center gap-3 mb-4">
+                                                    <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
+                                                        <Icon name="user" className="w-5 h-5" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-black text-gray-800">{review.author}</p>
+                                                        <div className="flex gap-0.5">
+                                                            {[...Array(5)].map((_, i) => (
+                                                                <Icon 
+                                                                    key={i} 
+                                                                    name="star" 
+                                                                    className={`w-3 h-3 ${i < review.rating ? 'text-[#FBBC05] fill-[#FBBC05]' : 'text-gray-200 fill-gray-200'}`} 
+                                                                />
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="relative mb-6 flex-grow">
+                                                    <div className="absolute -top-2 -left-2 opacity-10 text-gray-400">
+                                                        <Icon name="message" className="w-8 h-8" />
+                                                    </div>
+                                                    <p className="text-xs text-gray-600 leading-relaxed italic relative z-10 font-medium line-clamp-4">
+                                                        "{review.text}"
+                                                    </p>
+                                                </div>
+
+                                                <div className="pt-4 border-t border-gray-50 flex items-center justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                                    <span>{review.date}</span>
+                                                    <div className="flex items-center gap-1.5 text-[#34A853]">
+                                                        Odpovězeno <Icon name="check" className="w-3 h-3" strokeWidth={3} />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <footer className="mt-32 pt-12 border-t border-[#DADCE0] flex flex-col md:flex-row justify-between items-center text-gray-400 text-[10px] font-black uppercase tracking-[0.3em] gap-8 text-center md:text-left">
                             <p>© 2024 VIEW - Autorizovaný partner Google</p>
                             <div className="flex gap-8 items-center">
                                 <span>Google My Business API</span>
                                 <span className="text-gray-200">|</span>
-                                <span className="text-gray-800 font-bold">v3.8.0-GITHUB</span>
+                                <span className="text-gray-800 font-bold">v3.9.0-GITHUB</span>
                             </div>
                         </footer>
                     </main>
