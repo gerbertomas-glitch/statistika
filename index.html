@@ -38,6 +38,21 @@
         .transition-all {
             transition: all 0.3s ease;
         }
+        .aspect-video-container {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; /* 16:9 Aspect Ratio */
+            overflow: hidden;
+            border-radius: 12px;
+        }
+        .aspect-video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
     </style>
 </head>
 <body>
@@ -69,7 +84,9 @@
                 phone: <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>,
                 map: <><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></>,
                 mouse: <><rect x="5" y="2" width="14" height="20" rx="7"/><line x1="12" y1="6" x2="12" y2="10"/></>,
-                target: <><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></>
+                target: <><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></>,
+                camera: <><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></>,
+                award: <><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></>
             };
             return (
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -79,26 +96,29 @@
         };
 
         // --- MOCK DATA ---
-        // Opraveno: Přidán výpočet prevInterakce, aby se čára v prvním grafu zobrazovala
         const generateData = () => {
             const months = ['Led', 'Úno', 'Bře', 'Dub', 'Kvě', 'Čer', 'Čec', 'Srp', 'Zář', 'Říj', 'Lis', 'Pro'];
             return months.map(m => {
                 const hovory = Math.floor(Math.random() * 50) + 40;
                 const trasy = Math.floor(Math.random() * 120) + 150;
                 const web = Math.floor(Math.random() * 80) + 100;
+                const streetView = Math.floor(Math.random() * 3000) + 10000;
                 
                 const prevHovory = Math.floor(Math.random() * 40) + 30;
                 const prevTrasy = Math.floor(Math.random() * 100) + 120;
                 const prevWeb = Math.floor(Math.random() * 70) + 80;
+                const prevStreetView = Math.floor(Math.random() * 2000) + 9000;
 
                 return {
                     name: m,
                     hovory,
                     trasy,
                     web,
+                    streetView,
                     prevHovory,
                     prevTrasy,
                     prevWeb,
+                    prevStreetView,
                     interakce: hovory + trasy + web,
                     prevInterakce: prevHovory + prevTrasy + prevWeb
                 };
@@ -107,7 +127,7 @@
 
         const welcomeStats = [
             { id: 'interakce', title: 'Interakce celkem', total: 124580, periodValue: 3412, periodTrend: 12.5, icon: 'users', color: '#34A853', description: 'Hovory, navigace a prokliky na web.' },
-            { id: 'streetview', title: 'Zobrazení prohlídky', total: 842105, periodValue: 12840, periodTrend: -4.2, icon: 'globe', color: '#FBBC05', description: 'Zhlédnutí 360° prohlídek a fotek.' },
+            { id: 'streetview', title: 'Zobrazení prohlídky', total: 842105, periodValue: 12840, periodTrend: -4.2, icon: 'globe', color: '#4285F4', description: 'Zhlédnutí 360° prohlídek a fotek.' },
             { id: 'zobrazeni', title: 'Zobrazení profilu', total: 2154300, periodValue: 84200, periodTrend: 5.2, icon: 'eye', color: '#4285F4', description: 'Lidé, kteří viděli váš profil na Googlu.' },
             { id: 'vyhledavani', title: 'Nalezení vyhledáváním', total: 1542000, periodValue: 56120, periodTrend: 8.9, icon: 'search', color: '#EA4335', description: 'Dotazy vedoucí k vašemu profilu.' }
         ];
@@ -135,6 +155,13 @@
                 benefit: 'Telefonát je nejrychlejší cesta k uzavření obchodu. Tito lidé mají okamžitý dotaz a chtějí u vás nakoupit právě teď.'
             }
         };
+
+        // Jednotný formát pro kroky z virtuální prohlídky s reálnými URL a pořadím
+        const topSteps = [
+            { id: 1, rank: "1. místo", color: "#FFD700", title: 'Krok z virtuální prohlídky', views: 24500, embedUrl: 'https://www.google.com/maps/embed?pb=!4v1775715361745!6m8!1m7!1sCAoSF0NJSE0wb2dLRUlDQWdJQzN3LW53akFF!2m2!1d50.04255807996196!2d15.77225026634575!3f66.97761681063815!4f-2.331028279394502!5f0.7820865974627469' },
+            { id: 2, rank: "2. místo", color: "#C0C0C0", title: 'Krok z virtuální prohlídky', views: 18200, embedUrl: 'https://www.google.com/maps/embed?pb=!4v1775715399654!6m8!1m7!1sCAoSFkNJSE0wb2dLRUlDQWdJQzN3NlhfUUE.!2m2!1d50.0426206116332!2d15.77216330488757!3f347.8940540545073!4f-12.537977008895155!5f0.4000000000000002' },
+            { id: 3, rank: "3. místo", color: "#CD7F32", title: 'Krok z virtuální prohlídky', views: 12400, embedUrl: 'https://www.google.com/maps/embed?pb=!4v1775715417837!6m8!1m7!1sCAoSFkNJSE0wb2dLRUlDQWdJQzN3X24zU3c.!2m2!1d50.04269573454846!2d15.7725293643046!3f248.9847873713557!4f-1.5409597818569694!5f0.4000000000000002' }
+        ];
 
         // --- MODAL ---
         const RecommendationsModal = ({ isOpen, onClose }) => {
@@ -304,7 +331,6 @@
                                             <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#70757a', fontSize: 11, fontWeight: 900}} dy={15} />
                                             <YAxis axisLine={false} tickLine={false} tick={{fill: '#70757a', fontSize: 11, fontWeight: 900}} />
                                             <Tooltip contentStyle={{borderRadius: '12px', border: '1px solid #DADCE0', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)'}} />
-                                            {/* Čára pro minulý rok nyní dostává správný klíč prevInterakce a jméno */}
                                             <Area type="monotone" dataKey="prevInterakce" name="Minulý rok" stroke="#cbd5e1" fill="transparent" strokeDasharray="5 5" strokeWidth={2} />
                                             <Area type="monotone" dataKey="interakce" name="Aktuální rok" stroke="#34A853" fill="url(#colorInt)" strokeWidth={4} />
                                         </AreaChart>
@@ -410,12 +436,122 @@
                             </div>
                         </div>
 
-                        <footer className="mt-32 pt-12 border-t border-[#DADCE0] flex flex-col md:flex-row justify-between items-center text-gray-400 text-[10px] font-bold uppercase tracking-[0.3em] gap-8">
+                        {/* SEKCE: GOOGLE STREET VIEW S REÁLNÝMI UKÁZKAMI A ŽEBŘÍČKEM */}
+                        <div className="mt-24">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-10">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-3 bg-white border border-[#DADCE0] text-[#4285F4] rounded-xl shadow-sm"><Icon name="globe" className="w-6 h-6" strokeWidth={2.5} /></div>
+                                    <div>
+                                        <h2 className="text-2xl font-black text-gray-800 tracking-tight italic uppercase">Virtuální prohlídka & Street View</h2>
+                                        <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Analýza vizuálního zásahu vašich 360° snímků</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                                {/* Hlavní suma Street View v modré se zeleným nárůstem */}
+                                <div className="lg:col-span-1 bg-white border border-[#DADCE0] p-8 rounded-2xl shadow-sm flex flex-col justify-center text-center">
+                                    <div className="text-[#4285F4] mb-4 flex justify-center"><Icon name="camera" className="w-10 h-10" /></div>
+                                    <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Zobrazení celkem</h3>
+                                    <div className="text-5xl font-black text-gray-900 tracking-tighter mb-4">
+                                        {data.reduce((sum, item) => sum + item.streetView, 0).toLocaleString()}
+                                    </div>
+                                    {/* Zvýrazněný zelený nárůst */}
+                                    <div className="flex items-center justify-center gap-2 text-base font-black text-[#34A853] bg-[#E6F4EA] py-2 px-4 rounded-full">
+                                        <Icon name="trendingUp" className="w-5 h-5" strokeWidth={3} />
+                                        <span>+18.4 % meziročně</span>
+                                    </div>
+                                    <p className="text-[10px] text-gray-400 mt-6 leading-relaxed italic">
+                                        "Vaše virtuální prohlídka aktivně buduje důvěru zákazníků ještě před jejich návštěvou."
+                                    </p>
+                                </div>
+
+                                {/* Graf návštěvnosti Street View v modré */}
+                                <div className="lg:col-span-3 bg-white p-8 md:p-10 border border-[#DADCE0] rounded-2xl shadow-sm">
+                                    <div className="flex justify-between items-center mb-8">
+                                        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest italic">Vývoj zobrazení panoramat</h3>
+                                        <div className="flex gap-6 text-[10px] font-black uppercase tracking-widest">
+                                            <span className="flex items-center gap-2.5 text-[#4285F4]"><div className="w-3 h-3 rounded-full bg-[#4285F4] shadow-sm" /> Aktuální</span>
+                                            <span className="flex items-center gap-2.5 text-gray-300"><div className="w-3 h-0.5 bg-gray-200" /> Loni</span>
+                                        </div>
+                                    </div>
+                                    <div className="h-[280px] w-full">
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <AreaChart data={data}>
+                                                <defs>
+                                                    <linearGradient id="colorSV" x1="0" y1="0" x2="0" y2="1">
+                                                        <stop offset="5%" stopColor="#4285F4" stopOpacity={0.15}/>
+                                                        <stop offset="95%" stopColor="#4285F4" stopOpacity={0}/>
+                                                    </linearGradient>
+                                                </defs>
+                                                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#70757a', fontSize: 10, fontWeight: 700}} dy={10} />
+                                                <YAxis axisLine={false} tickLine={false} tick={{fill: '#70757a', fontSize: 10, fontWeight: 700}} />
+                                                <Tooltip contentStyle={{borderRadius: '12px', border: '1px solid #DADCE0'}} />
+                                                <Area type="monotone" dataKey="prevStreetView" name="Minulý rok" stroke="#cbd5e1" fill="transparent" strokeDasharray="5 5" strokeWidth={1.5} />
+                                                <Area type="monotone" dataKey="streetView" name="Letošní rok" stroke="#4285F4" fill="url(#colorSV)" strokeWidth={4} />
+                                            </AreaChart>
+                                        </ResponsiveContainer>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Žebříček Top 3 Snímků s medailemi a pořadím */}
+                            <div className="mt-12">
+                                <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-8 px-2 text-center md:text-left">Nejnavštěvovanější kroky prohlídky</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                    {topSteps.map((step) => (
+                                        <div key={step.id} className="bg-white border border-[#DADCE0] p-5 rounded-2xl shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
+                                            {/* Rank Badge / Medaile */}
+                                            <div className="absolute top-0 left-0 w-16 h-16 pointer-events-none">
+                                                <div className="absolute transform -rotate-45 bg-white border-b border-r border-gray-100 w-24 h-10 -left-8 top-1 flex items-center justify-center shadow-sm z-20">
+                                                    <span className="text-[10px] font-black uppercase text-gray-800 tracking-tighter pl-4">{step.rank}</span>
+                                                </div>
+                                            </div>
+
+                                            {/* Iframe náhled kroku */}
+                                            <div className="aspect-video-container mb-6 bg-gray-100 shadow-inner">
+                                                <iframe 
+                                                    src={step.embedUrl} 
+                                                    loading="lazy" 
+                                                    allowFullScreen 
+                                                    referrerPolicy="no-referrer-when-downgrade"
+                                                    title={step.title}>
+                                                </iframe>
+                                            </div>
+                                            
+                                            <div className="flex justify-between items-center mb-4">
+                                                <div className="flex items-center gap-2">
+                                                    <div style={{ color: step.color }}>
+                                                        <Icon name="award" className="w-5 h-5" strokeWidth={3} />
+                                                    </div>
+                                                    <h4 className="text-xs font-black text-gray-800 uppercase tracking-tight">{step.title}</h4>
+                                                </div>
+                                                <span className="bg-[#4285F4]/10 text-[#4285F4] px-2 py-1 rounded text-[8px] font-black uppercase">Top výkon</span>
+                                            </div>
+                                            
+                                            <div className="pt-5 border-t border-gray-50 flex items-center justify-between">
+                                                <div>
+                                                    <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mb-0.5">Zobrazení v období</p>
+                                                    <p className="text-2xl font-black text-[#4285F4] tracking-tighter leading-none">{step.views.toLocaleString()}</p>
+                                                </div>
+                                                <div className="text-[#34A853] flex items-center gap-1.5 text-[10px] font-bold bg-[#E6F4EA] px-2 py-1 rounded-lg">
+                                                    <Icon name="trendingUp" className="w-3 h-3" strokeWidth={3} />
+                                                    <span>Skvělé</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        <footer className="mt-32 pt-12 border-t border-[#DADCE0] flex flex-col md:flex-row justify-between items-center text-gray-400 text-[10px] font-bold uppercase tracking-[0.3em] gap-8 text-center md:text-left">
                             <p>© 2024 VIEW - Autorizovaný partner Google</p>
                             <div className="flex gap-8 items-center">
                                 <span>Google My Business API</span>
                                 <span className="text-gray-200">|</span>
-                                <span className="text-gray-800 font-bold">v3.5.1-GITHUB</span>
+                                <span className="text-gray-800 font-bold">v3.8.0-GITHUB</span>
                             </div>
                         </footer>
                     </main>
