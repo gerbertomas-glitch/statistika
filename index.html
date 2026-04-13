@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VIEW - Statistiky Google Moje Firma</title>
     
-    <!-- Scripts & Styles -->
+    <!-- Skripty a styly -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <!-- Prop-Types must be loaded before Recharts -->
+    <!-- Prop-Types musí být načteny před Recharts -->
     <script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -31,7 +31,6 @@
         h1, h2, h3, h4, .font-bold {
             letter-spacing: -0.01em;
         }
-        /* Custom transitions for Recharts and Modals */
         .recharts-cartesian-grid-horizontal line, .recharts-cartesian-grid-vertical line {
             stroke: #f1f3f4;
         }
@@ -41,7 +40,7 @@
         .aspect-video-container {
             position: relative;
             width: 100%;
-            padding-top: 56.25%; /* 16:9 Aspect Ratio */
+            padding-top: 56.25%; /* 16:9 poměr stran */
             overflow: hidden;
             border-radius: 12px;
         }
@@ -53,6 +52,10 @@
             height: 100%;
             border: 0;
         }
+        /* Plynulé animace pro progress bary */
+        .progress-bar {
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
     </style>
 </head>
 <body>
@@ -61,11 +64,11 @@
     <script type="text/babel">
         const { 
             AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
-            BarChart, Bar, Cell
+            BarChart, Bar, Cell, PieChart, Pie, Legend
         } = window.Recharts;
 
         // --- MANUÁLNÍ IKONY (SVG) ---
-        const Icon = ({ name, className = "w-5 h-5", strokeWidth = 2 }) => {
+        const Icon = ({ name, className = "w-5 h-5", strokeWidth = 2, fill = "none" }) => {
             const icons = {
                 users: <><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></>,
                 eye: <><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></>,
@@ -84,14 +87,17 @@
                 phone: <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>,
                 map: <><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></>,
                 mouse: <><rect x="5" y="2" width="14" height="20" rx="7"/><line x1="12" y1="6" x2="12" y2="10"/></>,
-                target: <><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></>,
                 camera: <><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></>,
                 award: <><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></>,
                 message: <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>,
-                user: <><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></>
+                user: <><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></>,
+                smartphone: <><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></>,
+                monitor: <><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></>,
+                android: <><path d="M5.5 13a.5.5 0 1 0 0 1 .5.5 0 0 0 0-1zm13 0a.5.5 0 1 0 0 1 .5.5 0 0 0 0-1zM7 20h10a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2z"/><path d="M9 7V5a3 3 0 0 1 6 0v2"/></>,
+                target: <><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></>
             };
             return (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <svg viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
                     {icons[name]}
                 </svg>
             );
@@ -113,19 +119,33 @@
 
                 return {
                     name: m,
-                    hovory,
-                    trasy,
-                    web,
-                    streetView,
-                    prevHovory,
-                    prevTrasy,
-                    prevWeb,
-                    prevStreetView,
+                    hovory, trasy, web, streetView,
+                    prevHovory, prevTrasy, prevWeb, prevStreetView,
                     interakce: hovory + trasy + web,
                     prevInterakce: prevHovory + prevTrasy + prevWeb
                 };
             });
         };
+
+        const searchSources = [
+            { name: 'Google Mapy (Aplikace)', value: 42, color: '#34A853', icon: 'map', trend: '+5%' },
+            { name: 'Vyhledávání Mobil - Android', value: 28, color: '#A4C639', icon: 'android', trend: '+12%' },
+            { name: 'Vyhledávání Mobil - iOS', value: 18, color: '#555555', icon: 'smartphone', trend: '+8%' },
+            { name: 'Vyhledávání Počítače', value: 12, color: '#EA4335', icon: 'monitor', trend: '-2%' }
+        ];
+
+        const topKeywords = [
+            { word: 'restaurace pardubice', count: 1240 },
+            { word: 'nejlepší obědy', count: 980 },
+            { word: 'kam na večeři', count: 850 },
+            { word: 'steak house', count: 720 },
+            { word: 'pivo z tanku', count: 610 },
+            { word: 'zahrádka restaurace', count: 540 },
+            { word: 'dětský koutek', count: 480 },
+            { word: 'romantická večeře', count: 410 },
+            { word: 'burgery', count: 390 },
+            { word: 'polední menu', count: 350 }
+        ];
 
         const welcomeStats = [
             { id: 'interakce', title: 'Interakce celkem', total: 124580, periodValue: 3412, periodTrend: 12.5, icon: 'users', color: '#34A853', description: 'Hovory, navigace a prokliky na web.' },
@@ -135,27 +155,9 @@
         ];
 
         const interactionDetails = {
-            trasy: {
-                title: 'Vyžádání trasy',
-                icon: 'map',
-                color: '#34A853',
-                meaning: 'Zákazníci si aktivně vyhledali cestu k vaší pobočce v Mapách Google.',
-                benefit: 'Toto je nejsilnější signál reálného zájmu. Čím více tras, tím více lidí fyzicky vstoupilo do vašich dveří. Každá trasa je potenciální nákup!'
-            },
-            web: {
-                title: 'Návštěvy webu',
-                icon: 'mouse',
-                color: '#4285F4',
-                meaning: 'Uživatelé klikli na tlačítko „Web“ přímo ve vašem firemním profilu.',
-                benefit: 'Získáváte relevantní návštěvnost bez nákladů na reklamu. Lidé se chtějí dozvědět více o vaší nabídce, jídelním lístku nebo ceníku.'
-            },
-            hovory: {
-                title: 'Telefonáty',
-                icon: 'phone',
-                color: '#EA4335',
-                meaning: 'Počet přímých vytočení vašeho čísla jedním kliknutím z mobilního vyhledávání.',
-                benefit: 'Telefonát je nejrychlejší cesta k uzavření obchodu. Tito lidé mají okamžitý dotaz a chtějí u vás nakoupit právě teď.'
-            }
+            trasy: { title: 'Vyžádání trasy', icon: 'map', color: '#34A853', meaning: 'Zákazníci si aktivně vyhledali cestu k vaší pobočce.', benefit: 'Toto je nejsilnější signál reálného zájmu. Každá trasa je potenciální nákup!' },
+            web: { title: 'Návštěvy webu', icon: 'mouse', color: '#4285F4', meaning: 'Uživatelé klikli na tlačítko „Web“ přímo ve vašem profilu.', benefit: 'Získáváte relevantní návštěvnost. Lidé se chtějí dozvědět více o vaší nabídce.' },
+            hovory: { title: 'Telefonáty', icon: 'phone', color: '#EA4335', meaning: 'Počet přímých vytočení čísla jedním kliknutím.', benefit: 'Telefonát je nejrychlejší cesta k uzavření obchodu. Mají okamžitý zájem.' }
         };
 
         const topSteps = [
@@ -164,14 +166,14 @@
             { id: 3, rank: "3. místo", color: "#CD7F32", title: 'Krok z virtuální prohlídky', views: 12400, embedUrl: 'https://www.google.com/maps/embed?pb=!4v1775715417837!6m8!1m7!1sCAoSFkNJSE0wb2dLRUlDQWdJQzN3X24zU3c.!2m2!1d50.04269573454846!2d15.7725293643046!3f248.9847873713557!4f-1.5409597818569694!5f0.4000000000000002' }
         ];
 
-        // Data pro recenze
         const featuredReviews = [
-            { id: 'new', type: 'Nejnovější', author: 'Jan Novák', rating: 5, text: 'Vynikající přístup a profesionální jednání. Virtuální prohlídka mi velmi pomohla se zorientovat ještě před návštěvou.', date: 'před 2 dny', color: '#4285F4' },
-            { id: 'best', type: 'Nejlepší', author: 'Marie Svobodová', rating: 5, text: 'Nejlepší servis v okolí, vracím se sem pravidelně už roky. Vždy čisté prostředí a milý personál.', date: 'před měsícem', color: '#34A853' },
-            { id: 'worst', type: 'Nejslabší', author: 'Petr Marek', rating: 2, text: 'Dlouhá čekací doba na odpověď přes chat, jinak v pořádku.', date: 'před 2 měsíci', color: '#EA4335' }
+            { id: 'new', type: 'Nejnovější', author: 'Jan Novák', rating: 5, text: 'Vynikající přístup a profesionální jednání. Prohlídka mi moc pomohla.', date: 'před 2 dny', color: '#4285F4' },
+            { id: 'best', type: 'Nejlepší', author: 'Marie Svobodová', rating: 5, text: 'Nejlepší servis v okolí, vracím se pravidelně už roky.', date: 'před měsícem', color: '#34A853' },
+            { id: 'worst', type: 'Nejslabší', author: 'Petr Marek', rating: 2, text: 'Dlouhá čekací doba na odpověď přes chat, jinak ok.', date: 'před 2 měsíci', color: '#EA4335' }
         ];
 
-        // --- MODAL ---
+        // --- COMPONENTS ---
+
         const RecommendationsModal = ({ isOpen, onClose }) => {
             if (!isOpen) return null;
             return (
@@ -206,7 +208,6 @@
             );
         };
 
-        // --- KPI CARD ---
         const WelcomeKpiCard = ({ stat }) => {
             const isNegative = stat.periodTrend < 0;
             return (
@@ -257,7 +258,7 @@
                 <div className="min-h-screen pb-20">
                     <RecommendationsModal isOpen={isModalOpen} onClose={() => setModalOpen(false)} />
 
-                    {/* HEADER */}
+                    {/* ZÁHLAVÍ */}
                     <header className="sticky top-0 z-50 bg-white border-b border-[#DADCE0] shadow-sm">
                         <div className="py-3 px-4 md:px-10 border-b border-gray-100 flex items-center justify-start">
                             <div className="h-7 md:h-8">
@@ -279,17 +280,12 @@
                     </header>
 
                     <main className="max-w-7xl mx-auto px-4 md:px-10 pt-10">
-                        {/* WELCOME */}
+                        {/* UVÍTACÍ SEKCE */}
                         <div className="bg-white border border-[#DADCE0] p-8 md:p-12 rounded-2xl mb-12 shadow-sm">
                             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-10 mb-12">
                                 <div className="max-w-3xl text-gray-500 text-lg md:text-xl leading-relaxed font-light">
                                     <div className="inline-flex items-center gap-2 bg-[#E6F4EA] text-[#34A853] px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest mb-6">Souhrnný přehled firemní prezentace</div>
                                     <p>Tento dashboard zobrazuje aktuální výsledky a efektivitu vaší prezentace na Googlu spravované v systému <strong className="text-gray-900 font-bold">VIEW</strong>. Data reprezentují souhrnnou aktivitu uživatelů napříč lokalitami.</p>
-                                    {hasNegativeTrend && (
-                                        <button onClick={() => setModalOpen(true)} className="flex items-center gap-3 bg-[#FCE8E6] hover:bg-[#FAD2CF] text-[#C5221F] px-6 py-3 rounded-xl text-sm font-bold mt-8 transition-all border border-[#FAD2CF] group shadow-sm">
-                                            <Icon name="alert" className="w-5 h-5 animate-pulse" /> Zobrazit doporučení pro růst <Icon name="chevronRight" className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                                        </button>
-                                    )}
                                 </div>
                                 <div className="bg-[#F8F9FA] border border-[#DADCE0] p-6 rounded-xl text-center min-w-[240px]">
                                     <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-2">Aktuálně zobrazeno</p>
@@ -303,30 +299,23 @@
                             </div>
                         </div>
 
-                        {/* HLAVNÍ TREND INTERAKCÍ */}
+                        {/* HLAVNÍ TREND */}
                         <div className="mt-20">
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-10">
                                 <div className="flex items-center gap-4">
                                     <div className="p-3 bg-white border border-[#DADCE0] text-[#34A853] rounded-xl shadow-sm"><Icon name="users" className="w-6 h-6" /></div>
                                     <h2 className="text-2xl font-black text-gray-800 tracking-tight italic uppercase">Celkový vývoj interakcí</h2>
                                 </div>
-                                <div className="flex gap-1 p-1 bg-white border border-[#DADCE0] rounded-full shadow-sm overflow-hidden">
-                                    {['týden', 'měsíc', 'rok'].map(type => (
-                                        <button key={type} onClick={() => setViewType(type)} className={`px-5 py-2 text-[10px] font-bold uppercase tracking-widest rounded-full transition-all ${viewType === type ? 'bg-[#34A853] text-white shadow-md' : 'text-gray-400 hover:text-gray-600'}`}>
-                                            {type}
-                                        </button>
-                                    ))}
-                                </div>
                             </div>
-                            <div className="bg-white p-10 md:p-14 border border-[#DADCE0] rounded-2xl shadow-sm mb-12">
-                                <div className="flex justify-between items-center mb-12 text-xs font-bold text-gray-400 uppercase tracking-widest">
+                            <div className="bg-white p-10 md:p-14 border border-[#DADCE0] rounded-2xl shadow-sm mb-12 text-xs font-bold text-gray-400 uppercase tracking-widest">
+                                <div className="flex justify-between items-center mb-8">
                                     <p>Meziroční srovnání aktivity</p>
                                     <div className="flex gap-6">
                                         <span className="flex items-center gap-2.5 text-[#34A853]"><div className="w-3 h-3 rounded-full bg-[#34A853]" /> Aktuální</span>
                                         <span className="flex items-center gap-2.5"><div className="w-3 h-0.5 bg-gray-300" /> Loni</span>
                                     </div>
                                 </div>
-                                <div className="h-[420px] w-full">
+                                <div className="h-[400px] w-full">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <AreaChart data={data}>
                                             <defs>
@@ -338,323 +327,226 @@
                                             <CartesianGrid strokeDasharray="3 3" vertical={false} />
                                             <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#70757a', fontSize: 11, fontWeight: 900}} dy={15} />
                                             <YAxis axisLine={false} tickLine={false} tick={{fill: '#70757a', fontSize: 11, fontWeight: 900}} />
-                                            <Tooltip contentStyle={{borderRadius: '12px', border: '1px solid #DADCE0', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)'}} />
-                                            <Area type="monotone" dataKey="prevInterakce" name="Minulý rok" stroke="#cbd5e1" fill="transparent" strokeDasharray="5 5" strokeWidth={2} />
-                                            <Area type="monotone" dataKey="interakce" name="Aktuální rok" stroke="#34A853" fill="url(#colorInt)" strokeWidth={4} />
+                                            <Tooltip contentStyle={{borderRadius: '12px', border: '1px solid #DADCE0'}} />
+                                            <Area type="monotone" dataKey="prevInterakce" stroke="#cbd5e1" fill="transparent" strokeDasharray="5 5" strokeWidth={2} />
+                                            <Area type="monotone" dataKey="interakce" stroke="#34A853" fill="url(#colorInt)" strokeWidth={4} />
                                         </AreaChart>
                                     </ResponsiveContainer>
                                 </div>
                             </div>
                         </div>
 
-                        {/* DETAILNÍ ANALÝZA AKTIVIT S PŘEPÍNAČEM */}
+                        {/* DETAILNÍ ANALÝZA S PŘEPÍNAČEM */}
                         <div className="mt-24">
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-10">
                                 <div className="flex items-center gap-4">
                                     <div className="p-3 bg-white border border-[#DADCE0] text-[#4285F4] rounded-xl shadow-sm"><Icon name="target" className="w-6 h-6" /></div>
-                                    <div>
-                                        <h2 className="text-2xl font-black text-gray-800 tracking-tight italic uppercase">Detailní analýza aktivit</h2>
-                                        <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Sledujte konkrétní přínos jednotlivých kanálů</p>
-                                    </div>
+                                    <h2 className="text-2xl font-black text-gray-800 tracking-tight italic uppercase">Detailní analýza aktivit</h2>
                                 </div>
-                                
                                 <div className="flex gap-1 p-1 bg-white border border-[#DADCE0] rounded-full shadow-sm overflow-hidden">
                                     {['trasy', 'web', 'hovory'].map(type => (
-                                        <button 
-                                            key={type} 
-                                            onClick={() => setSelectedDetail(type)} 
-                                            className={`px-5 py-2 text-[10px] font-bold uppercase tracking-widest rounded-full transition-all flex items-center gap-2 ${selectedDetail === type ? 'bg-[#4285F4] text-white shadow-md' : 'text-gray-400 hover:text-gray-600'}`}
-                                        >
-                                            <Icon name={interactionDetails[type].icon} className="w-3 h-3" strokeWidth={3} />
-                                            {interactionDetails[type].title}
+                                        <button key={type} onClick={() => setSelectedDetail(type)} className={`px-5 py-2 text-[10px] font-bold uppercase rounded-full transition-all flex items-center gap-2 ${selectedDetail === type ? 'bg-[#4285F4] text-white' : 'text-gray-400'}`}>
+                                            <Icon name={interactionDetails[type].icon} className="w-3 h-3" /> {interactionDetails[type].title}
                                         </button>
                                     ))}
                                 </div>
                             </div>
-
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                                <div className="lg:col-span-2 bg-white p-10 md:p-12 border border-[#DADCE0] rounded-2xl shadow-sm">
-                                    <div className="flex justify-between items-center mb-10">
-                                        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest italic">Trend: {activeDetail.title}</h3>
-                                        <div className="flex gap-4 text-[10px] font-bold uppercase">
-                                            <span className="flex items-center gap-1.5" style={{ color: activeDetail.color }}>
-                                                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: activeDetail.color }} /> Aktuálně
-                                            </span>
-                                            <span className="flex items-center gap-1.5 text-gray-300">
-                                                <div className="w-2.5 h-0.5 bg-gray-200" /> Minulý rok
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div className="h-[350px] w-full">
-                                        <ResponsiveContainer width="100%" height="100%">
-                                            <AreaChart data={data}>
-                                                <defs>
-                                                    <linearGradient id="colorDetail" x1="0" y1="0" x2="0" y2="1">
-                                                        <stop offset="5%" stopColor={activeDetail.color} stopOpacity={0.15}/>
-                                                        <stop offset="95%" stopColor={activeDetail.color} stopOpacity={0}/>
-                                                    </linearGradient>
-                                                </defs>
-                                                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#70757a', fontSize: 11, fontWeight: 900}} dy={15} />
-                                                <YAxis axisLine={false} tickLine={false} tick={{fill: '#70757a', fontSize: 11, fontWeight: 900}} />
-                                                <Tooltip contentStyle={{borderRadius: '12px', border: '1px solid #DADCE0', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)'}} />
-                                                <Area type="monotone" dataKey={`prev${selectedDetail.charAt(0).toUpperCase() + selectedDetail.slice(1)}`} name="Minulý rok" stroke="#cbd5e1" fill="transparent" strokeDasharray="4 4" strokeWidth={1.5} />
-                                                <Area type="monotone" dataKey={selectedDetail} name="Letošní rok" stroke={activeDetail.color} fill="url(#colorDetail)" strokeWidth={4} />
-                                            </AreaChart>
-                                        </ResponsiveContainer>
-                                    </div>
+                                <div className="lg:col-span-2 bg-white p-10 md:p-12 border border-[#DADCE0] rounded-2xl shadow-sm h-[450px]">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <AreaChart data={data}>
+                                            <defs><linearGradient id="colorDetail" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor={activeDetail.color} stopOpacity={0.15}/><stop offset="95%" stopColor={activeDetail.color} stopOpacity={0}/></linearGradient></defs>
+                                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#70757a', fontSize: 11, fontWeight: 900}} />
+                                            <YAxis axisLine={false} tickLine={false} tick={{fill: '#70757a', fontSize: 11, fontWeight: 900}} />
+                                            <Tooltip contentStyle={{borderRadius: '12px', border: '1px solid #DADCE0'}} />
+                                            <Area type="monotone" dataKey={`prev${selectedDetail.charAt(0).toUpperCase() + selectedDetail.slice(1)}`} stroke="#cbd5e1" fill="transparent" strokeDasharray="4 4" strokeWidth={1.5} />
+                                            <Area type="monotone" dataKey={selectedDetail} stroke={activeDetail.color} fill="url(#colorDetail)" strokeWidth={4} />
+                                        </AreaChart>
+                                    </ResponsiveContainer>
                                 </div>
-
-                                <div className="flex flex-col gap-6">
-                                    <div className="bg-white border border-[#DADCE0] p-8 rounded-2xl shadow-sm h-full flex flex-col">
-                                        <div className="flex items-center gap-4 mb-6">
-                                            <div className="p-3 rounded-xl" style={{ backgroundColor: `${activeDetail.color}10`, color: activeDetail.color }}>
-                                                <Icon name={activeDetail.icon} className="w-6 h-6" strokeWidth={2.5} />
-                                            </div>
-                                            <h3 className="font-black text-gray-900 text-lg uppercase">{activeDetail.title}</h3>
-                                        </div>
-                                        
-                                        <div className="space-y-8">
-                                            <div>
-                                                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3">Co to znamená?</h4>
-                                                <p className="text-sm text-gray-600 leading-relaxed font-medium">
-                                                    {activeDetail.meaning}
-                                                </p>
-                                            </div>
-                                            
-                                            <div className="bg-gray-50 border-l-4 p-5 rounded-r-xl" style={{ borderColor: activeDetail.color }}>
-                                                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] mb-2" style={{ color: activeDetail.color }}>Proč je to skvělé?</h4>
-                                                <p className="text-sm text-gray-700 leading-relaxed italic font-bold">
-                                                    "{activeDetail.benefit}"
-                                                </p>
-                                            </div>
-
-                                            <div className="mt-auto pt-6 border-t border-gray-100">
-                                                <div className="flex items-center justify-between text-[11px] font-black text-gray-400 uppercase tracking-widest">
-                                                    <span>Efektivita kanálu</span>
-                                                    <span className="text-[#34A853]">Vysoká</span>
-                                                </div>
-                                                <div className="w-full h-1.5 bg-gray-100 rounded-full mt-2 overflow-hidden">
-                                                    <div className="h-full bg-[#34A853] rounded-full" style={{ width: '85%' }} />
-                                                </div>
-                                            </div>
-                                        </div>
+                                <div className="bg-white border border-[#DADCE0] p-8 rounded-2xl shadow-sm flex flex-col justify-center">
+                                    <div className="flex items-center gap-4 mb-6">
+                                        <div className="p-3 rounded-xl" style={{ backgroundColor: `${activeDetail.color}10`, color: activeDetail.color }}><Icon name={activeDetail.icon} className="w-6 h-6" strokeWidth={3} /></div>
+                                        <h3 className="font-black text-gray-900 text-lg uppercase">{activeDetail.title}</h3>
+                                    </div>
+                                    <div className="space-y-6">
+                                        <div><h4 className="text-[10px] font-black text-gray-400 uppercase mb-2">Co to znamená?</h4><p className="text-sm text-gray-600 font-medium">{activeDetail.meaning}</p></div>
+                                        <div className="bg-gray-50 border-l-4 p-5 rounded-r-xl" style={{ borderColor: activeDetail.color }}><h4 className="text-[10px] font-black uppercase mb-1" style={{ color: activeDetail.color }}>Proč je to skvělé?</h4><p className="text-sm text-gray-700 italic font-bold">"{activeDetail.benefit}"</p></div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* SEKCE: GOOGLE STREET VIEW S REÁLNÝMI UKÁZKAMI A ŽEBŘÍČKEM */}
+                        {/* STREET VIEW SEKCE */}
+                        <div className="mt-24">
+                            <div className="flex items-center gap-4 mb-10">
+                                <div className="p-3 bg-white border border-[#DADCE0] text-[#4285F4] rounded-xl shadow-sm"><Icon name="globe" className="w-6 h-6" /></div>
+                                <h2 className="text-2xl font-black text-gray-800 tracking-tight italic uppercase">Virtuální prohlídka & Street View</h2>
+                            </div>
+                            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-12">
+                                <div className="lg:col-span-1 bg-white border border-[#DADCE0] p-8 rounded-2xl shadow-sm flex flex-col justify-center text-center">
+                                    <Icon name="camera" className="w-10 h-10 text-[#4285F4] mx-auto mb-4" />
+                                    <h3 className="text-[10px] font-black text-gray-400 uppercase mb-2">Zobrazení celkem</h3>
+                                    <div className="text-5xl font-black text-gray-900 mb-4">{data.reduce((sum, i) => sum + i.streetView, 0).toLocaleString()}</div>
+                                    <div className="inline-flex items-center justify-center gap-2 text-base font-black text-[#34A853] bg-[#E6F4EA] py-2 px-4 rounded-full"><Icon name="trendingUp" className="w-4 h-4" strokeWidth={3} /> +18.4 % meziročně</div>
+                                </div>
+                                <div className="lg:col-span-3 bg-white p-8 border border-[#DADCE0] rounded-2xl h-[300px]">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <AreaChart data={data}>
+                                            <defs><linearGradient id="colorSV" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#4285F4" stopOpacity={0.15}/><stop offset="95%" stopColor="#4285F4" stopOpacity={0}/></linearGradient></defs>
+                                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                            <XAxis dataKey="name" tick={{fill: '#70757a', fontSize: 10}} />
+                                            <Tooltip />
+                                            <Area type="monotone" dataKey="prevStreetView" stroke="#cbd5e1" fill="transparent" strokeDasharray="5 5" />
+                                            <Area type="monotone" dataKey="streetView" stroke="#4285F4" fill="url(#colorSV)" strokeWidth={4} />
+                                        </AreaChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            </div>
+                            
+                            {/* TOP 3 KROKY */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+                                {topSteps.map((step) => (
+                                    <div key={step.id} className="bg-white border border-[#DADCE0] p-5 rounded-2xl shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
+                                        <div className="absolute top-0 left-0 w-16 h-16 pointer-events-none">
+                                            <div className="absolute transform -rotate-45 bg-white border-b border-r border-gray-100 w-24 h-10 -left-8 top-1 flex items-center justify-center shadow-sm z-20">
+                                                <span className="text-[10px] font-black uppercase text-gray-800 tracking-tighter pl-4">{step.rank}</span>
+                                            </div>
+                                        </div>
+                                        <div className="aspect-video-container mb-6 bg-gray-100 shadow-inner">
+                                            <iframe src={step.embedUrl} loading="lazy" allowFullScreen referrerPolicy="no-referrer-when-downgrade" title={step.title}></iframe>
+                                        </div>
+                                        <div className="flex justify-between items-center mb-4">
+                                            <div className="flex items-center gap-2">
+                                                <div style={{ color: step.color }}><Icon name="award" className="w-5 h-5" strokeWidth={3} /></div>
+                                                <h4 className="text-xs font-black text-gray-800 uppercase tracking-tight">{step.title}</h4>
+                                            </div>
+                                        </div>
+                                        <div className="pt-5 border-t border-gray-50 flex items-center justify-between">
+                                            <div>
+                                                <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mb-0.5">Zobrazení v období</p>
+                                                <p className="text-2xl font-black text-[#4285F4] tracking-tighter leading-none">{step.views.toLocaleString()}</p>
+                                            </div>
+                                            <div className="text-[#34A853] flex items-center gap-1.5 text-[10px] font-bold bg-[#E6F4EA] px-2 py-1 rounded-lg">
+                                                <Icon name="trendingUp" className="w-3 h-3" strokeWidth={3} />
+                                                <span>Skvělé</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* VÝKON VE VYHLEDÁVÁNÍ */}
                         <div className="mt-24">
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-10">
                                 <div className="flex items-center gap-4">
-                                    <div className="p-3 bg-white border border-[#DADCE0] text-[#4285F4] rounded-xl shadow-sm"><Icon name="globe" className="w-6 h-6" strokeWidth={2.5} /></div>
+                                    <div className="p-3 bg-white border border-[#DADCE0] text-[#EA4335] rounded-xl shadow-sm"><Icon name="search" className="w-6 h-6" strokeWidth={2.5} /></div>
                                     <div>
-                                        <h2 className="text-2xl font-black text-gray-800 tracking-tight italic uppercase">Virtuální prohlídka & Street View</h2>
-                                        <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Analýza vizuálního zásahu vašich 360° snímků</p>
+                                        <h2 className="text-2xl font-black text-gray-800 tracking-tight italic uppercase">Výkon ve vyhledávání</h2>
+                                        <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Odkud přicházejí vaši zákazníci a co hledají</p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                                {/* Hlavní suma Street View v modré se zeleným nárůstem */}
-                                <div className="lg:col-span-1 bg-white border border-[#DADCE0] p-8 rounded-2xl shadow-sm flex flex-col justify-center text-center">
-                                    <div className="text-[#4285F4] mb-4 flex justify-center"><Icon name="camera" className="w-10 h-10" /></div>
-                                    <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Zobrazení celkem</h3>
-                                    <div className="text-5xl font-black text-gray-900 tracking-tighter mb-4">
-                                        {data.reduce((sum, item) => sum + item.streetView, 0).toLocaleString()}
-                                    </div>
-                                    {/* Zvýrazněný zelený nárůst */}
-                                    <div className="flex items-center justify-center gap-2 text-base font-black text-[#34A853] bg-[#E6F4EA] py-2 px-4 rounded-full">
-                                        <Icon name="trendingUp" className="w-5 h-5" strokeWidth={3} />
-                                        <span>+18.4 % meziročně</span>
-                                    </div>
-                                    <p className="text-[10px] text-gray-400 mt-6 leading-relaxed italic">
-                                        "Vaše virtuální prohlídka aktivně buduje důvěru zákazníků ještě před jejich návštěvou."
-                                    </p>
-                                </div>
-
-                                {/* Graf návštěvnosti Street View v modré */}
-                                <div className="lg:col-span-3 bg-white p-8 md:p-10 border border-[#DADCE0] rounded-2xl shadow-sm">
-                                    <div className="flex justify-between items-center mb-8">
-                                        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest italic">Vývoj zobrazení panoramat</h3>
-                                        <div className="flex gap-6 text-[10px] font-black uppercase tracking-widest">
-                                            <span className="flex items-center gap-2.5 text-[#4285F4]"><div className="w-3 h-3 rounded-full bg-[#4285F4] shadow-sm" /> Aktuální</span>
-                                            <span className="flex items-center gap-2.5 text-gray-300"><div className="w-3 h-0.5 bg-gray-200" /> Loni</span>
-                                        </div>
-                                    </div>
-                                    <div className="h-[280px] w-full">
-                                        <ResponsiveContainer width="100%" height="100%">
-                                            <AreaChart data={data}>
-                                                <defs>
-                                                    <linearGradient id="colorSV" x1="0" y1="0" x2="0" y2="1">
-                                                        <stop offset="5%" stopColor="#4285F4" stopOpacity={0.15}/>
-                                                        <stop offset="95%" stopColor="#4285F4" stopOpacity={0}/>
-                                                    </linearGradient>
-                                                </defs>
-                                                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#70757a', fontSize: 10, fontWeight: 700}} dy={10} />
-                                                <YAxis axisLine={false} tickLine={false} tick={{fill: '#70757a', fontSize: 10, fontWeight: 700}} />
-                                                <Tooltip contentStyle={{borderRadius: '12px', border: '1px solid #DADCE0'}} />
-                                                <Area type="monotone" dataKey="prevStreetView" name="Minulý rok" stroke="#cbd5e1" fill="transparent" strokeDasharray="5 5" strokeWidth={1.5} />
-                                                <Area type="monotone" dataKey="streetView" name="Letošní rok" stroke="#4285F4" fill="url(#colorSV)" strokeWidth={4} />
-                                            </AreaChart>
-                                        </ResponsiveContainer>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Žebříček Top 3 Snímků s medailemi a pořadím */}
-                            <div className="mt-12">
-                                <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-8 px-2 text-center md:text-left">Nejnavštěvovanější kroky prohlídky</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                                    {topSteps.map((step) => (
-                                        <div key={step.id} className="bg-white border border-[#DADCE0] p-5 rounded-2xl shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
-                                            {/* Rank Badge / Medaile */}
-                                            <div className="absolute top-0 left-0 w-16 h-16 pointer-events-none">
-                                                <div className="absolute transform -rotate-45 bg-white border-b border-r border-gray-100 w-24 h-10 -left-8 top-1 flex items-center justify-center shadow-sm z-20">
-                                                    <span className="text-[10px] font-black uppercase text-gray-800 tracking-tighter pl-4">{step.rank}</span>
-                                                </div>
-                                            </div>
-
-                                            {/* Iframe náhled kroku */}
-                                            <div className="aspect-video-container mb-6 bg-gray-100 shadow-inner">
-                                                <iframe 
-                                                    src={step.embedUrl} 
-                                                    loading="lazy" 
-                                                    allowFullScreen 
-                                                    referrerPolicy="no-referrer-when-downgrade"
-                                                    title={step.title}>
-                                                </iframe>
-                                            </div>
-                                            
-                                            <div className="flex justify-between items-center mb-4">
-                                                <div className="flex items-center gap-2">
-                                                    <div style={{ color: step.color }}>
-                                                        <Icon name="award" className="w-5 h-5" strokeWidth={3} />
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                                {/* DECENTNÍ ROZPIS ZDROJŮ */}
+                                <div className="bg-white border border-[#DADCE0] p-8 rounded-2xl shadow-sm">
+                                    <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-8">Zdroje návštěvnosti a Platformy</h3>
+                                    <div className="space-y-8">
+                                        {searchSources.map((source, i) => (
+                                            <div key={i} className="group">
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center transition-colors group-hover:bg-white border border-transparent group-hover:border-gray-100" style={{ color: source.color }}>
+                                                            <Icon name={source.icon} className="w-4 h-4" strokeWidth={2.5} />
+                                                        </div>
+                                                        <span className="text-xs font-bold text-gray-700">{source.name}</span>
                                                     </div>
-                                                    <h4 className="text-xs font-black text-gray-800 uppercase tracking-tight">{step.title}</h4>
+                                                    <div className="text-right">
+                                                        <span className="text-sm font-black text-gray-900">{source.value}%</span>
+                                                        <span className="ml-2 text-[9px] font-black text-[#34A853]">{source.trend}</span>
+                                                    </div>
                                                 </div>
-                                                <span className="bg-[#4285F4]/10 text-[#4285F4] px-2 py-1 rounded text-[8px] font-black uppercase">Top výkon</span>
+                                                <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                                    <div 
+                                                        className="h-full progress-bar rounded-full" 
+                                                        style={{ 
+                                                            backgroundColor: source.color,
+                                                            width: `${source.value}%`
+                                                        }} 
+                                                    />
+                                                </div>
                                             </div>
-                                            
-                                            <div className="pt-5 border-t border-gray-50 flex items-center justify-between">
-                                                <div>
-                                                    <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mb-0.5">Zobrazení v období</p>
-                                                    <p className="text-2xl font-black text-[#4285F4] tracking-tighter leading-none">{step.views.toLocaleString()}</p>
+                                        ))}
+                                    </div>
+                                    <div className="mt-12 pt-8 border-t border-gray-50 text-center text-[10px] text-gray-400 font-medium italic uppercase">
+                                        "Mobilní zařízení nyní tvoří 46 % veškerého vyhledávání vaší firmy."
+                                    </div>
+                                </div>
+
+                                {/* TOP 10 SLOV */}
+                                <div className="lg:col-span-2 bg-white border border-[#DADCE0] p-8 rounded-2xl shadow-sm">
+                                    <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6">Top 10 vyhledávacích dotazů</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-1">
+                                        {topKeywords.map((kw, i) => (
+                                            <div key={i} className="flex items-center justify-between py-3 border-b border-gray-50 group hover:bg-gray-50 px-2 rounded-lg transition-all">
+                                                <div className="flex items-center gap-4">
+                                                    <span className="text-[10px] font-black text-gray-300 w-4">{i + 1}.</span>
+                                                    <span className="text-xs font-bold text-gray-700 group-hover:text-gray-900">{kw.word}</span>
                                                 </div>
-                                                <div className="text-[#34A853] flex items-center gap-1.5 text-[10px] font-bold bg-[#E6F4EA] px-2 py-1 rounded-lg">
-                                                    <Icon name="trendingUp" className="w-3 h-3" strokeWidth={3} />
-                                                    <span>Skvělé</span>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-[11px] font-black text-[#EA4335]">{kw.count.toLocaleString()}</span>
+                                                    <span className="text-[9px] text-gray-400 font-bold uppercase">zobrazení</span>
                                                 </div>
                                             </div>
+                                        ))}
+                                    </div>
+                                    <div className="mt-8 p-4 bg-[#FCE8E6] rounded-xl border border-[#FAD2CF] text-center text-[10px] text-[#C5221F] font-black uppercase tracking-wider">
+                                        Většina klientů vás nachází přes obecné dotazy (Local SEO)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* RECENZE */}
+                        <div className="mt-24">
+                            <div className="flex items-center gap-4 mb-10">
+                                <div className="p-3 bg-white border border-[#DADCE0] text-[#FBBC05] rounded-xl shadow-sm"><Icon name="star" className="w-6 h-6" strokeWidth={2.5} /></div>
+                                <h2 className="text-2xl font-black text-gray-800 tracking-tight italic uppercase">Zákaznické recenze</h2>
+                            </div>
+                            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                                <div className="lg:col-span-1 space-y-6">
+                                    <div className="bg-white border border-[#DADCE0] p-8 rounded-2xl shadow-sm text-center">
+                                        <h3 className="text-[10px] font-black text-gray-400 uppercase mb-4">Průměrné hodnocení</h3>
+                                        <div className="flex justify-center items-end gap-1 mb-4"><span className="text-6xl font-black text-gray-900">4.8</span><span className="text-xl font-bold text-gray-400 mb-1">/ 5</span></div>
+                                        <div className="flex justify-center gap-1 mb-6">{[1,2,3,4,5].map(s => <Icon key={s} name="star" className="w-6 h-6 text-[#FBBC05] fill-[#FBBC05]" />)}</div>
+                                        <div className="bg-[#FFF8E1] text-[#A67C00] text-[11px] font-black px-4 py-2 rounded-full uppercase">Vynikající reputace</div>
+                                    </div>
+                                    <div className="bg-white border border-[#DADCE0] p-8 rounded-2xl shadow-sm text-center">
+                                        <h3 className="text-[10px] font-black text-gray-400 uppercase mb-2">Recenzí celkem</h3>
+                                        <div className="text-4xl font-black text-[#34A853] mb-4">1 248</div>
+                                        <div className="flex items-center justify-center gap-2 text-xs font-bold text-[#34A853] bg-[#E6F4EA] py-2 rounded-full"><Icon name="trendingUp" className="w-4 h-4" /> +12 nových</div>
+                                    </div>
+                                </div>
+                                <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    {featuredReviews.map(r => (
+                                        <div key={r.id} className="bg-white border border-[#DADCE0] p-6 rounded-2xl shadow-sm flex flex-col">
+                                            <div className="flex items-center gap-2 mb-6"><div className="p-2 rounded-lg" style={{ backgroundColor: `${r.color}15`, color: r.color }}><Icon name={r.id === 'worst' ? 'alert' : 'award'} className="w-4 h-4" /></div><span className="text-[10px] font-black uppercase text-gray-400">{r.type}</span></div>
+                                            <div className="flex items-center gap-3 mb-4"><div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400"><Icon name="user" className="w-5 h-5" /></div><div><p className="text-sm font-black text-gray-800">{r.author}</p><div className="flex gap-0.5">{[...Array(5)].map((_, i) => <Icon key={i} name="star" className={`w-3 h-3 ${i < r.rating ? 'text-[#FBBC05] fill-[#FBBC05]' : 'text-gray-200 fill-gray-200'}`} />)}</div></div></div>
+                                            <p className="text-xs text-gray-600 italic mb-6 flex-grow">"{r.text}"</p>
+                                            <div className="pt-4 border-t border-gray-50 flex items-center justify-between text-[10px] font-bold text-gray-400 uppercase"><span>{r.date}</span><div className="flex items-center gap-1.5 text-[#34A853]">Odpovězeno <Icon name="check" className="w-3 h-3" /></div></div>
                                         </div>
                                     ))}
                                 </div>
                             </div>
                         </div>
 
-                        {/* NOVÁ SEKCE: PŘEHLED RECENZÍ (Žlutá a Zelená) */}
-                        <div className="mt-24">
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-10">
-                                <div className="flex items-center gap-4">
-                                    <div className="p-3 bg-white border border-[#DADCE0] text-[#FBBC05] rounded-xl shadow-sm"><Icon name="star" className="w-6 h-6" strokeWidth={2.5} /></div>
-                                    <div>
-                                        <h2 className="text-2xl font-black text-gray-800 tracking-tight italic uppercase">Zákaznické recenze</h2>
-                                        <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Vaše reputace ve vyhledávání Google</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                                {/* Celkové hodnocení a počet */}
-                                <div className="lg:col-span-1 space-y-6">
-                                    <div className="bg-white border border-[#DADCE0] p-8 rounded-2xl shadow-sm text-center">
-                                        <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Průměrné hodnocení</h3>
-                                        <div className="flex justify-center items-end gap-1 mb-4">
-                                            <span className="text-6xl font-black text-gray-900 leading-none">4.8</span>
-                                            <span className="text-xl font-bold text-gray-400 mb-1">/ 5</span>
-                                        </div>
-                                        <div className="flex justify-center gap-1 mb-6">
-                                            {[1, 2, 3, 4, 5].map((s) => (
-                                                <div key={s} className="text-[#FBBC05]">
-                                                    <Icon name="star" className="w-6 h-6 fill-[#FBBC05]" />
-                                                </div>
-                                            ))}
-                                        </div>
-                                        <div className="bg-[#FFF8E1] text-[#A67C00] text-[11px] font-black px-4 py-2 rounded-full uppercase">
-                                            Vynikající reputace
-                                        </div>
-                                    </div>
-
-                                    <div className="bg-white border border-[#DADCE0] p-8 rounded-2xl shadow-sm text-center">
-                                        <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Recenzí celkem</h3>
-                                        <div className="text-4xl font-black text-[#34A853] mb-4">1 248</div>
-                                        <div className="flex items-center justify-center gap-2 text-xs font-bold text-[#34A853] bg-[#E6F4EA] py-2 rounded-full">
-                                            <Icon name="trendingUp" className="w-4 h-4" />
-                                            <span>+12 nových tento měsíc</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Výběr recenzí */}
-                                <div className="lg:col-span-3">
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full">
-                                        {featuredReviews.map((review) => (
-                                            <div key={review.id} className="bg-white border border-[#DADCE0] p-6 rounded-2xl shadow-sm flex flex-col relative group hover:border-gray-300 transition-all">
-                                                <div className="flex items-center gap-2 mb-6">
-                                                    <div className="p-2 rounded-lg" style={{ backgroundColor: `${review.color}15`, color: review.color }}>
-                                                        <Icon name={review.id === 'worst' ? 'alert' : 'award'} className="w-4 h-4" strokeWidth={3} />
-                                                    </div>
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">{review.type}</span>
-                                                </div>
-
-                                                <div className="flex items-center gap-3 mb-4">
-                                                    <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
-                                                        <Icon name="user" className="w-5 h-5" />
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-sm font-black text-gray-800">{review.author}</p>
-                                                        <div className="flex gap-0.5">
-                                                            {[...Array(5)].map((_, i) => (
-                                                                <Icon 
-                                                                    key={i} 
-                                                                    name="star" 
-                                                                    className={`w-3 h-3 ${i < review.rating ? 'text-[#FBBC05] fill-[#FBBC05]' : 'text-gray-200 fill-gray-200'}`} 
-                                                                />
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div className="relative mb-6 flex-grow">
-                                                    <div className="absolute -top-2 -left-2 opacity-10 text-gray-400">
-                                                        <Icon name="message" className="w-8 h-8" />
-                                                    </div>
-                                                    <p className="text-xs text-gray-600 leading-relaxed italic relative z-10 font-medium line-clamp-4">
-                                                        "{review.text}"
-                                                    </p>
-                                                </div>
-
-                                                <div className="pt-4 border-t border-gray-50 flex items-center justify-between text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                                                    <span>{review.date}</span>
-                                                    <div className="flex items-center gap-1.5 text-[#34A853]">
-                                                        Odpovězeno <Icon name="check" className="w-3 h-3" strokeWidth={3} />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <footer className="mt-32 pt-12 border-t border-[#DADCE0] flex flex-col md:flex-row justify-between items-center text-gray-400 text-[10px] font-black uppercase tracking-[0.3em] gap-8 text-center md:text-left">
+                        <footer className="mt-32 pt-12 border-t border-[#DADCE0] flex flex-col md:flex-row justify-between items-center text-gray-400 text-[10px] font-bold uppercase tracking-[0.3em] gap-8 text-center md:text-left">
                             <p>© 2024 VIEW - Autorizovaný partner Google</p>
                             <div className="flex gap-8 items-center">
-                                <span>Google My Business API</span>
-                                <span className="text-gray-200">|</span>
-                                <span className="text-gray-800 font-bold">v3.9.0-GITHUB</span>
+                                <span>Google My Business API</span><span className="text-gray-200">|</span><span className="text-gray-800 font-bold">v4.0.0-GITHUB</span>
                             </div>
                         </footer>
                     </main>
