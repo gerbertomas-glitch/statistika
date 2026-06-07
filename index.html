@@ -64,6 +64,9 @@
         @keyframes fillBar { from { width: 0; } }
         .animate-bar { animation: fillBar 1s ease-out forwards; }
         
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+
         /* Leaderboard styling */
         .medal-1 { color: #fbbf24; text-shadow: 0 2px 4px rgba(251, 191, 36, 0.3); }
         .medal-2 { color: #9ca3af; text-shadow: 0 2px 4px rgba(156, 163, 175, 0.3); }
@@ -193,23 +196,37 @@
                         </div>
                     </div>
 
-                    <div class="flex items-end gap-3 w-full md:w-auto">
-                        <div class="relative min-w-[180px]">
+                    <div class="flex items-end gap-3 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
+                        <!-- NOVÁ POLE PRO VLASTNÍ OBDOBÍ (Skrytá ve výchozím stavu) -->
+                        <div id="custom-date-fields" class="hidden items-end gap-2 animate-fade-in shrink-0">
+                            <div class="relative min-w-[120px]">
+                                <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Od</label>
+                                <input type="date" id="date-from" onchange="refreshDashboardData()" class="bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm font-medium text-gray-900 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all shadow-sm">
+                            </div>
+                            <span class="text-gray-400 font-bold pb-2">-</span>
+                            <div class="relative min-w-[120px]">
+                                <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Do</label>
+                                <input type="date" id="date-to" onchange="refreshDashboardData()" class="bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm font-medium text-gray-900 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all shadow-sm">
+                            </div>
+                        </div>
+
+                        <div class="relative min-w-[180px] shrink-0">
                             <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Období</label>
-                            <div class="relative flex items-center bg-white border border-gray-300 rounded-lg px-3 py-2 cursor-pointer">
+                            <div class="relative flex items-center bg-white border border-gray-300 rounded-lg px-3 py-2 cursor-pointer transition-colors hover:border-gray-400">
                                 <i class="fa-regular fa-calendar text-gray-400 mr-2.5"></i>
-                                <select id="period-select" onchange="refreshDashboardData()" class="text-sm font-medium text-gray-900 bg-transparent border-none focus:outline-none w-full appearance-none cursor-pointer">
+                                <select id="period-select" onchange="handlePeriodChange()" class="text-sm font-medium text-gray-900 bg-transparent border-none focus:outline-none w-full appearance-none cursor-pointer">
                                     <option value="30d">Posledních 30 dní</option>
                                     <option value="tm">Tento měsíc</option>
                                     <option value="mm">Minulý měsíc</option>
                                     <option value="tr">Tento rok</option>
                                     <option value="mr">Minulý rok</option>
                                     <option value="all">Celé období (Vše)</option>
+                                    <option value="custom">Vlastní (výběr)</option>
                                 </select>
                                 <i class="fa-solid fa-chevron-down text-gray-400 ml-2 text-xs pointer-events-none absolute right-3"></i>
                             </div>
                         </div>
-                        <button class="bg-white border border-gray-300 text-gray-700 h-[38px] px-4 rounded-lg text-sm font-medium hover:bg-gray-50 transition shadow-sm flex items-center gap-2">
+                        <button class="bg-white border border-gray-300 text-gray-700 h-[38px] px-4 rounded-lg text-sm font-medium hover:bg-gray-50 transition shadow-sm flex items-center gap-2 shrink-0">
                             <i class="fa-solid fa-download"></i> Export
                         </button>
                     </div>
@@ -235,7 +252,7 @@
             <!-- OBSAH TABŮ -->
             <div class="p-4 sm:p-8 max-w-7xl mx-auto w-full">
                 
-                <!-- TAB 1: ZÁKLADNÍ PŘEHLED (BEZ GRAFŮ, JEN ČÍSLA) -->
+                <!-- TAB 1: ZÁKLADNÍ PŘEHLED -->
                 <div id="tab-prehled" class="space-y-6 block">
                     
                     <!-- SMART INSIGHTS -->
@@ -275,7 +292,7 @@
                             <div class="flex items-end justify-between">
                                 <div class="flex items-center gap-2">
                                     <p class="text-2xl font-bold text-gray-900" id="kpi-recenze">324</p>
-                                    <div id="kpi-hodnoceni" class="text-gray-600 text-xs font-bold bg-gray-50 px-1.5 py-0.5 rounded border border-gray-200"><i class="fa-solid fa-star text-gray-400"></i> 4.8</div>
+                                    <div id="kpi-hodnoceni" class="text-gray-600 text-xs font-bold bg-gray-50 px-1.5 py-0.5 rounded border border-gray-200"><i class="fa-solid fa-star text-yellow-400"></i> 4.8</div>
                                 </div>
                             </div>
                         </div>
@@ -476,41 +493,86 @@
                         </div>
 
                     </div>
-                    
                 </div>
 
                 <!-- TAB 2: DETAILNÍ GRAFY A TRENDY -->
                 <div id="tab-grafy" class="hidden space-y-6">
                     
-                    <div class="card-minimal p-6">
-                        <div class="flex justify-between items-start mb-6">
-                            <div>
-                                <h3 class="font-bold text-gray-900">Vývoj zobrazení a interakcí v čase</h3>
-                                <p class="text-xs text-gray-500 mt-1">Liniový graf trendů.</p>
-                            </div>
-                            <div class="flex gap-3">
-                                <span class="flex items-center text-[10px] font-bold text-gray-500 uppercase"><span class="w-3 h-1 rounded-full bg-blue-500 mr-1.5"></span>Zobrazení</span>
-                                <span class="flex items-center text-[10px] font-bold text-gray-500 uppercase"><span class="w-3 h-1 rounded-full bg-brand-500 mr-1.5"></span>Interakce</span>
+                    <!-- Liniový graf s přepínáním -->
+                    <div class="card-minimal p-0 overflow-hidden">
+                        <div class="px-6 pt-6 border-b border-gray-200">
+                            <div class="flex overflow-x-auto hide-scrollbar gap-6">
+                                <button onclick="changeChartMetric('overview')" id="btn-metric-overview" class="whitespace-nowrap pb-3 border-b-2 font-bold text-sm transition-colors border-blue-500 text-blue-600">Přehled</button>
+                                <button onclick="changeChartMetric('calls')" id="btn-metric-calls" class="whitespace-nowrap pb-3 border-b-2 font-medium text-sm transition-colors border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">Volání</button>
+                                <button onclick="changeChartMetric('bookings')" id="btn-metric-bookings" class="whitespace-nowrap pb-3 border-b-2 font-medium text-sm transition-colors border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">Rezervace</button>
+                                <button onclick="changeChartMetric('directions')" id="btn-metric-directions" class="whitespace-nowrap pb-3 border-b-2 font-medium text-sm transition-colors border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">Trasy</button>
+                                <button onclick="changeChartMetric('clicks')" id="btn-metric-clicks" class="whitespace-nowrap pb-3 border-b-2 font-medium text-sm transition-colors border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">Prokliky na web</button>
                             </div>
                         </div>
-                        <div class="relative h-72 w-full">
-                            <canvas id="trendChart"></canvas>
+                        
+                        <div class="p-6">
+                            <div class="mb-8">
+                                <h2 class="text-4xl font-normal text-gray-900 tracking-tight" id="chart-main-value">413</h2>
+                                <p class="text-sm text-gray-800 mt-2 flex items-center gap-2" id="chart-main-label">Interakce s Firemním profilem <i class="fa-solid fa-circle-info text-gray-400 text-xs ml-1"></i></p>
+                                <p class="text-xs mt-1" id="chart-trend-container">
+                                    <!-- Trend se doplní přes JS -->
+                                </p>
+                            </div>
+                            
+                            <div class="relative h-72 w-full">
+                                <canvas id="trendChart"></canvas>
+                            </div>
                         </div>
                     </div>
 
+                    <!-- Karty objevování a dotazů -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="card-minimal p-6">
-                            <h3 class="font-bold text-gray-900 mb-1">Jak vás lidé nacházejí</h3>
-                            <p class="text-xs text-gray-500 mb-6">Rozpad akvizice uživatelů.</p>
-                            <div class="relative h-56 w-full flex items-center justify-center">
-                                <canvas id="doughnutChart"></canvas>
+                        <!-- Objevování (Kruhový graf) -->
+                        <div class="card-minimal p-6 flex flex-col">
+                            <h3 class="text-sm font-medium text-gray-900 mb-6 flex items-center gap-1.5">Jak vás uživatelé objevili <i class="fa-solid fa-circle-info text-gray-400 text-xs"></i></h3>
+                            
+                            <div class="mb-8">
+                                <h2 class="text-3xl font-normal text-gray-900" id="discovery-total-value">2 067</h2>
+                                <p class="text-sm text-gray-600 mt-1 flex items-center gap-1.5"><i class="fa-regular fa-eye"></i> Počet lidí, kteří si prohlédli váš Firemní profil</p>
+                            </div>
+                            
+                            <div class="flex-1">
+                                <h4 class="font-medium text-gray-900 text-sm">Rozdělení podle platforem a zařízení</h4>
+                                <p class="text-xs text-gray-500 mb-6">Platformy a zařízení, na kterých lidé našli váš profil</p>
+                                
+                                <div class="flex items-center gap-8">
+                                    <div class="relative w-36 h-36 shrink-0">
+                                        <canvas id="doughnutChart"></canvas>
+                                    </div>
+                                    <div class="space-y-4 flex-1" id="doughnut-legend">
+                                        <!-- Legenda se vygeneruje přes JS -->
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="card-minimal p-6">
-                            <h3 class="font-bold text-gray-900 mb-1">Typy interakcí detailně</h3>
-                            <p class="text-xs text-gray-500 mb-6">Rozdělení jednotlivých akcí.</p>
-                            <div class="relative h-56 w-full">
-                                <canvas id="barChart"></canvas>
+                        
+                        <!-- Vyhledávací dotazy -->
+                        <div class="card-minimal p-6 flex flex-col">
+                            <h3 class="text-sm font-medium text-gray-900 mb-6 flex items-center gap-1.5">Vyhledávací dotazy <i class="fa-solid fa-circle-info text-gray-400 text-xs"></i></h3>
+                            
+                            <div class="mb-8">
+                                <h2 class="text-3xl font-normal text-gray-900" id="queries-total-value">123</h2>
+                                <p class="text-sm text-gray-600 mt-1 flex items-center gap-1.5"><i class="fa-solid fa-magnifying-glass text-xs"></i> Vyhledávání, která spustila zobrazení vašeho Firemního profilu</p>
+                            </div>
+                            
+                            <div class="flex-1 flex flex-col">
+                                <h4 class="font-medium text-gray-900 text-sm">Přehled vyhledání</h4>
+                                <p class="text-xs text-gray-500 mb-4">Nejčastější vyhledávací dotazy v síti Google</p>
+                                
+                                <div class="space-y-3 flex-1">
+                                    <ul id="search-queries-list" class="space-y-3">
+                                        <!-- Dotazy z JS -->
+                                    </ul>
+                                </div>
+                                
+                                <div class="mt-6 pt-4 border-t border-gray-100 text-center">
+                                    <button onclick="showToast('Otevírám kompletní seznam slov...')" class="text-sm font-medium text-blue-600 hover:text-blue-800 transition border border-gray-200 rounded px-6 py-2 bg-white shadow-sm">Další informace</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -654,7 +716,7 @@
     </div>
 
     <script>
-        // Data pro 10 poboček
+        // Data pro pobočky
         const branches = ['Praha 13', 'Liberec', 'Brno', 'Ostrava', 'Plzeň', 'Olomouc', 'České Budějovice', 'Hradec Králové', 'Pardubice', 'Zlín'];
         
         // Simulovaná databáze pro každou pobočku
@@ -671,10 +733,15 @@
             'Zlín': { views: 13500, interactions: 1050, reviews: 20, rating: 4.8, sv: 4000, photos: 6500, nfc: 11, search: 8500, maps: 5000, mob: 79, desk: 21, web: 500, dir: 380, call: 170 }
         };
 
-        let compareSelection = ['Praha 13', 'Liberec', 'Brno', 'Ostrava', 'Plzeň']; // Default vybráno 5
-        let sourceSelection = [...branches]; // Default vybráno všech 10
+        // Globální proměnné
+        let compareSelection = ['Praha 13', 'Liberec', 'Brno', 'Ostrava', 'Plzeň'];
+        let sourceSelection = [...branches]; 
+        let chartDataStore = { overview: 0, calls: 0, bookings: 0, directions: 0, clicks: 0, views: 0 };
+        let activeChartMetric = 'overview';
+        let trendChart, doughnutChart, compareChart;
+        let toastTimeout;
 
-        // Inicializace rozbalovacího menu
+        // TABS Logika a Menu
         function toggleMenu(menuId) {
             const submenu = document.getElementById(menuId);
             if(submenu) {
@@ -696,7 +763,6 @@
             }
         }
 
-        // TABS Logika
         function switchTab(tabId) {
             const tabs = ['tab-prehled', 'tab-grafy', 'tab-porovnani', 'tab-skupiny'];
             tabs.forEach(t => {
@@ -777,13 +843,42 @@
                 input.value = `Vybráno ${checkedCount}/${branches.length} poboček`;
                 if(masterCb) masterCb.checked = false;
             }
-            
             refreshDashboardData();
         }
-        
+
+        function filterList() {
+            const input = document.getElementById('branch-search-input');
+            const filter = input.value.toLowerCase();
+            const nodes = document.querySelectorAll('.filter-opt');
+            nodes.forEach(node => {
+                const text = node.innerText.toLowerCase();
+                node.style.display = text.includes(filter) ? "" : "none";
+            });
+        }
+
+        // --- ZMĚNA OBDOBÍ A ZOBRAZENÍ VLASTNÍCH DATUMŮ ---
+        function handlePeriodChange() {
+            const period = document.getElementById('period-select').value;
+            const customFields = document.getElementById('custom-date-fields');
+            
+            if (period === 'custom') {
+                customFields.classList.remove('hidden');
+                customFields.classList.add('flex');
+                
+                // Nastaví výchozí hodnoty na dnešek, pokud nejsou vyplněné
+                const today = new Date().toISOString().split('T')[0];
+                if (!document.getElementById('date-from').value) document.getElementById('date-from').value = today;
+                if (!document.getElementById('date-to').value) document.getElementById('date-to').value = today;
+            } else {
+                customFields.classList.add('hidden');
+                customFields.classList.remove('flex');
+            }
+            refreshDashboardData();
+        }
+
+        // --- ZÁKLADNÍ VÝPOČTY (Refresh dat) ---
         function refreshDashboardData() {
             if (sourceSelection.length === 0) {
-                // Nulový stav
                 document.getElementById('kpi-zobrazeni').innerText = '0';
                 document.getElementById('kpi-interakce').innerText = '0';
                 document.getElementById('kpi-recenze').innerText = '0';
@@ -793,7 +888,6 @@
                 return;
             }
 
-            // Nastavení násobitele podle vybraného období
             const periodSelect = document.getElementById('period-select');
             let multiplier = 1.0;
             if (periodSelect) {
@@ -804,6 +898,7 @@
                     case 'tr': multiplier = 6.0; break;
                     case 'mr': multiplier = 12.5; break;
                     case 'all': multiplier = 35.0; break;
+                    case 'custom': multiplier = 2.4; break;
                 }
             }
 
@@ -830,7 +925,6 @@
                 sumDesk += (d.desk * (d.views * multiplier));
             });
 
-            // Zaokrouhlení po pronásobení
             sumViews = Math.round(sumViews);
             sumInts = Math.round(sumInts);
             sumRev = Math.round(sumRev);
@@ -842,8 +936,8 @@
             sumWeb = Math.round(sumWeb);
             sumDir = Math.round(sumDir);
             sumCall = Math.round(sumCall);
+            let sumRes = Math.round(sumCall * 0.25);
 
-            // Výpočty průměrů a procent
             let avgRating = (sumRev > 0) ? (sumRatingWeight / sumRev).toFixed(1) : "0.0";
             let avgMob = sumViews > 0 ? Math.round(sumMob / sumViews) : 0;
             let avgDesk = sumViews > 0 ? Math.round(sumDesk / sumViews) : 0;
@@ -852,121 +946,85 @@
 
             const formatK = (num) => (num > 999) ? (num/1000).toFixed(1) + 'k' : num;
 
-            // Zápis do KPI karet
-            document.getElementById('kpi-zobrazeni').innerText = formatK(sumViews);
-            document.getElementById('kpi-interakce').innerText = sumInts.toLocaleString();
-            document.getElementById('kpi-recenze').innerText = sumRev.toLocaleString();
-            document.getElementById('kpi-hodnoceni').innerHTML = `<i class="fa-solid fa-star text-yellow-400"></i> ${avgRating}`;
-            document.getElementById('kpi-sv').innerText = formatK(sumSv);
-            document.getElementById('kpi-nfc').innerText = sumNfc.toLocaleString();
-            document.getElementById('kpi-nfc-percent').innerText = `${nfcPercent} % všech`;
+            // Zápis do karet v prvním tabu
+            if(document.getElementById('kpi-zobrazeni')) document.getElementById('kpi-zobrazeni').innerText = formatK(sumViews);
+            if(document.getElementById('kpi-interakce')) document.getElementById('kpi-interakce').innerText = sumInts.toLocaleString();
+            if(document.getElementById('kpi-recenze')) document.getElementById('kpi-recenze').innerText = sumRev.toLocaleString();
+            if(document.getElementById('kpi-hodnoceni')) document.getElementById('kpi-hodnoceni').innerHTML = `<i class="fa-solid fa-star text-yellow-400"></i> ${avgRating}`;
+            if(document.getElementById('kpi-sv')) document.getElementById('kpi-sv').innerText = formatK(sumSv);
+            if(document.getElementById('kpi-nfc')) document.getElementById('kpi-nfc').innerText = sumNfc.toLocaleString();
+            if(document.getElementById('kpi-nfc-percent')) document.getElementById('kpi-nfc-percent').innerText = `${nfcPercent} % všech`;
 
-            // Zápis detailní karty Recenze
-            if (document.getElementById('detail-rev-val')) {
-                document.getElementById('detail-rev-val').innerText = sumRev.toLocaleString();
-            }
-            if (document.getElementById('detail-rating-val')) {
-                document.getElementById('detail-rating-val').innerText = avgRating;
-            }
+            if(document.getElementById('detail-rev-val')) document.getElementById('detail-rev-val').innerText = sumRev.toLocaleString();
+            if(document.getElementById('detail-rating-val')) document.getElementById('detail-rating-val').innerText = avgRating;
 
-            // Zápis do grafů viditelnosti
             let pctSearch = sumViews > 0 ? Math.round((sumSearch / sumViews) * 100) : 0;
             let pctMaps = 100 - pctSearch;
-            document.getElementById('bar-vyhledavani-val').innerText = `${pctSearch}% (${formatK(sumSearch)})`;
-            document.getElementById('bar-mapy-val').innerText = `${pctMaps}% (${formatK(sumMaps)})`;
+            if(document.getElementById('bar-vyhledavani-val')) document.getElementById('bar-vyhledavani-val').innerText = `${pctSearch}% (${formatK(sumSearch)})`;
+            if(document.getElementById('bar-mapy-val')) document.getElementById('bar-mapy-val').innerText = `${pctMaps}% (${formatK(sumMaps)})`;
 
             let maxView = Math.max(sumSearch, sumMaps);
-            document.getElementById('bar-vyhledavani').style.width = `${pctSearch}%`;
-            document.getElementById('bar-vyhledavani').className = (sumSearch === maxView && maxView > 0) ? 'h-full animate-bar bg-brand-500' : 'h-full animate-bar bg-gray-300';
-            document.getElementById('bar-mapy').style.width = `${pctMaps}%`;
-            document.getElementById('bar-mapy').className = (sumMaps === maxView && maxView > 0) ? 'h-full animate-bar bg-brand-500' : 'h-full animate-bar bg-gray-300';
+            if(document.getElementById('bar-vyhledavani')) {
+                document.getElementById('bar-vyhledavani').style.width = `${pctSearch}%`;
+                document.getElementById('bar-vyhledavani').className = (sumSearch === maxView && maxView > 0) ? 'h-full animate-bar bg-brand-500' : 'h-full animate-bar bg-gray-300';
+            }
+            if(document.getElementById('bar-mapy')) {
+                document.getElementById('bar-mapy').style.width = `${pctMaps}%`;
+                document.getElementById('bar-mapy').className = (sumMaps === maxView && maxView > 0) ? 'h-full animate-bar bg-brand-500' : 'h-full animate-bar bg-gray-300';
+            }
 
-            document.getElementById('val-mobile').innerText = `${avgMob} %`;
-            document.getElementById('val-desktop').innerText = `${avgDesk} %`;
+            if(document.getElementById('val-mobile')) document.getElementById('val-mobile').innerText = `${avgMob} %`;
+            if(document.getElementById('val-desktop')) document.getElementById('val-desktop').innerText = `${avgDesk} %`;
 
-            // Zápis do Akcí
-            document.getElementById('act-web').innerText = sumWeb.toLocaleString();
-            document.getElementById('act-trasa').innerText = sumDir.toLocaleString();
-            document.getElementById('act-hovory').innerText = sumCall.toLocaleString();
+            if(document.getElementById('act-web')) document.getElementById('act-web').innerText = sumWeb.toLocaleString();
+            if(document.getElementById('act-trasa')) document.getElementById('act-trasa').innerText = sumDir.toLocaleString();
+            if(document.getElementById('act-hovory')) document.getElementById('act-hovory').innerText = sumCall.toLocaleString();
 
             let maxAct = Math.max(sumWeb, sumDir, sumCall);
-            document.getElementById('bar-act-web').style.width = sumInts > 0 ? `${(sumWeb/sumInts)*100}%` : '0%';
-            document.getElementById('bar-act-web').className = (sumWeb === maxAct && maxAct > 0) ? 'h-full transition-all duration-500 bg-brand-500' : 'h-full transition-all duration-500 bg-gray-300';
-            document.getElementById('bar-act-trasa').style.width = sumInts > 0 ? `${(sumDir/sumInts)*100}%` : '0%';
-            document.getElementById('bar-act-trasa').className = (sumDir === maxAct && maxAct > 0) ? 'h-full transition-all duration-500 bg-brand-500' : 'h-full transition-all duration-500 bg-gray-300';
-            document.getElementById('bar-act-hovory').style.width = sumInts > 0 ? `${(sumCall/sumInts)*100}%` : '0%';
-            document.getElementById('bar-act-hovory').className = (sumCall === maxAct && maxAct > 0) ? 'h-full transition-all duration-500 bg-brand-500' : 'h-full transition-all duration-500 bg-gray-300';
+            if(document.getElementById('bar-act-web')) {
+                document.getElementById('bar-act-web').style.width = sumInts > 0 ? `${(sumWeb/sumInts)*100}%` : '0%';
+                document.getElementById('bar-act-web').className = (sumWeb === maxAct && maxAct > 0) ? 'h-full transition-all duration-500 bg-brand-500' : 'h-full transition-all duration-500 bg-gray-300';
+            }
+            if(document.getElementById('bar-act-trasa')) {
+                document.getElementById('bar-act-trasa').style.width = sumInts > 0 ? `${(sumDir/sumInts)*100}%` : '0%';
+                document.getElementById('bar-act-trasa').className = (sumDir === maxAct && maxAct > 0) ? 'h-full transition-all duration-500 bg-brand-500' : 'h-full transition-all duration-500 bg-gray-300';
+            }
+            if(document.getElementById('bar-act-hovory')) {
+                document.getElementById('bar-act-hovory').style.width = sumInts > 0 ? `${(sumCall/sumInts)*100}%` : '0%';
+                document.getElementById('bar-act-hovory').className = (sumCall === maxAct && maxAct > 0) ? 'h-full transition-all duration-500 bg-brand-500' : 'h-full transition-all duration-500 bg-gray-300';
+            }
 
-            // Zápis do Street View / Fotky
             let totalVisual = sumSv + sumPhotos;
             let pctSv = totalVisual > 0 ? Math.round((sumSv / totalVisual) * 100) : 0;
             let pctPhotos = 100 - pctSv;
-            document.getElementById('bar-sv-val').innerText = `${pctSv}% (${formatK(sumSv)})`;
-            document.getElementById('bar-foto-val').innerText = `${pctPhotos}% (${formatK(sumPhotos)})`;
+            if(document.getElementById('bar-sv-val')) document.getElementById('bar-sv-val').innerText = `${pctSv}% (${formatK(sumSv)})`;
+            if(document.getElementById('bar-foto-val')) document.getElementById('bar-foto-val').innerText = `${pctPhotos}% (${formatK(sumPhotos)})`;
             
             let maxVis = Math.max(sumSv, sumPhotos);
-            document.getElementById('bar-sv').style.width = `${pctSv}%`;
-            document.getElementById('bar-sv').className = (sumSv === maxVis && maxVis > 0) ? 'h-full animate-bar bg-brand-500' : 'h-full animate-bar bg-gray-300';
-            document.getElementById('bar-foto').style.width = `${pctPhotos}%`;
-            document.getElementById('bar-foto').className = (sumPhotos === maxVis && maxVis > 0) ? 'h-full animate-bar bg-brand-500' : 'h-full animate-bar bg-gray-300';
-
-            // Zápis do NFC vs Organika
-            let orgReviews = sumRev - sumNfc;
-            document.getElementById('bar-nfc-val').innerText = `${nfcPercent}% (${sumNfc})`;
-            document.getElementById('bar-org-val').innerText = `${orgPercent}% (${orgReviews})`;
-            
-            let maxNfc = Math.max(sumNfc, orgReviews);
-            document.getElementById('bar-nfc-ratio').style.width = `${nfcPercent}%`;
-            document.getElementById('bar-nfc-ratio').className = (sumNfc === maxNfc && maxNfc > 0) ? 'h-full animate-bar bg-brand-500' : 'h-full animate-bar bg-gray-300';
-            document.getElementById('bar-org-ratio').style.width = `${orgPercent}%`;
-            document.getElementById('bar-org-ratio').className = (orgReviews === maxNfc && maxNfc > 0) ? 'h-full animate-bar bg-brand-500' : 'h-full animate-bar bg-gray-300';
-
-            // TOP 3 Dynamický rendering
-            function renderTop3(metricKey, containerId, listId, isK = false, isRating = false) {
-                const container = document.getElementById(containerId);
-                const list = document.getElementById(listId);
-                if (!container || !list) return;
-
-                if (sourceSelection.length <= 1) {
-                    container.classList.add('hidden');
-                    return;
-                }
-                container.classList.remove('hidden');
-
-                let branchData = sourceSelection.map(b => {
-                    // Hodnocení se nesmí násobit objemovým koeficientem
-                    let val = isRating ? mockDatabase[b][metricKey] : mockDatabase[b][metricKey] * multiplier;
-                    return { name: b, value: val };
-                });
-
-                branchData.sort((a, b) => b.value - a.value);
-                let top3 = branchData.slice(0, 3);
-
-                let html = '';
-                top3.forEach((item, index) => {
-                    // Decentní barvy pro TOP 3 (místo zlaté/stříbrné)
-                    let medal = index === 0 ? 'text-gray-700' : (index === 1 ? 'text-gray-500' : 'text-gray-400');
-                    
-                    let valStr = '';
-                    if (isRating) {
-                        valStr = item.value.toFixed(1) + ' <i class="fa-solid fa-star text-yellow-400 text-[10px] ml-0.5"></i>';
-                    } else {
-                        valStr = isK ? formatK(Math.round(item.value)) : Math.round(item.value).toLocaleString();
-                    }
-
-                    html += `
-                        <div class="flex items-center justify-between text-sm py-0.5">
-                            <div class="flex items-center gap-2 truncate pr-2">
-                                <span class="font-bold ${medal} w-4 text-right">${index + 1}.</span>
-                                <span class="text-gray-600 font-medium truncate">${item.name}</span>
-                            </div>
-                            <span class="font-bold text-gray-900">${valStr}</span>
-                        </div>
-                    `;
-                });
-                list.innerHTML = html;
+            if(document.getElementById('bar-sv')) {
+                document.getElementById('bar-sv').style.width = `${pctSv}%`;
+                document.getElementById('bar-sv').className = (sumSv === maxVis && maxVis > 0) ? 'h-full animate-bar bg-brand-500' : 'h-full animate-bar bg-gray-300';
+            }
+            if(document.getElementById('bar-foto')) {
+                document.getElementById('bar-foto').style.width = `${pctPhotos}%`;
+                document.getElementById('bar-foto').className = (sumPhotos === maxVis && maxVis > 0) ? 'h-full animate-bar bg-brand-500' : 'h-full animate-bar bg-gray-300';
             }
 
+            let orgReviews = sumRev - sumNfc;
+            if(document.getElementById('bar-nfc-val')) document.getElementById('bar-nfc-val').innerText = `${nfcPercent}% (${sumNfc})`;
+            if(document.getElementById('bar-org-val')) document.getElementById('bar-org-val').innerText = `${orgPercent}% (${orgReviews})`;
+            
+            let maxNfc = Math.max(sumNfc, orgReviews);
+            if(document.getElementById('bar-nfc-ratio')) {
+                document.getElementById('bar-nfc-ratio').style.width = `${nfcPercent}%`;
+                document.getElementById('bar-nfc-ratio').className = (sumNfc === maxNfc && maxNfc > 0) ? 'h-full animate-bar bg-brand-500' : 'h-full animate-bar bg-gray-300';
+            }
+            if(document.getElementById('bar-org-ratio')) {
+                document.getElementById('bar-org-ratio').style.width = `${orgPercent}%`;
+                document.getElementById('bar-org-ratio').className = (orgReviews === maxNfc && maxNfc > 0) ? 'h-full animate-bar bg-brand-500' : 'h-full animate-bar bg-gray-300';
+            }
+
+            // TOP 3 Dynamický rendering
             renderTop3('views', 'top3-views-container', 'top3-views-list', true);
             renderTop3('interactions', 'top3-ints-container', 'top3-ints-list', false);
             renderTop3('sv', 'top3-sv-container', 'top3-sv-list', true);
@@ -974,75 +1032,99 @@
             renderTop3('reviews', 'top3-rev-container', 'top3-rev-list', false);
             renderTop3('rating', 'top3-rating-container', 'top3-rating-list', false, true);
 
-            // Aktualizace textu "Chytrý souhrn"
-            if(sourceSelection.length === 1) {
-                document.getElementById('insight-text').innerHTML = `Pobočka <strong>${sourceSelection[0]}</strong> si vede skvěle. S průměrným hodnocením ${avgRating} hvězdiček patří k nadprůměru sítě.`;
-            } else if (sourceSelection.length === branches.length) {
-                document.getElementById('insight-text').innerHTML = `Celkově vaše pobočky vykazují růst zobrazení o 12 %. Největší objevitelnost má <strong>Praha 13</strong>, skvěle si vede i <strong>Brno</strong>.`;
-            } else {
-                 document.getElementById('insight-text').innerHTML = `Pro ${sourceSelection.length} vybraných poboček byla přepočtena data. Společně vygenerovaly <strong>${formatK(sumViews)} zobrazení</strong> a ${sumInts.toLocaleString()} interakcí.`;
+            if(document.getElementById('insight-text')) {
+                if(sourceSelection.length === 1) {
+                    document.getElementById('insight-text').innerHTML = `Pobočka <strong>${sourceSelection[0]}</strong> si vede skvěle. S průměrným hodnocením ${avgRating} hvězdiček patří k nadprůměru sítě.`;
+                } else if (sourceSelection.length === branches.length) {
+                    document.getElementById('insight-text').innerHTML = `Celkově vaše pobočky vykazují růst zobrazení o 12 %. Největší objevitelnost má <strong>Praha 13</strong>, skvěle si vede i <strong>Brno</strong>.`;
+                } else {
+                    document.getElementById('insight-text').innerHTML = `Pro ${sourceSelection.length} vybraných poboček byla přepočtena data. Společně vygenerovaly <strong>${formatK(sumViews)} zobrazení</strong> a ${sumInts.toLocaleString()} interakcí.`;
+                }
             }
 
-            // Aktualizace grafů (Tab 2)
-            if (trendChart && doughnutChart && barChart) {
-                updateChartDataObj(sumViews, sumInts, pctSearch, pctMaps);
+            // Uložení globálních dat pro detailní grafy
+            chartDataStore = {
+                overview: sumInts,
+                calls: sumCall,
+                bookings: sumRes,
+                directions: sumDir,
+                clicks: sumWeb,
+                views: sumViews,
+                s_mob: sumSearch * (avgMob/100),
+                s_desk: sumSearch * (avgDesk/100),
+                m_mob: sumMaps * (avgMob/100),
+                m_desk: sumMaps * (avgDesk/100)
+            };
+
+            // Aktualizace grafů (Tab 2 a 3)
+            if (trendChart && doughnutChart) {
+                updateDetailedCharts();
+            }
+            if (compareChart) {
+                updateCompareChart();
             }
         }
-        
-        function updateChartDataObj(totalViews, totalInts, pctSearch, pctMaps) {
-            // Škálování dat grafů podle celkového počtu, aby to vypadalo dynamicky
-            const baseViews = [120, 190, 150, 210, 280, 230, 310];
-            const baseInts = [30, 45, 35, 50, 65, 58, 72];
-            
-            const scaleV = totalViews / 10000;
-            const scaleI = totalInts / 1000;
-            
-            trendChart.data.datasets[0].data = baseViews.map(v => Math.round(v * scaleV));
-            trendChart.data.datasets[1].data = baseInts.map(i => Math.round(i * scaleI));
-            trendChart.update();
-            
-            const maxD = Math.max(pctSearch, pctMaps);
-            doughnutChart.data.datasets[0].data = [pctSearch, pctMaps, 10];
-            doughnutChart.data.datasets[0].backgroundColor = [
-                (pctSearch === maxD && maxD > 0) ? '#16a34a' : '#1f2937', 
-                (pctMaps === maxD && maxD > 0) ? '#16a34a' : '#9ca3af', 
-                '#e5e7eb'
-            ];
-            doughnutChart.update();
-            
-            const barData = baseInts.map(i => Math.round(i * scaleI * 1.5));
-            const maxBar = Math.max(...barData);
-            barChart.data.datasets[0].data = barData;
-            barChart.data.datasets[0].backgroundColor = barData.map(v => (v === maxBar && maxBar > 0) ? '#16a34a' : '#1f2937');
-            barChart.update();
-        }
 
-        function filterList() {
-            const input = document.getElementById('branch-search-input');
-            const filter = input.value.toLowerCase();
-            const nodes = document.querySelectorAll('.filter-opt');
-            nodes.forEach(node => {
-                const text = node.innerText.toLowerCase();
-                node.style.display = text.includes(filter) ? "" : "none";
+        function renderTop3(metricKey, containerId, listId, isK = false, isRating = false) {
+            const container = document.getElementById(containerId);
+            const list = document.getElementById(listId);
+            if (!container || !list) return;
+
+            if (sourceSelection.length <= 1) {
+                container.classList.add('hidden');
+                return;
+            }
+            container.classList.remove('hidden');
+
+            const periodSelect = document.getElementById('period-select');
+            let multiplier = 1.0;
+            if (periodSelect) {
+                switch(periodSelect.value) {
+                    case '30d': multiplier = 1.0; break;
+                    case 'tm': multiplier = 0.5; break;
+                    case 'mm': multiplier = 1.1; break;
+                    case 'tr': multiplier = 6.0; break;
+                    case 'mr': multiplier = 12.5; break;
+                    case 'all': multiplier = 35.0; break;
+                    case 'custom': multiplier = 2.4; break;
+                }
+            }
+
+            let branchData = sourceSelection.map(b => {
+                let val = isRating ? mockDatabase[b][metricKey] : mockDatabase[b][metricKey] * multiplier;
+                return { name: b, value: val };
             });
+
+            branchData.sort((a, b) => b.value - a.value);
+            let top3 = branchData.slice(0, 3);
+            const formatK = (num) => (num > 999) ? (num/1000).toFixed(1) + 'k' : num;
+
+            let html = '';
+            top3.forEach((item, index) => {
+                let medal = index === 0 ? 'text-gray-700' : (index === 1 ? 'text-gray-500' : 'text-gray-400');
+                let valStr = '';
+                if (isRating) {
+                    valStr = item.value.toFixed(1) + ' <i class="fa-solid fa-star text-yellow-400 text-[10px] ml-0.5"></i>';
+                } else {
+                    valStr = isK ? formatK(Math.round(item.value)) : Math.round(item.value).toLocaleString();
+                }
+
+                html += `
+                    <div class="flex items-center justify-between text-sm py-0.5">
+                        <div class="flex items-center gap-2 truncate pr-2">
+                            <span class="font-bold ${medal} w-4 text-right">${index + 1}.</span>
+                            <span class="text-gray-600 font-medium truncate">${item.name}</span>
+                        </div>
+                        <span class="font-bold text-gray-900">${valStr}</span>
+                    </div>
+                `;
+            });
+            list.innerHTML = html;
         }
 
-        // Zavření dropdownu klikem jinam
-        document.addEventListener('click', function(e) {
-            const wrapper = document.getElementById('filter-wrapper');
-            if (wrapper && !wrapper.contains(e.target)) {
-                document.getElementById('branch-dropdown').classList.add('hidden');
-            }
-            const compWrapper = document.getElementById('compare-dropdown').parentElement;
-            if (compWrapper && !compWrapper.contains(e.target)) {
-                document.getElementById('compare-dropdown').classList.add('hidden');
-            }
-        });
-
-        // Toasty
-        let toastTimeout;
         function showToast(message) {
             const toast = document.getElementById('toast');
+            if(!toast) return;
             document.getElementById('toast-message').innerText = message;
             toast.classList.remove('opacity-0', 'translate-y-4');
             toast.classList.add('opacity-100', 'translate-y-0');
@@ -1053,54 +1135,224 @@
             }, 3000);
         }
 
-        // --- CHART.JS INICIALIZACE ---
-        let trendChart, doughnutChart, barChart, compareChart;
-
+        // --- CHART.JS A DETAILNÍ GRAFY LOGIKA ---
         function initCharts() {
-            if(trendChart) return; // Už inicializováno
+            if(trendChart) return; 
             
             Chart.defaults.font.family = 'Inter';
             Chart.defaults.color = '#6b7280';
             
-            // 1. Line Chart
+            // 1. Line Chart (Styl Google)
             const ctxTrend = document.getElementById('trendChart').getContext('2d');
-            const gradientGray = ctxTrend.createLinearGradient(0, 0, 0, 300);
-            gradientGray.addColorStop(0, 'rgba(31, 41, 55, 0.2)');
-            gradientGray.addColorStop(1, 'rgba(31, 41, 55, 0)');
+            const gradientBlue = ctxTrend.createLinearGradient(0, 0, 0, 300);
+            gradientBlue.addColorStop(0, 'rgba(59, 130, 246, 0.2)'); 
+            gradientBlue.addColorStop(1, 'rgba(59, 130, 246, 0)');
             
             trendChart = new Chart(ctxTrend, {
                 type: 'line',
                 data: {
-                    labels: ['1.6', '5.6', '10.6', '15.6', '20.6', '25.6', '30.6'],
-                    datasets: [
-                        { label: 'Zobrazení', data: [120, 190, 150, 210, 280, 230, 310], borderColor: '#1f2937', backgroundColor: gradientGray, fill: true, tension: 0.4 },
-                        { label: 'Interakce', data: [30, 45, 35, 50, 65, 58, 72], borderColor: '#9ca3af', backgroundColor: 'transparent', tension: 0.4 }
-                    ]
+                    labels: ['leden', 'únor', 'březen', 'duben', 'květen', 'červen'],
+                    datasets: [{ 
+                        label: 'Hodnota', 
+                        data: [0, 0, 0, 0, 0, 0], 
+                        borderColor: '#3b82f6', 
+                        backgroundColor: gradientBlue, 
+                        fill: true, 
+                        tension: 0, 
+                        pointBackgroundColor: '#ffffff',
+                        pointBorderColor: '#3b82f6',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid: { color: '#f3f4f6' } } } }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { legend: { display: false } }, 
+                    scales: { 
+                        x: { grid: { display: false } }, 
+                        y: { 
+                            grid: { color: '#f3f4f6', drawBorder: false, borderDash: [5, 5] },
+                            beginAtZero: true,
+                            ticks: { maxTicksLimit: 5 }
+                        } 
+                    } 
+                }
             });
 
-            // 2. Doughnut Chart (Akvizice)
+            // 2. Doughnut Chart (Objevování podle Google)
             const ctxDoughnut = document.getElementById('doughnutChart').getContext('2d');
             doughnutChart = new Chart(ctxDoughnut, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Vyhledávání kategorie', 'Přímé hledání značky', 'Ostatní'],
-                    datasets: [{ data: [65, 25, 10], backgroundColor: ['#1f2937', '#9ca3af', '#e5e7eb'], borderWidth: 0 }]
+                    labels: ['Vyhledávání Google – mobil', 'Vyhledávání Google – počítač', 'Mapy Google – mobil', 'Mapy Google – počítač'],
+                    datasets: [{ 
+                        data: [0, 0, 0, 0], 
+                        backgroundColor: ['#f59e0b', '#3b82f6', '#ef4444', '#22c55e'],
+                        borderWidth: 0 
+                    }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } } } }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    cutout: '75%', 
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: { enabled: true }
+                    } 
+                }
             });
 
-            // 3. Bar Chart (Akce)
-            const ctxBar = document.getElementById('barChart').getContext('2d');
-            barChart = new Chart(ctxBar, {
-                type: 'bar',
-                data: {
-                    labels: ['Po', 'Út', 'St', 'Čt', 'Pá', 'So', 'Ne'],
-                    datasets: [{ label: 'Akce celkem', data: [120, 150, 140, 180, 200, 90, 80], backgroundColor: '#1f2937', borderRadius: 4 }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid: { color: '#f3f4f6' } } } }
+            updateDetailedCharts();
+        }
+
+        function changeChartMetric(metric) {
+            activeChartMetric = metric;
+            const metrics = ['overview', 'calls', 'bookings', 'directions', 'clicks'];
+            metrics.forEach(m => {
+                const btn = document.getElementById('btn-metric-' + m);
+                if(btn) btn.className = 'whitespace-nowrap pb-3 border-b-2 font-medium text-sm transition-colors border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300';
             });
+            
+            const activeBtn = document.getElementById('btn-metric-' + metric);
+            if(activeBtn) activeBtn.className = 'whitespace-nowrap pb-3 border-b-2 font-bold text-sm transition-colors border-blue-500 text-blue-600';
+
+            updateDetailedCharts();
+        }
+
+        function updateDetailedCharts() {
+            if(!trendChart) return;
+
+            // 1. UPDATE LINIÉHO GRAFU
+            const totalVal = chartDataStore[activeChartMetric];
+            
+            let metricLabels = {
+                overview: 'Interakce s Firemním profilem',
+                calls: 'Hovory z Firemního profilu',
+                bookings: 'Rezervace z Firemního profilu',
+                directions: 'Žádosti o zjištění trasy odeslané z vašeho Firemního profilu',
+                clicks: 'Prokliky na web uskutečněné ve vašem Firemním profilu'
+            };
+            
+            document.getElementById('chart-main-value').innerText = totalVal.toLocaleString();
+            document.getElementById('chart-main-label').innerText = metricLabels[activeChartMetric] + " ";
+            document.getElementById('chart-main-label').insertAdjacentHTML('beforeend', '<i class="fa-solid fa-circle-info text-gray-400 text-xs ml-1"></i>');
+
+            // Dynamická úprava osy X podle zvoleného období
+            const periodSelect = document.getElementById('period-select');
+            let chartLabels = ['leden', 'únor', 'březen', 'duben', 'květen', 'červen'];
+            if (periodSelect) {
+                switch(periodSelect.value) {
+                    case '30d': chartLabels = ['Před 30 d.', 'Před 24 d.', 'Před 18 d.', 'Před 12 d.', 'Před 6 d.', 'Dnes']; break;
+                    case 'tm': chartLabels = ['1.', '6.', '12.', '18.', '24.', '30.']; break;
+                    case 'mm': chartLabels = ['1.', '6.', '12.', '18.', '24.', '30.']; break;
+                    case 'tr': chartLabels = ['leden', 'únor', 'březen', 'duben', 'květen', 'červen']; break;
+                    case 'mr': chartLabels = ['led', 'bře', 'kvě', 'čvc', 'zář', 'lis']; break;
+                    case 'all': chartLabels = ['21', '22', '23', '24', '25', '26']; break;
+                    case 'custom': 
+                        const dF = document.getElementById('date-from').value;
+                        const dT = document.getElementById('date-to').value;
+                        if(dF && dT) {
+                            const dateFrom = new Date(dF).toLocaleDateString('cs-CZ', { day: 'numeric', month: 'short' });
+                            const dateTo = new Date(dT).toLocaleDateString('cs-CZ', { day: 'numeric', month: 'short' });
+                            chartLabels = [dateFrom, '', '', '', '', dateTo]; 
+                        } else {
+                            chartLabels = ['Začátek', '', '', '', '', 'Konec'];
+                        }
+                        break;
+                }
+            }
+            trendChart.data.labels = chartLabels;
+
+            const distribution = [0.22, 0.15, 0.18, 0.25, 0.15, 0.05]; 
+            let trendDataArray = distribution.map(factor => Math.round(totalVal * factor));
+            
+            trendChart.data.datasets[0].data = trendDataArray;
+            trendChart.update();
+
+            let mockPrevPeriod = Math.round(totalVal * (0.8 + (Math.random() * 0.4)));
+            let diff = totalVal - mockPrevPeriod;
+            let pct = mockPrevPeriod > 0 ? Math.round((diff / mockPrevPeriod) * 100) : 0;
+            
+            let trendHtml = '';
+            if(pct >= 0) {
+                trendHtml = `<span class="text-green-600 font-bold"><i class="fa-solid fa-arrow-trend-up"></i> +${pct}%</span> vs předchozí období`;
+            } else {
+                trendHtml = `<span class="text-red-600 font-bold"><i class="fa-solid fa-arrow-trend-down"></i> ${pct}%</span> vs předchozí období`;
+            }
+            document.getElementById('chart-trend-container').innerHTML = trendHtml;
+
+            // 2. UPDATE KRUHOVÉHO GRAFU
+            let views = chartDataStore.views;
+            document.getElementById('discovery-total-value').innerText = views.toLocaleString();
+            
+            let v1 = Math.round(chartDataStore.s_mob || 0);
+            let v2 = Math.round(chartDataStore.s_desk || 0);
+            let v3 = Math.round(chartDataStore.m_mob || 0);
+            let v4 = Math.round(chartDataStore.m_desk || 0);
+            
+            doughnutChart.data.datasets[0].data = [v1, v2, v3, v4];
+            doughnutChart.update();
+
+            let pct1 = views > 0 ? Math.round((v1/views)*100) : 0;
+            let pct2 = views > 0 ? Math.round((v2/views)*100) : 0;
+            let pct3 = views > 0 ? Math.round((v3/views)*100) : 0;
+            let pct4 = views > 0 ? Math.round((v4/views)*100) : 0;
+
+            document.getElementById('doughnut-legend').innerHTML = `
+                <div>
+                    <p class="text-sm font-bold text-gray-900 flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> ${v1.toLocaleString()} • ${pct1} %</p>
+                    <p class="text-xs text-gray-500 ml-4.5">Vyhledávání Google – mobil</p>
+                </div>
+                <div>
+                    <p class="text-sm font-bold text-gray-900 flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> ${v2.toLocaleString()} • ${pct2} %</p>
+                    <p class="text-xs text-gray-500 ml-4.5">Vyhledávání Google – počítač</p>
+                </div>
+                <div>
+                    <p class="text-sm font-bold text-gray-900 flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> ${v3.toLocaleString()} • ${pct3} %</p>
+                    <p class="text-xs text-gray-500 ml-4.5">Mapy Google – mobil</p>
+                </div>
+                <div>
+                    <p class="text-sm font-bold text-gray-900 flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-green-500"></span> ${v4.toLocaleString()} • ${pct4} %</p>
+                    <p class="text-xs text-gray-500 ml-4.5">Mapy Google – počítač</p>
+                </div>
+            `;
+
+            // 3. UPDATE VYHLEDÁVACÍCH DOTAZŮ
+            let searches = v1 + v2;
+            document.getElementById('queries-total-value').innerText = searches.toLocaleString();
+
+            const queryKeywords = [
+                "marketingová agentura praha", 
+                "tvorba webových stránek", 
+                "reklama na internetu", 
+                "seo optimalizace ceník", 
+                "správa sociálních sítí",
+                "grafické studio",
+                "brand identita"
+            ];
+
+            let qHtml = '';
+            let remaining = searches;
+            queryKeywords.forEach((kw, idx) => {
+                if(idx > 4) return;
+                let qVol = Math.round(remaining * (0.4 - (idx * 0.05)));
+                if (qVol < 15 && idx > 2) qVol = "< 15";
+                
+                qHtml += `
+                    <li class="flex justify-between items-center py-1">
+                        <div class="flex gap-4">
+                            <span class="text-sm text-gray-500 w-4">${idx + 1}.</span>
+                            <span class="text-sm text-gray-900">${kw}</span>
+                        </div>
+                        <span class="text-sm font-medium text-gray-900">${qVol}</span>
+                    </li>
+                `;
+                if(typeof qVol === 'number') remaining -= qVol;
+            });
+
+            document.getElementById('search-queries-list').innerHTML = qHtml;
         }
 
         // --- POROVNÁVÁNÍ (TAB 3) ---
@@ -1153,7 +1405,6 @@
         }
 
         function getCompareData() {
-            // Simulace dat pro vybrané pobočky
             const views = compareSelection.map(() => Math.floor(Math.random() * 5000 + 1000));
             const ints = compareSelection.map(() => Math.floor(Math.random() * 500 + 100));
             
@@ -1186,10 +1437,23 @@
             }
         }
 
-        // Načtení dat při startu
+        // Zavírání dropdownů kliknutím jinam
+        document.addEventListener('click', function(e) {
+            const wrapper = document.getElementById('filter-wrapper');
+            if (wrapper && !wrapper.contains(e.target)) {
+                const dropdown = document.getElementById('branch-dropdown');
+                if(dropdown) dropdown.classList.add('hidden');
+            }
+            const compWrapper = document.getElementById('compare-dropdown');
+            if (compWrapper && compWrapper.parentElement && !compWrapper.parentElement.contains(e.target)) {
+                compWrapper.classList.add('hidden');
+            }
+        });
+
+        // INIT
         window.onload = function() {
             renderSourceCheckboxes();
-            refreshDashboardData(); // Spustit načtení dat
+            refreshDashboardData(); 
         };
     </script>
 </body>
