@@ -64,13 +64,10 @@
         @keyframes fillBar { from { width: 0; } }
         .animate-bar { animation: fillBar 1s ease-out forwards; }
         
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
-
         /* Leaderboard styling */
-        .medal-1 { color: #16a34a; } /* Firemní zelená pro první místo */
-        .medal-2 { color: #6b7280; } /* Šedá */
-        .medal-3 { color: #9ca3af; } /* Světlejší šedá */
+        .medal-1 { color: #fbbf24; text-shadow: 0 2px 4px rgba(251, 191, 36, 0.3); }
+        .medal-2 { color: #9ca3af; text-shadow: 0 2px 4px rgba(156, 163, 175, 0.3); }
+        .medal-3 { color: #b45309; text-shadow: 0 2px 4px rgba(180, 83, 9, 0.3); }
     </style>
 </head>
 <body class="font-sans text-gray-900 h-screen flex overflow-hidden antialiased">
@@ -241,9 +238,9 @@
                         <i class="fa-solid fa-chart-line mr-2"></i> Detailní grafy
                     </button>
                     <button onclick="switchTab('tab-porovnani'); initCompareCharts();" id="btn-tab-porovnani" class="whitespace-nowrap py-3 px-5 border-b-2 font-medium text-sm transition-colors border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                        <i class="fa-solid fa-ranking-star mr-2"></i> Porovnání poboček
+                        <i class="fa-solid fa-code-compare mr-2"></i> Porovnání poboček
                     </button>
-                    <button onclick="switchTab('tab-skupiny')" id="btn-tab-skupiny" class="whitespace-nowrap py-3 px-5 border-b-2 font-medium text-sm transition-colors border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                    <button onclick="switchTab('tab-skupiny'); initGroupCharts();" id="btn-tab-skupiny" class="whitespace-nowrap py-3 px-5 border-b-2 font-medium text-sm transition-colors border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
                         <i class="fa-solid fa-users-viewfinder mr-2"></i> Týmy a Skupiny
                     </button>
                 </div>
@@ -858,51 +855,161 @@
 
                 </div>
 
-                <!-- TAB 4: SKUPINY A MANAŽEŘI -->
-                <div id="tab-skupiny" class="hidden space-y-6">
-                    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm text-center">
-                        <div class="w-16 h-16 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center text-2xl mx-auto mb-4">
-                            <i class="fa-solid fa-users-gear"></i>
+                <!-- TAB 4: SKUPINY A MANAŽEŘI (VYLEPŠENO O POROVNÁVÁNÍ) -->
+                <div id="tab-skupiny" class="hidden space-y-8">
+                    
+                    <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sticky top-[132px] z-10">
+                        <div>
+                            <h3 class="font-bold text-gray-900 text-lg">Porovnání Týmů a Skupin</h3>
+                            <p class="text-sm text-gray-500 mt-1">Sdružujte pobočky do celků a analyzujte jejich souhrnný výkon proti sobě.</p>
                         </div>
-                        <h3 class="font-bold text-gray-900 text-lg mb-2">Správa skupin a týmů</h3>
-                        <p class="text-sm text-gray-500 max-w-lg mx-auto mb-6">Sdružujte pobočky do logických celků (např. regiony, manažeři) a analyzujte jejich souhrnný výkon proti sobě.</p>
-                        <button class="bg-brand-500 text-white px-6 py-2.5 rounded-lg text-sm font-bold hover:bg-brand-600 transition shadow-sm" onclick="showToast('Otevírám tvůrce skupin...')">Vytvořit novou skupinu</button>
+                        <div class="flex items-center gap-3 w-full md:w-auto">
+                            <button class="bg-brand-50 text-brand-600 px-4 py-2.5 rounded-lg text-sm font-bold hover:bg-brand-100 transition shadow-sm border border-brand-200" onclick="openCreateGroupModal()">
+                                <i class="fa-solid fa-plus mr-1"></i> Vytvořit skupinu
+                            </button>
+                            <div class="w-full md:w-80 relative">
+                                <div class="flex items-center bg-gray-50 border border-gray-300 rounded-lg px-4 py-2.5 cursor-pointer hover:border-gray-400 transition" onclick="toggleGroupDropdown()">
+                                    <i class="fa-solid fa-users-viewfinder text-brand-500 mr-2"></i>
+                                    <span class="text-sm font-medium text-gray-700 flex-1" id="group-count-label">Vybrány 2 skupiny</span>
+                                    <i class="fa-solid fa-chevron-down text-gray-400 ml-auto text-xs"></i>
+                                </div>
+                                <div id="group-dropdown" class="absolute left-0 top-full mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-xl z-50 hidden flex-col overflow-hidden">
+                                    <div class="p-3 border-b border-gray-100 bg-gray-50 shrink-0">
+                                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Vyberte skupiny k porovnání</p>
+                                        <div class="max-h-60 overflow-y-auto custom-scrollbar pr-2 flex flex-col gap-1" id="group-dropdown-list">
+                                            <!-- Generováno JS -->
+                                        </div>
+                                    </div>
+                                    <div class="p-2 bg-white text-right shrink-0">
+                                        <button onclick="toggleGroupDropdown()" class="text-xs font-bold text-brand-600 hover:text-brand-700 px-3 py-1.5 rounded hover:bg-brand-50 transition">Dokončit výběr</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BLOK 1: ZOBRAZENÍ (SKUPINY) -->
+                    <div class="card-minimal overflow-hidden">
+                        <div class="p-4 border-b border-gray-100 bg-gray-50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <h3 class="font-bold text-gray-900 text-base whitespace-nowrap"><i class="fa-regular fa-eye text-brand-500 mr-2"></i> Zobrazení a Objevitelnost</h3>
+                            <div class="flex overflow-x-auto hide-scrollbar gap-2 w-full md:w-auto" id="group-tabs-1">
+                                <button onclick="setGroupMetric1('views', 'Zobrazení celkem')" data-metric="views" class="px-3 py-1.5 text-xs font-bold bg-white border border-gray-200 rounded shadow-sm text-brand-600 border-brand-200 whitespace-nowrap">Zobrazení celkem</button>
+                                <button onclick="setGroupMetric1('search', 'Vyhledávání')" data-metric="search" class="px-3 py-1.5 text-xs font-medium bg-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap">Vyhledávání</button>
+                                <button onclick="setGroupMetric1('queries', 'Vyhledávací dotazy')" data-metric="queries" class="px-3 py-1.5 text-xs font-medium bg-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap">Dotazy</button>
+                                <button onclick="setGroupMetric1('sv', 'Virtuální prohlídka')" data-metric="sv" class="px-3 py-1.5 text-xs font-medium bg-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap">Virtuální prohlídka</button>
+                            </div>
+                        </div>
+                        <div class="flex flex-col lg:flex-row">
+                            <div class="w-full lg:w-1/3 border-b lg:border-b-0 lg:border-r border-gray-100 p-5 bg-white">
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-4" id="title-g1-leaderboard">Žebříček (Zobrazení celkem)</p>
+                                <div id="group-leaderboard-1" class="space-y-1"></div>
+                            </div>
+                            <div class="w-full lg:w-2/3 p-6 bg-white flex flex-col justify-center">
+                                <div class="relative h-64 w-full"><canvas id="groupChart1"></canvas></div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="card-minimal p-6">
-                            <div class="flex justify-between items-center mb-6">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded bg-gray-100 text-gray-600 flex items-center justify-center font-bold text-xs">A</div>
-                                    <h4 class="font-bold text-gray-900">Tým Sever (Manažer A)</h4>
-                                </div>
-                                <span class="text-xs font-bold text-brand-600 bg-green-50 px-2 py-1 rounded">5 poboček</span>
-                            </div>
-                            <div class="space-y-4">
-                                <div class="flex justify-between text-sm"><span class="text-gray-500">Zobrazení</span><span class="font-bold">45.2k</span></div>
-                                <div class="flex justify-between text-sm"><span class="text-gray-500">Interakce</span><span class="font-bold">4,120</span></div>
-                                <div class="flex justify-between text-sm"><span class="text-gray-500">Průměrné hodnocení</span><span class="font-bold text-yellow-500">4.8 <i class="fa-solid fa-star text-xs"></i></span></div>
+                    <!-- BLOK 2: INTERAKCE (SKUPINY) -->
+                    <div class="card-minimal overflow-hidden">
+                        <div class="p-4 border-b border-gray-100 bg-gray-50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <h3 class="font-bold text-gray-900 text-base whitespace-nowrap"><i class="fa-solid fa-arrow-pointer text-brand-500 mr-2"></i> Interakce zákazníků</h3>
+                            <div class="flex overflow-x-auto hide-scrollbar gap-2 w-full md:w-auto" id="group-tabs-2">
+                                <button onclick="setGroupMetric2('interactions', 'Interakce celkem')" data-metric="interactions" class="px-3 py-1.5 text-xs font-bold bg-white border border-gray-200 rounded shadow-sm text-brand-600 border-brand-200 whitespace-nowrap">Interakce celkem</button>
+                                <button onclick="setGroupMetric2('web', 'Prokliky na web')" data-metric="web" class="px-3 py-1.5 text-xs font-medium bg-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap">Prokliky na web</button>
+                                <button onclick="setGroupMetric2('dir', 'Žádosti o trasu')" data-metric="dir" class="px-3 py-1.5 text-xs font-medium bg-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap">Trasy</button>
+                                <button onclick="setGroupMetric2('call', 'Volání')" data-metric="call" class="px-3 py-1.5 text-xs font-medium bg-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap">Volání</button>
+                                <button onclick="setGroupMetric2('res', 'Rezervace')" data-metric="res" class="px-3 py-1.5 text-xs font-medium bg-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap">Rezervace</button>
                             </div>
                         </div>
-                        <div class="card-minimal p-6">
-                            <div class="flex justify-between items-center mb-6">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded bg-gray-100 text-gray-600 flex items-center justify-center font-bold text-xs">B</div>
-                                    <h4 class="font-bold text-gray-900">Tým Jih (Manažer B)</h4>
-                                </div>
-                                <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">5 poboček</span>
+                        <div class="flex flex-col lg:flex-row">
+                            <div class="w-full lg:w-1/3 border-b lg:border-b-0 lg:border-r border-gray-100 p-5 bg-white">
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-4" id="title-g2-leaderboard">Žebříček (Interakce celkem)</p>
+                                <div id="group-leaderboard-2" class="space-y-1"></div>
                             </div>
-                            <div class="space-y-4">
-                                <div class="flex justify-between text-sm"><span class="text-gray-500">Zobrazení</span><span class="font-bold">97.3k</span></div>
-                                <div class="flex justify-between text-sm"><span class="text-gray-500">Interakce</span><span class="font-bold">8,022</span></div>
-                                <div class="flex justify-between text-sm"><span class="text-gray-500">Průměrné hodnocení</span><span class="font-bold text-yellow-500">4.7 <i class="fa-solid fa-star text-xs"></i></span></div>
+                            <div class="w-full lg:w-2/3 p-6 bg-white flex flex-col justify-center">
+                                <div class="relative h-64 w-full"><canvas id="groupChart2"></canvas></div>
                             </div>
                         </div>
                     </div>
+
+                    <!-- BLOK 3: RECENZE A HODNOCENÍ (SKUPINY) -->
+                    <div class="card-minimal overflow-hidden">
+                        <div class="p-4 border-b border-gray-100 bg-gray-50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <h3 class="font-bold text-gray-900 text-base whitespace-nowrap"><i class="fa-solid fa-star text-brand-500 mr-2"></i> Hodnocení a Nové recenze</h3>
+                            <div class="flex overflow-x-auto hide-scrollbar gap-2 w-full md:w-auto" id="group-tabs-3">
+                                <button onclick="setGroupMetric3('reviews', 'Nové recenze')" data-metric="reviews" class="px-3 py-1.5 text-xs font-bold bg-white border border-gray-200 rounded shadow-sm text-brand-600 border-brand-200 whitespace-nowrap">Nové recenze</button>
+                                <button onclick="setGroupMetric3('rating', 'Průměrné hodnocení')" data-metric="rating" class="px-3 py-1.5 text-xs font-medium bg-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap">Průměrné hodnocení</button>
+                            </div>
+                        </div>
+                        <div class="flex flex-col lg:flex-row">
+                            <div class="w-full lg:w-1/3 border-b lg:border-b-0 lg:border-r border-gray-100 p-5 bg-white">
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-4" id="title-g3-leaderboard">Žebříček (Nové recenze)</p>
+                                <div id="group-leaderboard-3" class="space-y-1"></div>
+                            </div>
+                            <div class="w-full lg:w-2/3 p-6 bg-white flex flex-col justify-center">
+                                <div class="relative h-64 w-full"><canvas id="groupChart3"></canvas></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BLOK 4: NFC PRODUKTY (SKUPINY) -->
+                    <div class="card-minimal overflow-hidden">
+                        <div class="p-4 border-b border-gray-100 bg-gray-50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <h3 class="font-bold text-gray-900 text-base whitespace-nowrap"><i class="fa-solid fa-wifi text-brand-500 mr-2"></i> Výkon NFC Produktů</h3>
+                            <div class="flex overflow-x-auto hide-scrollbar gap-2 w-full md:w-auto" id="group-tabs-4">
+                                <button onclick="setGroupMetric4('nfc_scans', 'Počet použití')" data-metric="nfc_scans" class="px-3 py-1.5 text-xs font-bold bg-white border border-gray-200 rounded shadow-sm text-brand-600 border-brand-200 whitespace-nowrap">Počet použití</button>
+                                <button onclick="setGroupMetric4('nfc_reviews', 'Získané recenze')" data-metric="nfc_reviews" class="px-3 py-1.5 text-xs font-medium bg-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap">Získané recenze</button>
+                                <button onclick="setGroupMetric4('nfc_conv', 'Konverzní poměr')" data-metric="nfc_conv" class="px-3 py-1.5 text-xs font-medium bg-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap">Konverzní poměr</button>
+                            </div>
+                        </div>
+                        <div class="flex flex-col lg:flex-row">
+                            <div class="w-full lg:w-1/3 border-b lg:border-b-0 lg:border-r border-gray-100 p-5 bg-white">
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-4" id="title-g4-leaderboard">Žebříček (Počet použití)</p>
+                                <div id="group-leaderboard-4" class="space-y-1"></div>
+                            </div>
+                            <div class="w-full lg:w-2/3 p-6 bg-white flex flex-col justify-center">
+                                <div class="relative h-64 w-full"><canvas id="groupChart4"></canvas></div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
             </div>
         </main>
+    </div>
+
+    <!-- MODAL PRO VYTVOŘENÍ SKUPINY -->
+    <div id="create-group-modal" class="fixed inset-0 bg-gray-900/60 z-[60] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300 px-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-xl transform scale-95 transition-transform duration-300 overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 shrink-0">
+                <h3 id="modal-group-title" class="text-lg font-bold text-gray-900">Vytvořit novou skupinu / tým</h3>
+                <button onclick="closeCreateGroupModal()" class="text-gray-400 hover:text-gray-600 transition">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-1 space-y-6 custom-scrollbar">
+                <div>
+                    <label class="label-minimal">Název skupiny</label>
+                    <input type="text" id="new-group-name" class="input-minimal" placeholder="Např. Tým Morava, Manažer Novák...">
+                </div>
+                <div>
+                    <label class="label-minimal">Vyberte pobočky pro tuto skupinu</label>
+                    <div class="relative mb-3 mt-1">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                        <input type="text" id="create-group-search" onkeyup="filterCreateGroupBranches()" class="input-minimal pl-9" placeholder="Hledat pobočku...">
+                    </div>
+                    <div class="border border-gray-200 rounded-lg max-h-48 overflow-y-auto bg-gray-50/50 custom-scrollbar" id="create-group-branch-list">
+                        <!-- Generováno JS -->
+                    </div>
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-end gap-3 shrink-0">
+                <button onclick="closeCreateGroupModal()" class="px-5 py-2 rounded-lg text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition shadow-sm">Zrušit</button>
+                <button onclick="submitCreateGroup()" class="px-5 py-2 rounded-lg text-sm font-medium text-white bg-brand-500 hover:bg-brand-600 transition shadow-sm">Uložit skupinu</button>
+            </div>
+        </div>
     </div>
 
     <!-- TOAST NOTIFIKACE -->
@@ -944,10 +1051,19 @@
         // Globální proměnné
         let compareSelection = ['Praha 13', 'Liberec', 'Brno', 'Ostrava', 'Plzeň'];
         let sourceSelection = [...branches]; 
-        let chartDataStore = { overview: 0, calls: 0, bookings: 0, directions: 0, clicks: 0, views: 0 };
+        let chartDataStore = { overview: 0, calls: 0, bookings: 0, directions: 0, clicks: 0, views: 0, s_mob: 0, s_desk: 0, m_mob: 0, m_desk: 0, searches: 0, sv: 0, reviews: 0, avgRating: 0 };
         let activeChartMetric = 'overview';
+        
+        // Týmy
+        let customGroups = [
+            { name: 'Tým Sever', branches: ['Praha 13', 'Liberec', 'Hradec Králové', 'Pardubice'] },
+            { name: 'Tým Jih', branches: ['Brno', 'Ostrava', 'Plzeň', 'Olomouc', 'České Budějovice', 'Zlín'] }
+        ];
+        let compareGroupSelection = ['Tým Sever', 'Tým Jih'];
+
         let trendChart, doughnutChart, photoChart, reviewChart, nfcTrendChart;
-        let cChart1, cChart2, cChart3, cChart4; // Modifikované proměnné pro srovnávací grafy
+        let cChart1, cChart2, cChart3, cChart4; 
+        let gChart1, gChart2, gChart3, gChart4;
         let toastTimeout;
 
         // TABS Logika a Menu
@@ -982,17 +1098,11 @@
             document.getElementById(tabId).classList.remove('hidden');
             document.getElementById(tabId).classList.add('block');
             document.getElementById('btn-' + tabId).className = 'whitespace-nowrap py-3 px-5 border-b-2 font-bold text-sm transition-colors border-brand-500 text-brand-600';
-        }
-
-        function toggleQueries() {
-            const container = document.getElementById('queries-list-container');
-            const btn = document.getElementById('btn-more-queries');
-            if (container.classList.contains('max-h-[140px]')) {
-                container.classList.remove('max-h-[140px]');
-                btn.innerText = 'Méně informací';
-            } else {
-                container.classList.add('max-h-[140px]');
-                btn.innerText = 'Další informace';
+            
+            // Automatické vyrolování úplně nahoru při změně záložky
+            const mainContainer = document.querySelector('main');
+            if (mainContainer) {
+                mainContainer.scrollTop = 0;
             }
         }
 
@@ -1289,11 +1399,13 @@
             if (trendChart && doughnutChart && photoChart && reviewChart) {
                 updateDetailedCharts();
             }
-            // ZDE JE OPRAVA PRO POROVNÁVÁNÍ (cChart1 musí existovat)
             if (cChart1) {
                 updateAllCompBlocks();
             }
-            filterNfcTable(); // Aktualizace NFC tabulky
+            if (gChart1) {
+                updateAllGroupBlocks();
+            }
+            filterNfcTable(); 
         }
 
         function renderTop3(metricKey, containerId, listId, isK = false, isRating = false) {
@@ -1560,7 +1672,7 @@
             document.getElementById('chart-main-label').innerText = metricLabels[activeChartMetric] + " ";
             document.getElementById('chart-main-label').insertAdjacentHTML('beforeend', '<i class="fa-solid fa-circle-info text-gray-400 text-xs ml-1"></i>');
 
-            // Dynamická úprava osy X podle zvoleného období a distribuce bodů
+            // Dynamická úprava osy X
             const periodSelect = document.getElementById('period-select');
             let chartLabels = [];
             let distribution = [];
@@ -1796,7 +1908,7 @@
             document.getElementById('nfc-conversion').innerText = totalScans > 0 ? ((totalReviews / totalScans) * 100).toFixed(1) + ' %' : '0 %';
         }
 
-        // --- POROVNÁVÁNÍ (TAB 3) ---
+        // --- POROVNÁVÁNÍ POBOČEK (TAB 3) ---
         let compM1 = 'views', compM2 = 'interactions', compM3 = 'reviews', compM4 = 'nfc_scans';
 
         function toggleCompareDropdown() {
@@ -1849,7 +1961,7 @@
         }
 
         function initCompareCharts() {
-            if (cChart1) return; // Zabráníme dvojímu načtení
+            if (cChart1) return; 
 
             const opts = { 
                 responsive: true, 
@@ -1993,7 +2105,7 @@
         }
 
         function updateAllCompBlocks() {
-            if(!cChart1) return; // Ochrana před chybou při startu
+            if(!cChart1) return; 
             const getLabel = (blockId, currentMetric) => {
                 const btn = document.querySelector(`#comp-tabs-${blockId} button[data-metric="${currentMetric}"]`);
                 return btn ? btn.innerText : '';
@@ -2002,6 +2114,330 @@
             renderCompLeaderboard(2, compM2, getLabel(2, compM2), false);
             renderCompLeaderboard(3, compM3, getLabel(3, compM3), false);
             renderCompLeaderboard(4, compM4, getLabel(4, compM4), true);
+        }
+
+        // --- POROVNÁVÁNÍ TÝMŮ A SKUPIN (TAB 4) ---
+        let groupM1 = 'views', groupM2 = 'interactions', groupM3 = 'reviews', groupM4 = 'nfc_scans';
+
+        function toggleGroupDropdown() {
+            const dropdown = document.getElementById('group-dropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        function renderGroupCheckboxes() {
+            const container = document.getElementById('group-dropdown-list');
+            if(!container) return;
+            let html = '';
+            customGroups.forEach(g => {
+                const checked = compareGroupSelection.includes(g.name) ? 'checked' : '';
+                html += `
+                <div class="flex items-center justify-between p-2 hover:bg-gray-50 rounded transition border border-transparent hover:border-gray-200">
+                    <label class="flex items-center gap-2 cursor-pointer flex-1">
+                        <input type="checkbox" value="${g.name}" onchange="updateGroupSelection(this)" class="w-4 h-4 rounded text-brand-600 focus:ring-brand-500" ${checked}>
+                        <div>
+                            <span class="text-sm font-bold text-gray-700">${g.name}</span>
+                            <span class="text-[10px] text-gray-400 block">${g.branches.length} poboček</span>
+                        </div>
+                    </label>
+                    <div class="flex items-center gap-2 bg-white pl-2">
+                        <button onclick="openEditGroupModal('${g.name}')" class="text-brand-500 hover:text-brand-700 transition p-1.5 rounded hover:bg-brand-50 shadow-sm border border-brand-100" title="Upravit skupinu"><i class="fa-solid fa-pen text-xs"></i></button>
+                        <button onclick="deleteGroup('${g.name}')" class="text-red-500 hover:text-red-700 transition p-1.5 rounded hover:bg-red-50 shadow-sm border border-red-100" title="Smazat skupinu"><i class="fa-solid fa-trash text-xs"></i></button>
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = html;
+            document.getElementById('group-count-label').innerText = `Vybrány ${compareGroupSelection.length} skupiny`;
+        }
+
+        function updateGroupSelection(checkbox) {
+            if (checkbox.checked) {
+                if (compareGroupSelection.length >= 10) {
+                    checkbox.checked = false;
+                    showToast('Lze porovnávat maximálně 10 skupin.');
+                    return;
+                }
+                compareGroupSelection.push(checkbox.value);
+            } else {
+                compareGroupSelection = compareGroupSelection.filter(g => g !== checkbox.value);
+            }
+            document.getElementById('group-count-label').innerText = `Vybrány ${compareGroupSelection.length} skupiny`;
+            updateAllGroupBlocks();
+        }
+
+        function initGroupCharts() {
+            if (gChart1) return; 
+
+            const opts = { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: { legend: { display: false } }, 
+                scales: { 
+                    x: { grid: { display: false } }, 
+                    y: { grid: { color: '#f3f4f6' }, beginAtZero: true } 
+                },
+                animation: { duration: 400 }
+            };
+            
+            gChart1 = new Chart(document.getElementById('groupChart1').getContext('2d'), { type: 'bar', data: {labels:[], datasets:[{label:'Hodnota', data:[], backgroundColor: '#d1d5db', borderRadius: 4}]}, options: opts });
+            gChart2 = new Chart(document.getElementById('groupChart2').getContext('2d'), { type: 'bar', data: {labels:[], datasets:[{label:'Hodnota', data:[], backgroundColor: '#d1d5db', borderRadius: 4}]}, options: opts });
+            gChart3 = new Chart(document.getElementById('groupChart3').getContext('2d'), { type: 'bar', data: {labels:[], datasets:[{label:'Hodnota', data:[], backgroundColor: '#d1d5db', borderRadius: 4}]}, options: opts });
+            gChart4 = new Chart(document.getElementById('groupChart4').getContext('2d'), { type: 'bar', data: {labels:[], datasets:[{label:'Hodnota', data:[], backgroundColor: '#d1d5db', borderRadius: 4}]}, options: opts });
+            
+            renderGroupCheckboxes();
+            updateAllGroupBlocks();
+        }
+
+        function setGroupMetric1(metric, label) { groupM1 = metric; updateGroupButtons(1, metric); renderGroupLeaderboard(1, metric, label); }
+        function setGroupMetric2(metric, label) { groupM2 = metric; updateGroupButtons(2, metric); renderGroupLeaderboard(2, metric, label); }
+        function setGroupMetric3(metric, label) { groupM3 = metric; updateGroupButtons(3, metric); renderGroupLeaderboard(3, metric, label); }
+        function setGroupMetric4(metric, label) { groupM4 = metric; updateGroupButtons(4, metric); renderGroupLeaderboard(4, metric, label); }
+
+        function updateGroupButtons(blockId, activeMetric) {
+            const container = document.getElementById(`group-tabs-${blockId}`);
+            if(!container) return;
+            container.querySelectorAll('button').forEach(btn => {
+                if(btn.dataset.metric === activeMetric) {
+                    btn.className = 'px-3 py-1.5 text-xs font-bold bg-white border border-gray-200 rounded shadow-sm text-brand-600 border-brand-200 whitespace-nowrap';
+                } else {
+                    btn.className = 'px-3 py-1.5 text-xs font-medium bg-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap';
+                }
+            });
+        }
+
+        function getGroupData(groupName, metric, multiplier) {
+            let group = customGroups.find(g => g.name === groupName);
+            if(!group) return { val: 0, extra: '' };
+
+            if (metric === 'rating') {
+                let totalRev = 0;
+                let weightedRating = 0;
+                group.branches.forEach(b => {
+                    let r = getBranchVal(b, 'reviews', multiplier);
+                    let rating = mockDatabase[b].rating;
+                    totalRev += r;
+                    weightedRating += (rating * r);
+                });
+                let avg = totalRev > 0 ? (weightedRating / totalRev) : 0;
+                return { val: avg, extra: `${Math.round(totalRev)} recenzí celkem` };
+            }
+
+            if (metric.startsWith('nfc_')) {
+                let scans = 0, revs = 0;
+                group.branches.forEach(b => {
+                    mockNfcData.forEach(item => {
+                        if(item.branch === b) {
+                            scans += item.scans * multiplier;
+                            revs += item.reviews * multiplier;
+                        }
+                    });
+                });
+                if(metric === 'nfc_scans') return { val: scans, extra: `${group.branches.length} poboček` };
+                if(metric === 'nfc_reviews') return { val: revs, extra: `${group.branches.length} poboček` };
+                if(metric === 'nfc_conv') return { val: scans > 0 ? (revs/scans)*100 : 0, extra: `${group.branches.length} poboček` };
+            }
+
+            // Ostatní standardní sečtené metriky
+            let sum = 0;
+            group.branches.forEach(b => {
+                sum += getBranchVal(b, metric, multiplier);
+            });
+            return { val: sum, extra: `${group.branches.length} poboček` };
+        }
+
+        function renderGroupLeaderboard(blockId, metric, labelTitle) {
+            const titleEl = document.getElementById(`title-g${blockId}-leaderboard`);
+            if(titleEl) titleEl.innerText = `Žebříček (${labelTitle})`;
+            
+            let multiplier = getPeriodMultiplier();
+            let dataList = [];
+            
+            compareGroupSelection.forEach(gName => {
+                let res = getGroupData(gName, metric, multiplier);
+                dataList.push({ name: gName, value: res.val, extra: res.extra });
+            });
+            
+            dataList.sort((a,b) => b.value - a.value);
+            let html = '';
+            dataList.forEach((item, index) => {
+                 let medal = index === 0 ? 'medal-1' : (index === 1 ? 'medal-2' : (index === 2 ? 'medal-3' : 'text-gray-400'));
+                 let valStr = '';
+                 if(metric === 'rating') valStr = item.value.toFixed(1) + ' <i class="fa-solid fa-star text-yellow-400 text-[10px] ml-0.5"></i>';
+                 else if (metric === 'nfc_conv') valStr = item.value.toFixed(1) + ' %';
+                 else {
+                     let rounded = Math.round(item.value);
+                     valStr = rounded > 9999 ? (rounded/1000).toFixed(1) + 'k' : rounded.toLocaleString();
+                 }
+                 let extraHtml = item.extra ? `<p class="text-[10px] text-gray-500 mt-0.5">${item.extra}</p>` : '';
+                 
+                 html += `
+                 <div class="flex items-center justify-between p-3 ${index < 3 ? 'rounded-lg bg-gray-50/50 border border-gray-100 mb-1' : 'border-b border-gray-50 last:border-0'}">
+                     <div class="flex items-center gap-3">
+                         <span class="font-bold text-lg w-5 text-center ${medal}">${index + 1}.</span>
+                         <div>
+                             <p class="text-sm font-bold text-gray-900">${item.name}</p>
+                             ${extraHtml}
+                         </div>
+                     </div>
+                     <span class="font-bold text-gray-900 text-sm">${valStr}</span>
+                 </div>
+                 `;
+            });
+            
+            const lb = document.getElementById(`group-leaderboard-${blockId}`);
+            if(lb) lb.innerHTML = html || '<p class="text-sm text-gray-500 p-3">Žádná data pro výběr.</p>';
+            
+            let chart = null;
+            if(blockId === 1) chart = gChart1;
+            if(blockId === 2) chart = gChart2;
+            if(blockId === 3) chart = gChart3;
+            if(blockId === 4) chart = gChart4;
+
+            if(!chart) return;
+            
+            let chartData = compareGroupSelection.map(gName => getGroupData(gName, metric, multiplier).val);
+            let maxVal = Math.max(...chartData);
+            chart.data.labels = compareGroupSelection.length > 0 ? compareGroupSelection : ['Prázdné'];
+            chart.data.datasets[0].data = chartData;
+            chart.data.datasets[0].backgroundColor = chartData.map(v => (v === maxVal && maxVal > 0) ? '#16a34a' : '#d1d5db');
+            chart.update();
+        }
+
+        function updateAllGroupBlocks() {
+            if(!gChart1) return; 
+            const getLabel = (blockId, currentMetric) => {
+                const btn = document.querySelector(`#group-tabs-${blockId} button[data-metric="${currentMetric}"]`);
+                return btn ? btn.innerText : '';
+            };
+            renderGroupLeaderboard(1, groupM1, getLabel(1, groupM1));
+            renderGroupLeaderboard(2, groupM2, getLabel(2, groupM2));
+            renderGroupLeaderboard(3, groupM3, getLabel(3, groupM3));
+            renderGroupLeaderboard(4, groupM4, getLabel(4, groupM4));
+        }
+
+        // --- VYTVÁŘENÍ SKUPIN (MODAL) ---
+        let editingGroupName = null;
+
+        function openCreateGroupModal() {
+            editingGroupName = null;
+            const modal = document.getElementById('create-group-modal');
+            const modalContent = modal.querySelector('div');
+            
+            const titleEl = document.getElementById('modal-group-title');
+            if (titleEl) titleEl.innerText = 'Vytvořit novou skupinu / tým';
+
+            document.getElementById('new-group-name').value = '';
+            document.getElementById('create-group-search').value = '';
+            
+            // Vygenerovat seznam poboček pro zaškrtnutí do skupiny
+            const listContainer = document.getElementById('create-group-branch-list');
+            let html = '';
+            branches.forEach(b => {
+                html += `
+                <label class="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md cursor-pointer transition create-group-opt">
+                    <input type="checkbox" value="${b}" class="w-4 h-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500 new-group-cb">
+                    <span>${b}</span>
+                </label>`;
+            });
+            listContainer.innerHTML = html;
+
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => modalContent.classList.remove('scale-95'), 10);
+        }
+
+        function openEditGroupModal(groupName) {
+            editingGroupName = groupName;
+            const group = customGroups.find(g => g.name === groupName);
+            if(!group) return;
+
+            const modal = document.getElementById('create-group-modal');
+            const modalContent = modal.querySelector('div');
+            
+            const titleEl = document.getElementById('modal-group-title');
+            if (titleEl) titleEl.innerText = 'Upravit skupinu / tým';
+
+            document.getElementById('new-group-name').value = group.name;
+            document.getElementById('create-group-search').value = '';
+
+            const listContainer = document.getElementById('create-group-branch-list');
+            let html = '';
+            branches.forEach(b => {
+                const checked = group.branches.includes(b) ? 'checked' : '';
+                html += `
+                <label class="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md cursor-pointer transition create-group-opt">
+                    <input type="checkbox" value="${b}" class="w-4 h-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500 new-group-cb" ${checked}>
+                    <span>${b}</span>
+                </label>`;
+            });
+            listContainer.innerHTML = html;
+
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => modalContent.classList.remove('scale-95'), 10);
+        }
+
+        function deleteGroup(groupName) {
+            customGroups = customGroups.filter(g => g.name !== groupName);
+            compareGroupSelection = compareGroupSelection.filter(name => name !== groupName);
+            showToast(`Skupina ${groupName} byla odstraněna.`);
+            renderGroupCheckboxes();
+            updateAllGroupBlocks();
+        }
+
+        function closeCreateGroupModal() {
+            const modal = document.getElementById('create-group-modal');
+            const modalContent = modal.querySelector('div');
+            modalContent.classList.add('scale-95');
+            setTimeout(() => modal.classList.add('opacity-0', 'pointer-events-none'), 300);
+        }
+
+        function filterCreateGroupBranches() {
+            const input = document.getElementById('create-group-search');
+            const filter = input.value.toLowerCase();
+            const nodes = document.querySelectorAll('.create-group-opt');
+            nodes.forEach(node => {
+                const text = node.innerText.toLowerCase();
+                node.style.display = text.includes(filter) ? "" : "none";
+            });
+        }
+
+        function submitCreateGroup() {
+            const nameInput = document.getElementById('new-group-name').value.trim();
+            if (!nameInput) {
+                showToast('Zadejte prosím název skupiny.');
+                return;
+            }
+            
+            const selectedBranches = [];
+            document.querySelectorAll('.new-group-cb:checked').forEach(cb => selectedBranches.push(cb.value));
+            
+            if (selectedBranches.length === 0) {
+                showToast('Vyberte alespoň jednu pobočku pro tuto skupinu.');
+                return;
+            }
+
+            if (editingGroupName) {
+                // UPDATE existující skupiny
+                const groupIndex = customGroups.findIndex(g => g.name === editingGroupName);
+                if (groupIndex > -1) {
+                    customGroups[groupIndex].name = nameInput;
+                    customGroups[groupIndex].branches = selectedBranches;
+                }
+                if (editingGroupName !== nameInput) {
+                    const selIndex = compareGroupSelection.indexOf(editingGroupName);
+                    if (selIndex > -1) {
+                        compareGroupSelection[selIndex] = nameInput;
+                    }
+                }
+                showToast(`Skupina ${nameInput} byla úspěšně upravena.`);
+            } else {
+                // VYTVOŘENÍ nové skupiny
+                customGroups.push({ name: nameInput, branches: selectedBranches });
+                compareGroupSelection.push(nameInput);
+                showToast(`Skupina ${nameInput} byla úspěšně vytvořena a přidána.`);
+            }
+            
+            closeCreateGroupModal();
+            renderGroupCheckboxes();
+            updateAllGroupBlocks();
         }
 
         // Zavírání dropdownů kliknutím jinam
@@ -2014,6 +2450,10 @@
             const compWrapper = document.getElementById('compare-dropdown');
             if (compWrapper && compWrapper.parentElement && !compWrapper.parentElement.contains(e.target)) {
                 compWrapper.classList.add('hidden');
+            }
+            const groupWrapper = document.getElementById('group-dropdown');
+            if (groupWrapper && groupWrapper.parentElement && !groupWrapper.parentElement.contains(e.target)) {
+                groupWrapper.classList.add('hidden');
             }
         });
 
