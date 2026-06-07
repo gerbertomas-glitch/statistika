@@ -3,559 +3,970 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIEW - Statistiky Google Moje Firma</title>
-    
-    <!-- Skripty a styly -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <!-- Prop-Types musí být načteny před Recharts -->
-    <script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <title>Statistiky GBP | View</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/recharts@2.1.16/umd/Recharts.js"></script>
+    <!-- FontAwesome pro ikony -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Chart.js pro detailní grafy -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;700&family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
-
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: { 500: '#16a34a', 600: '#15803d' },
+                        surface: '#fcfcfc',
+                        border: '#e5e7eb'
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        :root {
-            --google-font: 'Google Sans', 'Product Sans', 'Open Sans', 'Roboto', Arial, sans-serif;
-        }
-        * {
-            font-family: var(--google-font) !important;
-        }
-        body {
-            background-color: #F8F9FA;
-            color: #3C4043;
-        }
-        h1, h2, h3, h4, .font-bold {
-            letter-spacing: -0.01em;
-        }
-        .recharts-cartesian-grid-horizontal line, .recharts-cartesian-grid-vertical line {
-            stroke: #f1f3f4;
-        }
-        .transition-all {
-            transition: all 0.3s ease;
-        }
-        .aspect-video-container {
-            position: relative;
-            width: 100%;
-            padding-top: 56.25%; /* 16:9 poměr stran */
-            overflow: hidden;
+        body { background-color: #f3f4f6; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+        
+        .card-minimal {
+            background-color: #ffffff;
+            border: 1px solid #e5e7eb;
             border-radius: 12px;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
-        .aspect-video-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
+
+        .input-minimal {
             width: 100%;
-            height: 100%;
-            border: 0;
+            background-color: #ffffff;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 0.875rem;
+            color: #111827;
+            transition: all 0.2s;
         }
-        /* Plynulé animace pro progress bary */
-        .progress-bar {
-            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+        .input-minimal:focus { outline: none; border-color: #16a34a; box-shadow: 0 0 0 1px #16a34a; }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+        
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Progress bars animation */
+        @keyframes fillBar { from { width: 0; } }
+        .animate-bar { animation: fillBar 1s ease-out forwards; }
+        
+        /* Leaderboard styling */
+        .medal-1 { color: #fbbf24; text-shadow: 0 2px 4px rgba(251, 191, 36, 0.3); }
+        .medal-2 { color: #9ca3af; text-shadow: 0 2px 4px rgba(156, 163, 175, 0.3); }
+        .medal-3 { color: #b45309; text-shadow: 0 2px 4px rgba(180, 83, 9, 0.3); }
     </style>
 </head>
-<body>
-    <div id="root"></div>
+<body class="font-sans text-gray-900 h-screen flex overflow-hidden antialiased">
 
-    <script type="text/babel">
-        const { 
-            AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
-            BarChart, Bar, Cell, PieChart, Pie, Legend
-        } = window.Recharts;
+    <!-- Mobilní overlay -->
+    <div id="mobile-overlay" onclick="toggleMobileMenu()" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-30 hidden md:hidden transition-opacity opacity-0 duration-300"></div>
 
-        // --- MANUÁLNÍ IKONY (SVG) ---
-        const Icon = ({ name, className = "w-5 h-5", strokeWidth = 2, fill = "none" }) => {
-            const icons = {
-                users: <><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></>,
-                eye: <><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></>,
-                star: <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>,
-                globe: <><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10z"/></>,
-                search: <><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></>,
-                trendingUp: <><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></>,
-                trendingDown: <><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></>,
-                barChart: <><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></>,
-                alert: <><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></>,
-                info: <><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></>,
-                check: <polyline points="20 6 9 17 4 12"/>,
-                x: <><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></>,
-                chevronRight: <polyline points="9 18 15 12 9 6"/>,
-                arrowRight: <><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></>,
-                phone: <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>,
-                map: <><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></>,
-                mouse: <><rect x="5" y="2" width="14" height="20" rx="7"/><line x1="12" y1="6" x2="12" y2="10"/></>,
-                camera: <><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></>,
-                award: <><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></>,
-                message: <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>,
-                user: <><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></>,
-                smartphone: <><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></>,
-                monitor: <><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></>,
-                android: <><path d="M5.5 13a.5.5 0 1 0 0 1 .5.5 0 0 0 0-1zm13 0a.5.5 0 1 0 0 1 .5.5 0 0 0 0-1zM7 20h10a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2z"/><path d="M9 7V5a3 3 0 0 1 6 0v2"/></>,
-                target: <><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></>
-            };
-            return (
-                <svg viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
-                    {icons[name]}
-                </svg>
-            );
-        };
+    <!-- LEVÉ MENU -->
+    <aside id="sidebar" class="w-64 bg-surface border-r border-border flex flex-col flex-shrink-0 z-40 fixed inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300">
+        <!-- Logo -->
+        <div class="h-16 flex items-center justify-between px-6 border-b border-border shrink-0">
+            <img src="https://viewcz.com/images/svg/head-logo.svg" alt="View Logo" class="h-8 object-contain">
+            <button onclick="toggleMobileMenu()" class="md:hidden text-gray-400 hover:text-gray-600">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
 
-        // --- MOCK DATA ---
-        const generateData = () => {
-            const months = ['Led', 'Úno', 'Bře', 'Dub', 'Kvě', 'Čer', 'Čec', 'Srp', 'Zář', 'Říj', 'Lis', 'Pro'];
-            return months.map(m => {
-                const hovory = Math.floor(Math.random() * 50) + 40;
-                const trasy = Math.floor(Math.random() * 120) + 150;
-                const web = Math.floor(Math.random() * 80) + 100;
-                const streetView = Math.floor(Math.random() * 3000) + 10000;
+        <!-- Navigace -->
+        <nav class="flex-1 overflow-y-auto py-6 px-4 flex flex-col gap-1 custom-scrollbar">
+            <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Menu</p>
+            
+            <a href="dashboard.html" class="flex items-center gap-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 px-3 py-2.5 rounded-lg font-medium transition">
+                <i class="fa-solid fa-layer-group w-5 text-center"></i> Přehled
+            </a>
+            
+            <div>
+                <button onclick="toggleMenu('gmb-submenu')" class="w-full flex items-center text-gray-600 hover:bg-gray-50 hover:text-gray-900 px-3 py-2.5 rounded-lg font-medium transition group">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-brands fa-google w-5 text-center text-brand-600"></i> <span class="font-bold text-gray-900">Firemní Google profil</span>
+                    </div>
+                </button>
+                <div id="gmb-submenu" class="flex flex-col gap-1 pl-11 pr-3 max-h-40 opacity-100 py-1 transition-all duration-300 overflow-hidden">
+                    <a href="seznam-profilu.html" class="block py-1.5 text-sm text-gray-500 hover:text-gray-900 transition font-medium">Seznam profilů</a>
+                    <a href="gmb-prispevky.html" class="block py-1.5 text-sm text-gray-500 hover:text-gray-900 transition font-medium">Google Novinky</a>
+                    <a href="gmb-statistiky.html" class="block py-1.5 text-sm text-brand-600 font-bold transition">Statistiky</a>
+                </div>
+            </div>
+
+            <div>
+                <button onclick="toggleMenu('sv-submenu')" class="w-full flex items-center text-gray-600 hover:bg-gray-50 hover:text-gray-900 px-3 py-2.5 rounded-lg font-medium transition group">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-street-view w-5 text-center"></i> Google Street View
+                    </div>
+                </button>
+                <div id="sv-submenu" class="flex flex-col gap-1 pl-11 pr-3 max-h-0 overflow-hidden opacity-0 transition-all duration-300">
+                    <a href="sv-prohlidka.html" class="block py-1.5 text-sm text-gray-500 hover:text-gray-900 transition font-medium">Moje virtuální prohlídka</a>
+                    <a href="sv-statistiky.html" class="block py-1.5 text-sm text-gray-500 hover:text-gray-900 transition font-medium">Statistika</a>
+                </div>
+            </div>
+            
+            <div>
+                <button onclick="toggleMenu('nfc-submenu')" class="w-full flex items-center text-gray-600 hover:bg-gray-50 hover:text-gray-900 px-3 py-2.5 rounded-lg font-medium transition group">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-wifi w-5 text-center"></i> NFC Produkty
+                    </div>
+                </button>
+                <div id="nfc-submenu" class="flex flex-col gap-1 pl-11 pr-3 max-h-0 overflow-hidden opacity-0 transition-all duration-300">
+                    <a href="nfc-seznam.html" class="block py-1.5 text-sm text-gray-500 hover:text-gray-900 transition font-medium">Seznam produktů</a>
+                    <a href="nfc-statistiky.html" class="block py-1.5 text-sm text-gray-500 hover:text-gray-900 transition font-medium">Statistika</a>
+                </div>
+            </div>
+
+            <div class="h-px bg-border my-4 mx-3"></div>
+            <a href="nastaveni.html" class="flex items-center gap-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 px-3 py-2.5 rounded-lg font-medium transition">
+                <i class="fa-solid fa-gear w-5 text-center"></i> Nastavení
+            </a>
+        </nav>
+    </aside>
+
+    <!-- HLAVNÍ OBSAH -->
+    <div class="flex-1 flex flex-col h-screen overflow-hidden min-w-0">
+        
+        <!-- HORNÍ LIŠTA -->
+        <header class="h-16 bg-surface border-b border-border flex items-center justify-between px-4 sm:px-8 z-20 shrink-0">
+            <div class="flex items-center gap-3">
+                <button onclick="toggleMobileMenu()" class="md:hidden text-gray-500 hover:text-gray-700 transition">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+                <h1 class="text-lg sm:text-xl font-semibold text-gray-900 tracking-tight truncate">Analytika profilů</h1>
+            </div>
+            
+            <div class="flex items-center gap-4 sm:gap-6">
+                <button class="relative text-gray-400 hover:text-gray-600 transition">
+                    <i class="fa-regular fa-bell text-xl"></i>
+                </button>
+                <div class="flex items-center gap-3 hover:opacity-80 transition cursor-pointer">
+                    <div class="text-right hidden sm:block">
+                        <p class="text-sm font-semibold text-gray-900 leading-none">Business Power s.r.o.</p>
+                        <p class="text-[11px] text-gray-500 mt-1">IČO: 27177572</p>
+                    </div>
+                    <div class="w-9 h-9 rounded-full bg-gray-900 text-white flex items-center justify-center text-sm font-bold shadow-sm">BP</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- HLAVNÍ PLOCHA DASHBOARDU -->
+        <main class="flex-1 overflow-y-auto relative bg-gray-100 custom-scrollbar flex flex-col">
+            
+            <!-- TOP FIXNÍ FILTRY -->
+            <div class="bg-white border-b border-gray-200 px-4 sm:px-8 py-4 shrink-0 z-10 sticky top-0 shadow-sm">
+                <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    
+                    <div class="w-full md:w-80 relative" id="filter-wrapper">
+                        <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Zdroj dat (Pobočky)</label>
+                        <div class="relative flex items-center bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 focus-within:border-brand-500 focus-within:ring-1 focus-within:ring-brand-500 transition-all shadow-inner cursor-pointer" onclick="toggleBranchDropdown()">
+                            <i class="fa-solid fa-store text-brand-500 mr-2.5"></i>
+                            <input type="text" id="branch-search" class="text-sm font-bold text-gray-900 bg-transparent border-none focus:outline-none w-full cursor-pointer pointer-events-none" value="Všechny pobočky (10)" readonly>
+                            <i class="fa-solid fa-chevron-down text-gray-400 ml-2 text-xs"></i>
+                        </div>
+
+                        <!-- Našeptávač / Výběr s Checkboxy -->
+                        <div id="branch-dropdown" class="absolute left-0 top-full mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-xl z-50 hidden flex-col overflow-hidden">
+                            <div class="p-2 border-b border-gray-100 bg-gray-50 shrink-0">
+                                <input type="text" id="branch-search-input" onkeyup="filterList()" onclick="event.stopPropagation();" class="w-full bg-white border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-brand-500 mb-2" placeholder="Hledat pobočku...">
+                                <label class="flex items-center gap-2 px-2 cursor-pointer">
+                                    <input type="checkbox" id="master-branch-checkbox" onchange="toggleAllSourceBranches(this)" class="w-4 h-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500" checked>
+                                    <span class="text-xs font-bold text-gray-700">Vybrat všechny</span>
+                                </label>
+                            </div>
+                            <div class="p-1 max-h-60 overflow-y-auto custom-scrollbar" id="branch-list-items">
+                                <!-- Generováno JS dole -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-end gap-3 w-full md:w-auto">
+                        <div class="relative min-w-[180px]">
+                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Období</label>
+                            <div class="relative flex items-center bg-white border border-gray-300 rounded-lg px-3 py-2 cursor-pointer">
+                                <i class="fa-regular fa-calendar text-gray-400 mr-2.5"></i>
+                                <select class="text-sm font-medium text-gray-900 bg-transparent border-none focus:outline-none w-full appearance-none cursor-pointer">
+                                    <option>Posledních 30 dní</option>
+                                    <option>Tento měsíc</option>
+                                    <option>Minulý měsíc</option>
+                                    <option>Tento rok</option>
+                                    <option>Minulý rok</option>
+                                    <option>Celé období (Vše)</option>
+                                </select>
+                                <i class="fa-solid fa-chevron-down text-gray-400 ml-2 text-xs pointer-events-none absolute right-3"></i>
+                            </div>
+                        </div>
+                        <button class="bg-white border border-gray-300 text-gray-700 h-[38px] px-4 rounded-lg text-sm font-medium hover:bg-gray-50 transition shadow-sm flex items-center gap-2">
+                            <i class="fa-solid fa-download"></i> Export
+                        </button>
+                    </div>
+                </div>
                 
-                const prevHovory = Math.floor(Math.random() * 40) + 30;
-                const prevTrasy = Math.floor(Math.random() * 100) + 120;
-                const prevWeb = Math.floor(Math.random() * 70) + 80;
-                const prevStreetView = Math.floor(Math.random() * 2000) + 9000;
-
-                return {
-                    name: m,
-                    hovory, trasy, web, streetView,
-                    prevHovory, prevTrasy, prevWeb, prevStreetView,
-                    interakce: hovory + trasy + web,
-                    prevInterakce: prevHovory + prevTrasy + prevWeb
-                };
-            });
-        };
-
-        const searchSources = [
-            { name: 'Google Mapy (Aplikace)', value: 42, color: '#34A853', icon: 'map', trend: '+5%' },
-            { name: 'Vyhledávání Mobil - Android', value: 28, color: '#A4C639', icon: 'android', trend: '+12%' },
-            { name: 'Vyhledávání Mobil - iOS', value: 18, color: '#555555', icon: 'smartphone', trend: '+8%' },
-            { name: 'Vyhledávání Počítače', value: 12, color: '#EA4335', icon: 'monitor', trend: '-2%' }
-        ];
-
-        const topKeywords = [
-            { word: 'restaurace pardubice', count: 1240 },
-            { word: 'nejlepší obědy', count: 980 },
-            { word: 'kam na večeři', count: 850 },
-            { word: 'steak house', count: 720 },
-            { word: 'pivo z tanku', count: 610 },
-            { word: 'zahrádka restaurace', count: 540 },
-            { word: 'dětský koutek', count: 480 },
-            { word: 'romantická večeře', count: 410 },
-            { word: 'burgery', count: 390 },
-            { word: 'polední menu', count: 350 }
-        ];
-
-        const welcomeStats = [
-            { id: 'interakce', title: 'Interakce celkem', total: 124580, periodValue: 3412, periodTrend: 12.5, icon: 'users', color: '#34A853', description: 'Hovory, navigace a prokliky na web.' },
-            { id: 'streetview', title: 'Zobrazení prohlídky', total: 842105, periodValue: 12840, periodTrend: -4.2, icon: 'globe', color: '#4285F4', description: 'Zhlédnutí 360° prohlídek a fotek.' },
-            { id: 'zobrazeni', title: 'Zobrazení profilu', total: 2154300, periodValue: 84200, periodTrend: 5.2, icon: 'eye', color: '#4285F4', description: 'Lidé, kteří viděli váš profil na Googlu.' },
-            { id: 'vyhledavani', title: 'Nalezení vyhledáváním', total: 1542000, periodValue: 56120, periodTrend: 8.9, icon: 'search', color: '#EA4335', description: 'Dotazy vedoucí k vašemu profilu.' }
-        ];
-
-        const interactionDetails = {
-            trasy: { title: 'Vyžádání trasy', icon: 'map', color: '#34A853', meaning: 'Zákazníci si aktivně vyhledali cestu k vaší pobočce.', benefit: 'Toto je nejsilnější signál reálného zájmu. Každá trasa je potenciální nákup!' },
-            web: { title: 'Návštěvy webu', icon: 'mouse', color: '#4285F4', meaning: 'Uživatelé klikli na tlačítko „Web“ přímo ve vašem profilu.', benefit: 'Získáváte relevantní návštěvnost. Lidé se chtějí dozvědět více o vaší nabídce.' },
-            hovory: { title: 'Telefonáty', icon: 'phone', color: '#EA4335', meaning: 'Počet přímých vytočení čísla jedním kliknutím.', benefit: 'Telefonát je nejrychlejší cesta k uzavření obchodu. Mají okamžitý zájem.' }
-        };
-
-        const topSteps = [
-            { id: 1, rank: "1. místo", color: "#FFD700", title: 'Krok z virtuální prohlídky', views: 24500, embedUrl: 'https://www.google.com/maps/embed?pb=!4v1775715361745!6m8!1m7!1sCAoSF0NJSE0wb2dLRUlDQWdJQzN3LW53akFF!2m2!1d50.04255807996196!2d15.77225026634575!3f66.97761681063815!4f-2.331028279394502!5f0.7820865974627469' },
-            { id: 2, rank: "2. místo", color: "#C0C0C0", title: 'Krok z virtuální prohlídky', views: 18200, embedUrl: 'https://www.google.com/maps/embed?pb=!4v1775715399654!6m8!1m7!1sCAoSFkNJSE0wb2dLRUlDQWdJQzN3NlhfUUE.!2m2!1d50.0426206116332!2d15.77216330488757!3f347.8940540545073!4f-12.537977008895155!5f0.4000000000000002' },
-            { id: 3, rank: "3. místo", color: "#CD7F32", title: 'Krok z virtuální prohlídky', views: 12400, embedUrl: 'https://www.google.com/maps/embed?pb=!4v1775715417837!6m8!1m7!1sCAoSFkNJSE0wb2dLRUlDQWdJQzN3X24zU3c.!2m2!1d50.04269573454846!2d15.7725293643046!3f248.9847873713557!4f-1.5409597818569694!5f0.4000000000000002' }
-        ];
-
-        const featuredReviews = [
-            { id: 'new', type: 'Nejnovější', author: 'Jan Novák', rating: 5, text: 'Vynikající přístup a profesionální jednání. Prohlídka mi moc pomohla.', date: 'před 2 dny', color: '#4285F4' },
-            { id: 'best', type: 'Nejlepší', author: 'Marie Svobodová', rating: 5, text: 'Nejlepší servis v okolí, vracím se pravidelně už roky.', date: 'před měsícem', color: '#34A853' },
-            { id: 'worst', type: 'Nejslabší', author: 'Petr Marek', rating: 2, text: 'Dlouhá čekací doba na odpověď přes chat, jinak ok.', date: 'před 2 měsíci', color: '#EA4335' }
-        ];
-
-        // --- COMPONENTS ---
-
-        const RecommendationsModal = ({ isOpen, onClose }) => {
-            if (!isOpen) return null;
-            return (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm text-sm" onClick={onClose}>
-                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl border border-[#DADCE0] overflow-hidden" onClick={e => e.stopPropagation()}>
-                        <div className="px-8 py-5 border-b border-[#DADCE0] flex justify-between items-center bg-[#F8F9FA]">
-                            <div className="flex items-center gap-3 text-[#EA4335]">
-                                <Icon name="alert" className="w-6 h-6" />
-                                <h2 className="font-bold text-gray-900 text-lg">Strategie pro obnovení růstu</h2>
-                            </div>
-                            <button onClick={onClose} className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-500"><Icon name="x" className="w-5 h-5" /></button>
-                        </div>
-                        <div className="p-8 space-y-8">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="p-5 bg-white border border-[#DADCE0] rounded-xl shadow-sm">
-                                    <h3 className="text-xs font-bold text-gray-400 uppercase mb-3">Analýza Sezónnosti</h3>
-                                    <p className="text-gray-600 leading-relaxed text-xs">Pokles může být přirozený. Prověřujeme historické trendy na trhu.</p>
-                                </div>
-                                <div className="p-5 bg-white border border-[#DADCE0] rounded-xl shadow-sm">
-                                    <h3 className="text-xs font-bold text-gray-400 uppercase mb-3">Kvalita obsahu</h3>
-                                    <p className="text-gray-600 leading-relaxed text-xs">Google upřednostňuje profily s novými fotkami. Přidejte 3–5 snímků měsíčně.</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="p-6 border-t border-[#DADCE0] flex justify-center bg-[#F8F9FA]">
-                            <button onClick={onClose} className="bg-gray-900 text-white px-10 py-3 rounded-full text-sm font-bold hover:bg-black transition-all flex items-center gap-3 shadow-lg">
-                                Rozumím, zavřít <Icon name="arrowRight" className="w-4 h-4" />
-                            </button>
-                        </div>
-                    </div>
+                <!-- SUB-NAVIGACE (TABS) -->
+                <div class="max-w-7xl mx-auto mt-4 border-b border-gray-200 flex overflow-x-auto hide-scrollbar">
+                    <button onclick="switchTab('tab-prehled')" id="btn-tab-prehled" class="whitespace-nowrap py-3 px-5 border-b-2 font-bold text-sm transition-colors border-brand-500 text-brand-600">
+                        <i class="fa-solid fa-table-cells-large mr-2"></i> Číselný přehled
+                    </button>
+                    <button onclick="switchTab('tab-grafy'); initCharts();" id="btn-tab-grafy" class="whitespace-nowrap py-3 px-5 border-b-2 font-medium text-sm transition-colors border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                        <i class="fa-solid fa-chart-line mr-2"></i> Detailní grafy
+                    </button>
+                    <button onclick="switchTab('tab-porovnani'); initCompareCharts();" id="btn-tab-porovnani" class="whitespace-nowrap py-3 px-5 border-b-2 font-medium text-sm transition-colors border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                        <i class="fa-solid fa-ranking-star mr-2"></i> Porovnání poboček
+                    </button>
+                    <button onclick="switchTab('tab-skupiny')" id="btn-tab-skupiny" class="whitespace-nowrap py-3 px-5 border-b-2 font-medium text-sm transition-colors border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                        <i class="fa-solid fa-users-viewfinder mr-2"></i> Týmy a Skupiny
+                    </button>
                 </div>
-            );
-        };
+            </div>
 
-        const WelcomeKpiCard = ({ stat }) => {
-            const isNegative = stat.periodTrend < 0;
-            return (
-                <div className="bg-white border border-[#DADCE0] p-6 rounded-xl shadow-sm hover:shadow-md transition-all group">
-                    <div className="flex justify-between items-start mb-5">
-                        <div className="text-gray-300 group-hover:text-[#34A853] transition-colors">
-                            <Icon name={stat.icon} className="w-6 h-6" />
+            <!-- OBSAH TABŮ -->
+            <div class="p-4 sm:p-8 max-w-7xl mx-auto w-full">
+                
+                <!-- TAB 1: ZÁKLADNÍ PŘEHLED (BEZ GRAFŮ, JEN ČÍSLA) -->
+                <div id="tab-prehled" class="space-y-6 block">
+                    
+                    <!-- SMART INSIGHTS -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-4 items-start shadow-sm relative overflow-hidden" id="insights-box">
+                        <div class="absolute left-0 top-0 w-1 h-full bg-blue-500"></div>
+                        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0 mt-0.5">
+                            <i class="fa-solid fa-lightbulb"></i>
                         </div>
-                        <div className="text-right">
-                            <div className={`flex items-center font-bold text-sm ${isNegative ? 'text-[#EA4335]' : 'text-[#34A853]'}`}>
-                                <Icon name={isNegative ? 'trendingDown' : 'trendingUp'} className="w-4 h-4 mr-1" />
-                                {Math.abs(stat.periodTrend)}%
-                            </div>
-                            <div className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">vs loni</div>
-                        </div>
-                    </div>
-                    <div className="mb-5">
-                        <h3 className="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1.5 leading-none">{stat.title}</h3>
-                        <div className="text-3xl font-black text-gray-900 tracking-tighter leading-none">{stat.periodValue.toLocaleString()}</div>
-                    </div>
-                    <div className="pt-5 border-t border-[#F1F3F4] flex justify-between items-center">
-                        <div className="leading-tight">
-                            <p className="text-[9px] text-gray-400 font-bold uppercase mb-0.5 tracking-tighter">Historický součet</p>
-                            <p className="text-base font-light text-gray-500 tracking-tight">{stat.total.toLocaleString()}</p>
-                        </div>
-                        <div className="group/info relative cursor-help">
-                            <Icon name="info" className="w-3.5 h-3.5 text-gray-200 hover:text-gray-400" />
-                            <div className="absolute bottom-full right-0 mb-3 w-48 p-3 bg-gray-900 text-white text-[10px] rounded-lg shadow-2xl opacity-0 invisible group-hover/info:opacity-100 group-hover/info:visible transition-all z-20 leading-relaxed">
-                                {stat.description}
-                            </div>
+                        <div>
+                            <h4 class="font-bold text-blue-900 text-sm">Chytrý souhrn</h4>
+                            <p class="text-sm text-blue-800 mt-1" id="insight-text">Celkově vaše pobočky vykazují stabilní růst zobrazení (+12 %). Největší skokan je pobočka <strong>Brno</strong>. Naopak pobočky <strong>Plzeň</strong> a <strong>Ostrava</strong> zaznamenaly mírný propad v hledání na mapách.</p>
                         </div>
                     </div>
-                </div>
-            );
-        };
 
-        // --- APP ---
-        function App() {
-            const [isModalOpen, setModalOpen] = React.useState(false);
-            const [viewType, setViewType] = React.useState('měsíc');
-            const [selectedDetail, setSelectedDetail] = React.useState('trasy');
-            const data = React.useMemo(() => generateData(), [viewType]);
-            const hasNegativeTrend = React.useMemo(() => welcomeStats.some(s => s.periodTrend < 0), []);
-
-            const activeDetail = interactionDetails[selectedDetail];
-
-            return (
-                <div className="min-h-screen pb-20">
-                    <RecommendationsModal isOpen={isModalOpen} onClose={() => setModalOpen(false)} />
-
-                    {/* ZÁHLAVÍ */}
-                    <header className="sticky top-0 z-50 bg-white border-b border-[#DADCE0] shadow-sm">
-                        <div className="py-3 px-4 md:px-10 border-b border-gray-100 flex items-center justify-start">
-                            <div className="h-7 md:h-8">
-                                <img src="https://viewcz.com/images/svg/head-logo.svg" alt="VIEW" className="h-full w-auto object-contain block opacity-90" />
-                            </div>
-                        </div>
-                        <div className="py-2.5 px-4 md:px-10 flex items-center justify-start bg-white/50">
-                            <div className="flex items-center gap-3">
-                                <div className="text-[#34A853]"><Icon name="barChart" className="w-5 h-5" strokeWidth={2.5} /></div>
-                                <div className="flex items-center gap-2 text-sm md:text-base font-normal text-gray-700">
-                                    <span className="font-medium text-gray-600">Statistiky</span>
-                                    <div className="flex items-center h-5 border-l border-gray-300 ml-1 pl-3">
-                                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/3840px-Google_2015_logo.svg.png" alt="Google" className="h-4 md:h-5 w-auto block object-contain" />
-                                        <span className="font-light text-gray-500 ml-2 whitespace-nowrap">Moje Firma</span>
-                                    </div>
+                    <!-- EXECUTIVE KPI CARDS -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                        <div class="card-minimal p-5 border-t-4 border-t-blue-500">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Zobrazení</p>
+                            <div class="flex items-end justify-between">
+                                <div class="flex items-center gap-2">
+                                    <p class="text-2xl font-bold text-gray-900" id="kpi-zobrazeni">142.5k</p>
+                                    <span class="text-[10px] font-bold text-brand-600 bg-green-50 px-1.5 py-0.5 rounded flex items-center"><i class="fa-solid fa-arrow-trend-up mr-1"></i> 12%</span>
                                 </div>
                             </div>
                         </div>
-                    </header>
-
-                    <main className="max-w-7xl mx-auto px-4 md:px-10 pt-10">
-                        {/* UVÍTACÍ SEKCE */}
-                        <div className="bg-white border border-[#DADCE0] p-8 md:p-12 rounded-2xl mb-12 shadow-sm">
-                            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-10 mb-12">
-                                <div className="max-w-3xl text-gray-500 text-lg md:text-xl leading-relaxed font-light">
-                                    <div className="inline-flex items-center gap-2 bg-[#E6F4EA] text-[#34A853] px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest mb-6">Souhrnný přehled firemní prezentace</div>
-                                    <p>Tento dashboard zobrazuje aktuální výsledky a efektivitu vaší prezentace na Googlu spravované v systému <strong className="text-gray-900 font-bold">VIEW</strong>. Data reprezentují souhrnnou aktivitu uživatelů napříč lokalitami.</p>
-                                </div>
-                                <div className="bg-[#F8F9FA] border border-[#DADCE0] p-6 rounded-xl text-center min-w-[240px]">
-                                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-2">Aktuálně zobrazeno</p>
-                                    <p className="text-xl font-black text-gray-800 tracking-tight">Posledních 30 dní</p>
-                                    <div className="my-4 h-[1px] bg-gray-200 w-full opacity-50"></div>
-                                    <p className="text-[10px] text-[#34A853] font-bold uppercase tracking-wider">Vs stejné období 2024</p>
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-                                {welcomeStats.map(stat => <WelcomeKpiCard key={stat.id} stat={stat} />)}
-                            </div>
-                        </div>
-
-                        {/* HLAVNÍ TREND */}
-                        <div className="mt-20">
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-10">
-                                <div className="flex items-center gap-4">
-                                    <div className="p-3 bg-white border border-[#DADCE0] text-[#34A853] rounded-xl shadow-sm"><Icon name="users" className="w-6 h-6" /></div>
-                                    <h2 className="text-2xl font-black text-gray-800 tracking-tight italic uppercase">Celkový vývoj interakcí</h2>
-                                </div>
-                            </div>
-                            <div className="bg-white p-10 md:p-14 border border-[#DADCE0] rounded-2xl shadow-sm mb-12 text-xs font-bold text-gray-400 uppercase tracking-widest">
-                                <div className="flex justify-between items-center mb-8">
-                                    <p>Meziroční srovnání aktivity</p>
-                                    <div className="flex gap-6">
-                                        <span className="flex items-center gap-2.5 text-[#34A853]"><div className="w-3 h-3 rounded-full bg-[#34A853]" /> Aktuální</span>
-                                        <span className="flex items-center gap-2.5"><div className="w-3 h-0.5 bg-gray-300" /> Loni</span>
-                                    </div>
-                                </div>
-                                <div className="h-[400px] w-full">
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <AreaChart data={data}>
-                                            <defs>
-                                                <linearGradient id="colorInt" x1="0" y1="0" x2="0" y2="1">
-                                                    <stop offset="5%" stopColor="#34A853" stopOpacity={0.1}/>
-                                                    <stop offset="95%" stopColor="#34A853" stopOpacity={0}/>
-                                                </linearGradient>
-                                            </defs>
-                                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#70757a', fontSize: 11, fontWeight: 900}} dy={15} />
-                                            <YAxis axisLine={false} tickLine={false} tick={{fill: '#70757a', fontSize: 11, fontWeight: 900}} />
-                                            <Tooltip contentStyle={{borderRadius: '12px', border: '1px solid #DADCE0'}} />
-                                            <Area type="monotone" dataKey="prevInterakce" stroke="#cbd5e1" fill="transparent" strokeDasharray="5 5" strokeWidth={2} />
-                                            <Area type="monotone" dataKey="interakce" stroke="#34A853" fill="url(#colorInt)" strokeWidth={4} />
-                                        </AreaChart>
-                                    </ResponsiveContainer>
+                        <div class="card-minimal p-5 border-t-4 border-t-brand-500">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Interakce</p>
+                            <div class="flex items-end justify-between">
+                                <div class="flex items-center gap-2">
+                                    <p class="text-2xl font-bold text-gray-900" id="kpi-interakce">12,142</p>
+                                    <span class="text-[10px] font-bold text-brand-600 bg-green-50 px-1.5 py-0.5 rounded flex items-center"><i class="fa-solid fa-arrow-trend-up mr-1"></i> 5%</span>
                                 </div>
                             </div>
                         </div>
-
-                        {/* DETAILNÍ ANALÝZA S PŘEPÍNAČEM */}
-                        <div className="mt-24">
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-10">
-                                <div className="flex items-center gap-4">
-                                    <div className="p-3 bg-white border border-[#DADCE0] text-[#4285F4] rounded-xl shadow-sm"><Icon name="target" className="w-6 h-6" /></div>
-                                    <h2 className="text-2xl font-black text-gray-800 tracking-tight italic uppercase">Detailní analýza aktivit</h2>
-                                </div>
-                                <div className="flex gap-1 p-1 bg-white border border-[#DADCE0] rounded-full shadow-sm overflow-hidden">
-                                    {['trasy', 'web', 'hovory'].map(type => (
-                                        <button key={type} onClick={() => setSelectedDetail(type)} className={`px-5 py-2 text-[10px] font-bold uppercase rounded-full transition-all flex items-center gap-2 ${selectedDetail === type ? 'bg-[#4285F4] text-white' : 'text-gray-400'}`}>
-                                            <Icon name={interactionDetails[type].icon} className="w-3 h-3" /> {interactionDetails[type].title}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                                <div className="lg:col-span-2 bg-white p-10 md:p-12 border border-[#DADCE0] rounded-2xl shadow-sm h-[450px]">
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <AreaChart data={data}>
-                                            <defs><linearGradient id="colorDetail" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor={activeDetail.color} stopOpacity={0.15}/><stop offset="95%" stopColor={activeDetail.color} stopOpacity={0}/></linearGradient></defs>
-                                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#70757a', fontSize: 11, fontWeight: 900}} />
-                                            <YAxis axisLine={false} tickLine={false} tick={{fill: '#70757a', fontSize: 11, fontWeight: 900}} />
-                                            <Tooltip contentStyle={{borderRadius: '12px', border: '1px solid #DADCE0'}} />
-                                            <Area type="monotone" dataKey={`prev${selectedDetail.charAt(0).toUpperCase() + selectedDetail.slice(1)}`} stroke="#cbd5e1" fill="transparent" strokeDasharray="4 4" strokeWidth={1.5} />
-                                            <Area type="monotone" dataKey={selectedDetail} stroke={activeDetail.color} fill="url(#colorDetail)" strokeWidth={4} />
-                                        </AreaChart>
-                                    </ResponsiveContainer>
-                                </div>
-                                <div className="bg-white border border-[#DADCE0] p-8 rounded-2xl shadow-sm flex flex-col justify-center">
-                                    <div className="flex items-center gap-4 mb-6">
-                                        <div className="p-3 rounded-xl" style={{ backgroundColor: `${activeDetail.color}10`, color: activeDetail.color }}><Icon name={activeDetail.icon} className="w-6 h-6" strokeWidth={3} /></div>
-                                        <h3 className="font-black text-gray-900 text-lg uppercase">{activeDetail.title}</h3>
-                                    </div>
-                                    <div className="space-y-6">
-                                        <div><h4 className="text-[10px] font-black text-gray-400 uppercase mb-2">Co to znamená?</h4><p className="text-sm text-gray-600 font-medium">{activeDetail.meaning}</p></div>
-                                        <div className="bg-gray-50 border-l-4 p-5 rounded-r-xl" style={{ borderColor: activeDetail.color }}><h4 className="text-[10px] font-black uppercase mb-1" style={{ color: activeDetail.color }}>Proč je to skvělé?</h4><p className="text-sm text-gray-700 italic font-bold">"{activeDetail.benefit}"</p></div>
-                                    </div>
+                        <div class="card-minimal p-5 border-t-4 border-t-yellow-400">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Nové Recenze</p>
+                            <div class="flex items-end justify-between">
+                                <div class="flex items-center gap-2">
+                                    <p class="text-2xl font-bold text-gray-900" id="kpi-recenze">324</p>
+                                    <div id="kpi-hodnoceni" class="text-yellow-400 text-xs font-bold bg-yellow-50 px-1.5 py-0.5 rounded"><i class="fa-solid fa-star"></i> 4.8</div>
                                 </div>
                             </div>
                         </div>
-
-                        {/* STREET VIEW SEKCE */}
-                        <div className="mt-24">
-                            <div className="flex items-center gap-4 mb-10">
-                                <div className="p-3 bg-white border border-[#DADCE0] text-[#4285F4] rounded-xl shadow-sm"><Icon name="globe" className="w-6 h-6" /></div>
-                                <h2 className="text-2xl font-black text-gray-800 tracking-tight italic uppercase">Virtuální prohlídka & Street View</h2>
+                        <div class="card-minimal p-5 border-t-4 border-t-orange-400">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Míra odpovědí</p>
+                            <div class="flex items-end justify-between">
+                                <div class="flex items-center gap-2">
+                                    <p class="text-2xl font-bold text-gray-900" id="kpi-odpovedi">82%</p>
+                                    <span class="text-[10px] font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded flex items-center"><i class="fa-solid fa-arrow-trend-down mr-1"></i> 3%</span>
+                                </div>
                             </div>
-                            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-12">
-                                <div className="lg:col-span-1 bg-white border border-[#DADCE0] p-8 rounded-2xl shadow-sm flex flex-col justify-center text-center">
-                                    <Icon name="camera" className="w-10 h-10 text-[#4285F4] mx-auto mb-4" />
-                                    <h3 className="text-[10px] font-black text-gray-400 uppercase mb-2">Zobrazení celkem</h3>
-                                    <div className="text-5xl font-black text-gray-900 mb-4">{data.reduce((sum, i) => sum + i.streetView, 0).toLocaleString()}</div>
-                                    <div className="inline-flex items-center justify-center gap-2 text-base font-black text-[#34A853] bg-[#E6F4EA] py-2 px-4 rounded-full"><Icon name="trendingUp" className="w-4 h-4" strokeWidth={3} /> +18.4 % meziročně</div>
+                        </div>
+                        <div class="card-minimal p-5 bg-brand-50 border-brand-200">
+                            <p class="text-[10px] font-bold text-brand-700 uppercase tracking-wider mb-1"><i class="fa-solid fa-wifi mr-1"></i> NFC Recenze</p>
+                            <div class="flex items-end justify-between">
+                                <div class="flex items-center gap-2">
+                                    <p class="text-2xl font-bold text-brand-700" id="kpi-nfc">185</p>
+                                    <span id="kpi-nfc-percent" class="text-[10px] font-bold text-brand-600">57 % všech</span>
                                 </div>
-                                <div className="lg:col-span-3 bg-white p-8 border border-[#DADCE0] rounded-2xl h-[300px]">
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <AreaChart data={data}>
-                                            <defs><linearGradient id="colorSV" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#4285F4" stopOpacity={0.15}/><stop offset="95%" stopColor="#4285F4" stopOpacity={0}/></linearGradient></defs>
-                                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                            <XAxis dataKey="name" tick={{fill: '#70757a', fontSize: 10}} />
-                                            <Tooltip />
-                                            <Area type="monotone" dataKey="prevStreetView" stroke="#cbd5e1" fill="transparent" strokeDasharray="5 5" />
-                                            <Area type="monotone" dataKey="streetView" stroke="#4285F4" fill="url(#colorSV)" strokeWidth={4} />
-                                        </AreaChart>
-                                    </ResponsiveContainer>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ROZPAD DAT (CSS BARY) -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        
+                        <div class="card-minimal p-6">
+                            <h3 class="text-sm font-bold text-gray-900 mb-6">Kde vás zákazníci vidí (Zobrazení)</h3>
+                            
+                            <div class="mb-6">
+                                <div class="flex justify-between text-xs font-medium text-gray-600 mb-2">
+                                    <span>Vyhledávání Google</span>
+                                    <span class="font-bold text-gray-900" id="bar-vyhledavani-val">65% (92.6k)</span>
                                 </div>
+                                <div class="h-2 bg-gray-100 rounded-full overflow-hidden"><div id="bar-vyhledavani" class="bg-blue-500 h-full animate-bar" style="width: 65%"></div></div>
                             </div>
                             
-                            {/* TOP 3 KROKY */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
-                                {topSteps.map((step) => (
-                                    <div key={step.id} className="bg-white border border-[#DADCE0] p-5 rounded-2xl shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
-                                        <div className="absolute top-0 left-0 w-16 h-16 pointer-events-none">
-                                            <div className="absolute transform -rotate-45 bg-white border-b border-r border-gray-100 w-24 h-10 -left-8 top-1 flex items-center justify-center shadow-sm z-20">
-                                                <span className="text-[10px] font-black uppercase text-gray-800 tracking-tighter pl-4">{step.rank}</span>
-                                            </div>
-                                        </div>
-                                        <div className="aspect-video-container mb-6 bg-gray-100 shadow-inner">
-                                            <iframe src={step.embedUrl} loading="lazy" allowFullScreen referrerPolicy="no-referrer-when-downgrade" title={step.title}></iframe>
-                                        </div>
-                                        <div className="flex justify-between items-center mb-4">
-                                            <div className="flex items-center gap-2">
-                                                <div style={{ color: step.color }}><Icon name="award" className="w-5 h-5" strokeWidth={3} /></div>
-                                                <h4 className="text-xs font-black text-gray-800 uppercase tracking-tight">{step.title}</h4>
-                                            </div>
-                                        </div>
-                                        <div className="pt-5 border-t border-gray-50 flex items-center justify-between">
-                                            <div>
-                                                <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mb-0.5">Zobrazení v období</p>
-                                                <p className="text-2xl font-black text-[#4285F4] tracking-tighter leading-none">{step.views.toLocaleString()}</p>
-                                            </div>
-                                            <div className="text-[#34A853] flex items-center gap-1.5 text-[10px] font-bold bg-[#E6F4EA] px-2 py-1 rounded-lg">
-                                                <Icon name="trendingUp" className="w-3 h-3" strokeWidth={3} />
-                                                <span>Skvělé</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* VÝKON VE VYHLEDÁVÁNÍ */}
-                        <div className="mt-24">
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-10">
-                                <div className="flex items-center gap-4">
-                                    <div className="p-3 bg-white border border-[#DADCE0] text-[#EA4335] rounded-xl shadow-sm"><Icon name="search" className="w-6 h-6" strokeWidth={2.5} /></div>
-                                    <div>
-                                        <h2 className="text-2xl font-black text-gray-800 tracking-tight italic uppercase">Výkon ve vyhledávání</h2>
-                                        <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Odkud přicházejí vaši zákazníci a co hledají</p>
-                                    </div>
+                            <div>
+                                <div class="flex justify-between text-xs font-medium text-gray-600 mb-2">
+                                    <span>Mapy Google</span>
+                                    <span class="font-bold text-gray-900" id="bar-mapy-val">35% (49.9k)</span>
                                 </div>
+                                <div class="h-2 bg-gray-100 rounded-full overflow-hidden"><div id="bar-mapy" class="bg-brand-500 h-full animate-bar" style="width: 35%"></div></div>
                             </div>
-
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                                {/* DECENTNÍ ROZPIS ZDROJŮ */}
-                                <div className="bg-white border border-[#DADCE0] p-8 rounded-2xl shadow-sm">
-                                    <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-8">Zdroje návštěvnosti a Platformy</h3>
-                                    <div className="space-y-8">
-                                        {searchSources.map((source, i) => (
-                                            <div key={i} className="group">
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center transition-colors group-hover:bg-white border border-transparent group-hover:border-gray-100" style={{ color: source.color }}>
-                                                            <Icon name={source.icon} className="w-4 h-4" strokeWidth={2.5} />
-                                                        </div>
-                                                        <span className="text-xs font-bold text-gray-700">{source.name}</span>
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <span className="text-sm font-black text-gray-900">{source.value}%</span>
-                                                        <span className="ml-2 text-[9px] font-black text-[#34A853]">{source.trend}</span>
-                                                    </div>
-                                                </div>
-                                                <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                                    <div 
-                                                        className="h-full progress-bar rounded-full" 
-                                                        style={{ 
-                                                            backgroundColor: source.color,
-                                                            width: `${source.value}%`
-                                                        }} 
-                                                    />
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <div className="mt-12 pt-8 border-t border-gray-50 text-center text-[10px] text-gray-400 font-medium italic uppercase">
-                                        "Mobilní zařízení nyní tvoří 46 % veškerého vyhledávání vaší firmy."
-                                    </div>
+                            
+                            <div class="mt-6 pt-4 border-t border-gray-100 flex gap-6">
+                                <div class="flex-1">
+                                    <p class="text-[10px] uppercase font-bold text-gray-400 mb-1"><i class="fa-solid fa-mobile-screen mr-1"></i> Mobil</p>
+                                    <p class="text-lg font-bold text-gray-900" id="val-mobile">78 %</p>
                                 </div>
-
-                                {/* TOP 10 SLOV */}
-                                <div className="lg:col-span-2 bg-white border border-[#DADCE0] p-8 rounded-2xl shadow-sm">
-                                    <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6">Top 10 vyhledávacích dotazů</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-1">
-                                        {topKeywords.map((kw, i) => (
-                                            <div key={i} className="flex items-center justify-between py-3 border-b border-gray-50 group hover:bg-gray-50 px-2 rounded-lg transition-all">
-                                                <div className="flex items-center gap-4">
-                                                    <span className="text-[10px] font-black text-gray-300 w-4">{i + 1}.</span>
-                                                    <span className="text-xs font-bold text-gray-700 group-hover:text-gray-900">{kw.word}</span>
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-[11px] font-black text-[#EA4335]">{kw.count.toLocaleString()}</span>
-                                                    <span className="text-[9px] text-gray-400 font-bold uppercase">zobrazení</span>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <div className="mt-8 p-4 bg-[#FCE8E6] rounded-xl border border-[#FAD2CF] text-center text-[10px] text-[#C5221F] font-black uppercase tracking-wider">
-                                        Většina klientů vás nachází přes obecné dotazy (Local SEO)
-                                    </div>
+                                <div class="flex-1">
+                                    <p class="text-[10px] uppercase font-bold text-gray-400 mb-1"><i class="fa-solid fa-desktop mr-1"></i> Počítač</p>
+                                    <p class="text-lg font-bold text-gray-900" id="val-desktop">22 %</p>
                                 </div>
                             </div>
                         </div>
 
-                        {/* RECENZE */}
-                        <div className="mt-24">
-                            <div className="flex items-center gap-4 mb-10">
-                                <div className="p-3 bg-white border border-[#DADCE0] text-[#FBBC05] rounded-xl shadow-sm"><Icon name="star" className="w-6 h-6" strokeWidth={2.5} /></div>
-                                <h2 className="text-2xl font-black text-gray-800 tracking-tight italic uppercase">Zákaznické recenze</h2>
-                            </div>
-                            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                                <div className="lg:col-span-1 space-y-6">
-                                    <div className="bg-white border border-[#DADCE0] p-8 rounded-2xl shadow-sm text-center">
-                                        <h3 className="text-[10px] font-black text-gray-400 uppercase mb-4">Průměrné hodnocení</h3>
-                                        <div className="flex justify-center items-end gap-1 mb-4"><span className="text-6xl font-black text-gray-900">4.8</span><span className="text-xl font-bold text-gray-400 mb-1">/ 5</span></div>
-                                        <div className="flex justify-center gap-1 mb-6">{[1,2,3,4,5].map(s => <Icon key={s} name="star" className="w-6 h-6 text-[#FBBC05] fill-[#FBBC05]" />)}</div>
-                                        <div className="bg-[#FFF8E1] text-[#A67C00] text-[11px] font-black px-4 py-2 rounded-full uppercase">Vynikající reputace</div>
-                                    </div>
-                                    <div className="bg-white border border-[#DADCE0] p-8 rounded-2xl shadow-sm text-center">
-                                        <h3 className="text-[10px] font-black text-gray-400 uppercase mb-2">Recenzí celkem</h3>
-                                        <div className="text-4xl font-black text-[#34A853] mb-4">1 248</div>
-                                        <div className="flex items-center justify-center gap-2 text-xs font-bold text-[#34A853] bg-[#E6F4EA] py-2 rounded-full"><Icon name="trendingUp" className="w-4 h-4" /> +12 nových</div>
-                                    </div>
-                                </div>
-                                <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    {featuredReviews.map(r => (
-                                        <div key={r.id} className="bg-white border border-[#DADCE0] p-6 rounded-2xl shadow-sm flex flex-col">
-                                            <div className="flex items-center gap-2 mb-6"><div className="p-2 rounded-lg" style={{ backgroundColor: `${r.color}15`, color: r.color }}><Icon name={r.id === 'worst' ? 'alert' : 'award'} className="w-4 h-4" /></div><span className="text-[10px] font-black uppercase text-gray-400">{r.type}</span></div>
-                                            <div className="flex items-center gap-3 mb-4"><div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400"><Icon name="user" className="w-5 h-5" /></div><div><p className="text-sm font-black text-gray-800">{r.author}</p><div className="flex gap-0.5">{[...Array(5)].map((_, i) => <Icon key={i} name="star" className={`w-3 h-3 ${i < r.rating ? 'text-[#FBBC05] fill-[#FBBC05]' : 'text-gray-200 fill-gray-200'}`} />)}</div></div></div>
-                                            <p className="text-xs text-gray-600 italic mb-6 flex-grow">"{r.text}"</p>
-                                            <div className="pt-4 border-t border-gray-50 flex items-center justify-between text-[10px] font-bold text-gray-400 uppercase"><span>{r.date}</span><div className="flex items-center gap-1.5 text-[#34A853]">Odpovězeno <Icon name="check" className="w-3 h-3" /></div></div>
+                        <div class="card-minimal p-6">
+                            <h3 class="text-sm font-bold text-gray-900 mb-6">Akce zákazníků (Interakce)</h3>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="flex items-center gap-3 mb-1">
+                                        <div class="w-6 h-6 rounded bg-blue-50 text-blue-500 flex items-center justify-center text-xs shrink-0"><i class="fa-solid fa-globe"></i></div>
+                                        <div class="flex-1 flex justify-between text-xs font-medium text-gray-600">
+                                            <span>Návštěvy webu</span>
+                                            <span class="font-bold text-gray-900" id="act-web">6,420</span>
                                         </div>
-                                    ))}
+                                    </div>
+                                    <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden ml-9"><div id="bar-act-web" class="bg-blue-500 h-full transition-all duration-500" style="width: 55%"></div></div>
+                                </div>
+                                
+                                <div>
+                                    <div class="flex items-center gap-3 mb-1">
+                                        <div class="w-6 h-6 rounded bg-brand-50 text-brand-600 flex items-center justify-center text-xs shrink-0"><i class="fa-solid fa-diamond-turn-right"></i></div>
+                                        <div class="flex-1 flex justify-between text-xs font-medium text-gray-600">
+                                            <span>Žádosti o trasu</span>
+                                            <span class="font-bold text-gray-900" id="act-trasa">3,812</span>
+                                        </div>
+                                    </div>
+                                    <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden ml-9"><div id="bar-act-trasa" class="bg-brand-500 h-full transition-all duration-500" style="width: 32%"></div></div>
+                                </div>
+                                
+                                <div>
+                                    <div class="flex items-center gap-3 mb-1">
+                                        <div class="w-6 h-6 rounded bg-orange-50 text-orange-500 flex items-center justify-center text-xs shrink-0"><i class="fa-solid fa-phone"></i></div>
+                                        <div class="flex-1 flex justify-between text-xs font-medium text-gray-600">
+                                            <span>Telefonní hovory</span>
+                                            <span class="font-bold text-gray-900" id="act-hovory">1,910</span>
+                                        </div>
+                                    </div>
+                                    <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden ml-9"><div id="bar-act-hovory" class="bg-orange-500 h-full transition-all duration-500" style="width: 15%"></div></div>
                                 </div>
                             </div>
                         </div>
-
-                        <footer className="mt-32 pt-12 border-t border-[#DADCE0] flex flex-col md:flex-row justify-between items-center text-gray-400 text-[10px] font-bold uppercase tracking-[0.3em] gap-8 text-center md:text-left">
-                            <p>© 2024 VIEW - Autorizovaný partner Google</p>
-                            <div className="flex gap-8 items-center">
-                                <span>Google My Business API</span><span className="text-gray-200">|</span><span className="text-gray-800 font-bold">v4.0.0-GITHUB</span>
+                    </div>
+                    
+                    <!-- CSS HEATMAPA HOVORŮ -->
+                    <div class="card-minimal p-6">
+                        <div class="flex justify-between items-end mb-4">
+                            <div>
+                                <h3 class="text-sm font-bold text-gray-900">Kdy zákazníci nejčastěji volají</h3>
+                                <p class="text-xs text-gray-500 mt-1">Heatmapa hovorů za zvolené období.</p>
                             </div>
-                        </footer>
-                    </main>
+                        </div>
+                        <div class="overflow-x-auto hide-scrollbar">
+                            <div class="min-w-[600px]">
+                                <div class="grid grid-cols-8 gap-1 mb-2 text-center text-[10px] font-bold text-gray-400">
+                                    <div>ČAS</div><div>Po</div><div>Út</div><div>St</div><div>Čt</div><div>Pá</div><div>So</div><div>Ne</div>
+                                </div>
+                                <div class="grid grid-cols-8 gap-1 text-center text-xs">
+                                    <div class="flex items-center justify-end pr-3 text-gray-500 font-medium text-[10px]">Dopoledne</div>
+                                    <div class="bg-brand-100 rounded py-3"></div><div class="bg-brand-200 rounded py-3"></div><div class="bg-brand-500 rounded py-3"></div><div class="bg-brand-300 rounded py-3"></div><div class="bg-brand-400 rounded py-3"></div><div class="bg-gray-50 rounded py-3"></div><div class="bg-gray-50 rounded py-3"></div>
+                                    
+                                    <div class="flex items-center justify-end pr-3 text-gray-500 font-medium text-[10px] mt-1">Odpoledne</div>
+                                    <div class="bg-brand-500 rounded py-3 mt-1"></div><div class="bg-brand-400 rounded py-3 mt-1"></div><div class="bg-brand-600 rounded py-3 mt-1"></div><div class="bg-brand-500 rounded py-3 mt-1"></div><div class="bg-brand-300 rounded py-3 mt-1"></div><div class="bg-gray-100 rounded py-3 mt-1"></div><div class="bg-gray-50 rounded py-3 mt-1"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
-            );
+
+                <!-- TAB 2: DETAILNÍ GRAFY A TRENDY -->
+                <div id="tab-grafy" class="hidden space-y-6">
+                    
+                    <div class="card-minimal p-6">
+                        <div class="flex justify-between items-start mb-6">
+                            <div>
+                                <h3 class="font-bold text-gray-900">Vývoj zobrazení a interakcí v čase</h3>
+                                <p class="text-xs text-gray-500 mt-1">Liniový graf trendů.</p>
+                            </div>
+                            <div class="flex gap-3">
+                                <span class="flex items-center text-[10px] font-bold text-gray-500 uppercase"><span class="w-3 h-1 rounded-full bg-blue-500 mr-1.5"></span>Zobrazení</span>
+                                <span class="flex items-center text-[10px] font-bold text-gray-500 uppercase"><span class="w-3 h-1 rounded-full bg-brand-500 mr-1.5"></span>Interakce</span>
+                            </div>
+                        </div>
+                        <div class="relative h-72 w-full">
+                            <canvas id="trendChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="card-minimal p-6">
+                            <h3 class="font-bold text-gray-900 mb-1">Jak vás lidé nacházejí</h3>
+                            <p class="text-xs text-gray-500 mb-6">Rozpad akvizice uživatelů.</p>
+                            <div class="relative h-56 w-full flex items-center justify-center">
+                                <canvas id="doughnutChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="card-minimal p-6">
+                            <h3 class="font-bold text-gray-900 mb-1">Typy interakcí detailně</h3>
+                            <p class="text-xs text-gray-500 mb-6">Rozdělení jednotlivých akcí.</p>
+                            <div class="relative h-56 w-full">
+                                <canvas id="barChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- TAB 3: POROVNÁNÍ POBOČEK -->
+                <div id="tab-porovnani" class="hidden space-y-6">
+                    
+                    <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                        <div>
+                            <h3 class="font-bold text-gray-900">Vyberte pobočky k porovnání</h3>
+                            <p class="text-xs text-gray-500 mt-1">Můžete vybrat až 10 poboček pro detailní srovnání.</p>
+                        </div>
+                        <div class="w-full md:w-96 relative">
+                            <div class="flex items-center bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 cursor-pointer" onclick="toggleCompareDropdown()">
+                                <span class="text-sm font-medium text-gray-700" id="compare-count-label">Vybráno 5 poboček</span>
+                                <i class="fa-solid fa-chevron-down text-gray-400 ml-auto text-xs"></i>
+                            </div>
+                            <div id="compare-dropdown" class="absolute left-0 top-full mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-xl z-50 hidden max-h-60 overflow-y-auto custom-scrollbar p-2">
+                                <!-- Generováno JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        
+                        <!-- Žebříček (Leaderboard) -->
+                        <div class="card-minimal p-0 overflow-hidden flex flex-col">
+                            <div class="p-5 border-b border-gray-100 bg-gray-50">
+                                <h3 class="font-bold text-gray-900 text-sm"><i class="fa-solid fa-trophy text-yellow-500 mr-2"></i> Žebříček (Dle interakcí)</h3>
+                            </div>
+                            <div class="flex-1 overflow-y-auto custom-scrollbar p-2">
+                                <ul class="space-y-1" id="leaderboard-list">
+                                    <li class="flex items-center justify-between p-3 rounded-lg bg-yellow-50/50 border border-yellow-100">
+                                        <div class="flex items-center gap-3">
+                                            <span class="font-bold text-lg w-5 text-center medal-1">1.</span>
+                                            <div><p class="text-sm font-bold text-gray-900">Brno</p><p class="text-[10px] text-gray-500">Hodnocení 4.9</p></div>
+                                        </div>
+                                        <span class="font-bold text-gray-900 text-sm">3,420</span>
+                                    </li>
+                                    <li class="flex items-center justify-between p-3 rounded-lg bg-gray-50 border border-gray-100">
+                                        <div class="flex items-center gap-3">
+                                            <span class="font-bold text-lg w-5 text-center medal-2">2.</span>
+                                            <div><p class="text-sm font-bold text-gray-900">Praha 13</p><p class="text-[10px] text-gray-500">Hodnocení 4.8</p></div>
+                                        </div>
+                                        <span class="font-bold text-gray-900 text-sm">2,810</span>
+                                    </li>
+                                    <li class="flex items-center justify-between p-3 rounded-lg bg-orange-50/30 border border-orange-50">
+                                        <div class="flex items-center gap-3">
+                                            <span class="font-bold text-lg w-5 text-center medal-3">3.</span>
+                                            <div><p class="text-sm font-bold text-gray-900">Ostrava</p><p class="text-[10px] text-gray-500">Hodnocení 4.5</p></div>
+                                        </div>
+                                        <span class="font-bold text-gray-900 text-sm">1,940</span>
+                                    </li>
+                                    <li class="flex items-center justify-between p-3">
+                                        <div class="flex items-center gap-3">
+                                            <span class="font-bold text-sm text-gray-400 w-5 text-center">4.</span>
+                                            <p class="text-sm font-medium text-gray-700">Liberec</p>
+                                        </div>
+                                        <span class="font-medium text-gray-700 text-sm">1,402</span>
+                                    </li>
+                                    <li class="flex items-center justify-between p-3">
+                                        <div class="flex items-center gap-3">
+                                            <span class="font-bold text-sm text-gray-400 w-5 text-center">5.</span>
+                                            <p class="text-sm font-medium text-gray-700">Plzeň</p>
+                                        </div>
+                                        <span class="font-medium text-gray-700 text-sm">950</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Graf porovnání -->
+                        <div class="card-minimal p-6 lg:col-span-2 flex flex-col">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="font-bold text-gray-900">Vizuální porovnání</h3>
+                                    <p class="text-xs text-gray-500 mt-1">Zobrazení vs Interakce u vybraných poboček.</p>
+                                </div>
+                            </div>
+                            <div class="flex-1 relative h-72 w-full">
+                                <canvas id="compareChart"></canvas>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- TAB 4: SKUPINY A MANAŽEŘI -->
+                <div id="tab-skupiny" class="hidden space-y-6">
+                    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm text-center">
+                        <div class="w-16 h-16 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center text-2xl mx-auto mb-4">
+                            <i class="fa-solid fa-users-gear"></i>
+                        </div>
+                        <h3 class="font-bold text-gray-900 text-lg mb-2">Správa skupin a týmů</h3>
+                        <p class="text-sm text-gray-500 max-w-lg mx-auto mb-6">Sdružujte pobočky do logických celků (např. regiony, manažeři) a analyzujte jejich souhrnný výkon proti sobě.</p>
+                        <button class="bg-brand-500 text-white px-6 py-2.5 rounded-lg text-sm font-bold hover:bg-brand-600 transition shadow-sm" onclick="showToast('Otevírám tvůrce skupin...')">Vytvořit novou skupinu</button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="card-minimal p-6">
+                            <div class="flex justify-between items-center mb-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded bg-gray-100 text-gray-600 flex items-center justify-center font-bold text-xs">A</div>
+                                    <h4 class="font-bold text-gray-900">Tým Sever (Manažer A)</h4>
+                                </div>
+                                <span class="text-xs font-bold text-brand-600 bg-green-50 px-2 py-1 rounded">5 poboček</span>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="flex justify-between text-sm"><span class="text-gray-500">Zobrazení</span><span class="font-bold">45.2k</span></div>
+                                <div class="flex justify-between text-sm"><span class="text-gray-500">Interakce</span><span class="font-bold">4,120</span></div>
+                                <div class="flex justify-between text-sm"><span class="text-gray-500">Průměrné hodnocení</span><span class="font-bold text-yellow-500">4.8 <i class="fa-solid fa-star text-xs"></i></span></div>
+                            </div>
+                        </div>
+                        <div class="card-minimal p-6">
+                            <div class="flex justify-between items-center mb-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded bg-gray-100 text-gray-600 flex items-center justify-center font-bold text-xs">B</div>
+                                    <h4 class="font-bold text-gray-900">Tým Jih (Manažer B)</h4>
+                                </div>
+                                <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">5 poboček</span>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="flex justify-between text-sm"><span class="text-gray-500">Zobrazení</span><span class="font-bold">97.3k</span></div>
+                                <div class="flex justify-between text-sm"><span class="text-gray-500">Interakce</span><span class="font-bold">8,022</span></div>
+                                <div class="flex justify-between text-sm"><span class="text-gray-500">Průměrné hodnocení</span><span class="font-bold text-yellow-500">4.7 <i class="fa-solid fa-star text-xs"></i></span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- TOAST NOTIFIKACE -->
+    <div id="toast" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-5 py-3 rounded-lg shadow-xl opacity-0 pointer-events-none transition-all duration-300 z-50 flex items-center gap-3">
+        <i class="fa-solid fa-circle-check text-brand-500"></i>
+        <span id="toast-message" class="text-sm font-medium">Akce byla úspěšná</span>
+    </div>
+
+    <script>
+        // Data pro 10 poboček
+        const branches = ['Praha 13', 'Liberec', 'Brno', 'Ostrava', 'Plzeň', 'Olomouc', 'České Budějovice', 'Hradec Králové', 'Pardubice', 'Zlín'];
+        
+        // Simulovaná databáze pro každou pobočku
+        const mockDatabase = {
+            'Praha 13': { views: 45200, interactions: 4120, reviews: 85, rating: 4.8, respRate: 92, nfc: 45, search: 30000, maps: 15200, mob: 80, desk: 20, web: 2100, dir: 1200, call: 820 },
+            'Liberec': { views: 18500, interactions: 1500, reviews: 32, rating: 4.6, respRate: 85, nfc: 15, search: 12000, maps: 6500, mob: 75, desk: 25, web: 800, dir: 400, call: 300 },
+            'Brno': { views: 35000, interactions: 3420, reviews: 68, rating: 4.9, respRate: 95, nfc: 50, search: 22000, maps: 13000, mob: 82, desk: 18, web: 1800, dir: 1000, call: 620 },
+            'Ostrava': { views: 22000, interactions: 1940, reviews: 45, rating: 4.5, respRate: 80, nfc: 20, search: 15000, maps: 7000, mob: 70, desk: 30, web: 900, dir: 600, call: 440 },
+            'Plzeň': { views: 19500, interactions: 1650, reviews: 38, rating: 4.7, respRate: 88, nfc: 22, search: 12500, maps: 7000, mob: 78, desk: 22, web: 850, dir: 500, call: 300 },
+            'Olomouc': { views: 15000, interactions: 1200, reviews: 25, rating: 4.8, respRate: 90, nfc: 12, search: 10000, maps: 5000, mob: 76, desk: 24, web: 600, dir: 400, call: 200 },
+            'České Budějovice': { views: 14000, interactions: 1100, reviews: 22, rating: 4.6, respRate: 82, nfc: 10, search: 9000, maps: 5000, mob: 74, desk: 26, web: 550, dir: 350, call: 200 },
+            'Hradec Králové': { views: 16000, interactions: 1300, reviews: 28, rating: 4.7, respRate: 86, nfc: 14, search: 10500, maps: 5500, mob: 77, desk: 23, web: 650, dir: 400, call: 250 },
+            'Pardubice': { views: 15500, interactions: 1250, reviews: 26, rating: 4.5, respRate: 84, nfc: 13, search: 10000, maps: 5500, mob: 75, desk: 25, web: 600, dir: 420, call: 230 },
+            'Zlín': { views: 13500, interactions: 1050, reviews: 20, rating: 4.8, respRate: 91, nfc: 11, search: 8500, maps: 5000, mob: 79, desk: 21, web: 500, dir: 380, call: 170 }
+        };
+
+        let compareSelection = ['Praha 13', 'Liberec', 'Brno', 'Ostrava', 'Plzeň']; // Default vybráno 5
+        let sourceSelection = [...branches]; // Default vybráno všech 10
+
+        // Inicializace rozbalovacího menu
+        function toggleMenu(menuId) {
+            const submenu = document.getElementById(menuId);
+            if(submenu) {
+                submenu.classList.toggle('max-h-0'); submenu.classList.toggle('opacity-0');
+                submenu.classList.toggle('max-h-40'); submenu.classList.toggle('opacity-100'); submenu.classList.toggle('py-1');
+            }
         }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobile-overlay');
+            sidebar.classList.toggle('-translate-x-full');
+            if (overlay.classList.contains('hidden')) {
+                overlay.classList.remove('hidden');
+                setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            } else {
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+            }
+        }
+
+        // TABS Logika
+        function switchTab(tabId) {
+            const tabs = ['tab-prehled', 'tab-grafy', 'tab-porovnani', 'tab-skupiny'];
+            tabs.forEach(t => {
+                document.getElementById(t).classList.add('hidden');
+                document.getElementById(t).classList.remove('block');
+                document.getElementById('btn-' + t).className = 'whitespace-nowrap py-3 px-5 border-b-2 font-medium text-sm transition-colors border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300';
+            });
+            document.getElementById(tabId).classList.remove('hidden');
+            document.getElementById(tabId).classList.add('block');
+            document.getElementById('btn-' + tabId).className = 'whitespace-nowrap py-3 px-5 border-b-2 font-bold text-sm transition-colors border-brand-500 text-brand-600';
+        }
+
+        // --- ZDROJ DAT (ZAŠKRTÁVÁTKA) ---
+        function toggleBranchDropdown() {
+            const dropdown = document.getElementById('branch-dropdown');
+            if (dropdown.classList.contains('hidden')) {
+                dropdown.classList.remove('hidden');
+                document.getElementById('branch-search-input').focus();
+            } else {
+                dropdown.classList.add('hidden');
+            }
+        }
+
+        function renderSourceCheckboxes() {
+            const container = document.getElementById('branch-list-items');
+            if(!container) return;
+            let html = '';
+            branches.forEach(b => {
+                const checked = sourceSelection.includes(b) ? 'checked' : '';
+                html += `
+                <label class="flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md cursor-pointer transition filter-opt">
+                    <input type="checkbox" value="${b}" onchange="updateSourceSelection(this)" class="w-4 h-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500 source-cb" ${checked}>
+                    <span>${b}</span>
+                </label>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function updateSourceSelection(checkbox) {
+            if (checkbox.checked) {
+                if (!sourceSelection.includes(checkbox.value)) sourceSelection.push(checkbox.value);
+            } else {
+                sourceSelection = sourceSelection.filter(b => b !== checkbox.value);
+            }
+            updateSourceInputLabel();
+        }
+
+        function toggleAllSourceBranches(masterCb) {
+            const checkboxes = document.querySelectorAll('.source-cb');
+            checkboxes.forEach(cb => {
+                if (cb.closest('.filter-opt').style.display !== 'none') {
+                    cb.checked = masterCb.checked;
+                    if (masterCb.checked && !sourceSelection.includes(cb.value)) {
+                        sourceSelection.push(cb.value);
+                    } else if (!masterCb.checked) {
+                        sourceSelection = sourceSelection.filter(b => b !== cb.value);
+                    }
+                }
+            });
+            updateSourceInputLabel();
+        }
+
+        function updateSourceInputLabel() {
+            const input = document.getElementById('branch-search');
+            const masterCb = document.getElementById('master-branch-checkbox');
+            const checkedCount = sourceSelection.length;
+            
+            if (checkedCount === branches.length) {
+                input.value = "Vybrány všechny pobočky (10)";
+                if(masterCb) masterCb.checked = true;
+            } else if (checkedCount === 0) {
+                input.value = "Vyberte pobočku";
+                if(masterCb) masterCb.checked = false;
+            } else if (checkedCount === 1) {
+                input.value = sourceSelection[0];
+                if(masterCb) masterCb.checked = false;
+            } else {
+                input.value = `Vybráno ${checkedCount}/${branches.length} poboček`;
+                if(masterCb) masterCb.checked = false;
+            }
+            
+            refreshDashboardData();
+        }
+        
+        function refreshDashboardData() {
+            if (sourceSelection.length === 0) {
+                // Nulový stav
+                document.getElementById('kpi-zobrazeni').innerText = '0';
+                document.getElementById('kpi-interakce').innerText = '0';
+                document.getElementById('kpi-recenze').innerText = '0';
+                document.getElementById('kpi-odpovedi').innerText = '0%';
+                document.getElementById('kpi-nfc').innerText = '0';
+                document.getElementById('insight-text').innerHTML = 'Vyberte alespoň jednu pobočku pro zobrazení dat.';
+                return;
+            }
+
+            let sumViews = 0, sumInts = 0, sumRev = 0, sumNfc = 0;
+            let sumRatingWeight = 0, sumResp = 0;
+            let sumSearch = 0, sumMaps = 0, sumWeb = 0, sumDir = 0, sumCall = 0;
+            let sumMob = 0, sumDesk = 0;
+
+            sourceSelection.forEach(b => {
+                let d = mockDatabase[b];
+                sumViews += d.views;
+                sumInts += d.interactions;
+                sumRev += d.reviews;
+                sumNfc += d.nfc;
+                sumRatingWeight += (d.rating * d.reviews);
+                sumResp += d.respRate;
+                sumSearch += d.search;
+                sumMaps += d.maps;
+                sumWeb += d.web;
+                sumDir += d.dir;
+                sumCall += d.call;
+                sumMob += (d.mob * d.views);
+                sumDesk += (d.desk * d.views);
+            });
+
+            // Výpočty průměrů a procent
+            let avgRating = (sumRev > 0) ? (sumRatingWeight / sumRev).toFixed(1) : "0.0";
+            let avgResp = Math.round(sumResp / sourceSelection.length);
+            let avgMob = Math.round(sumMob / sumViews);
+            let avgDesk = Math.round(sumDesk / sumViews);
+            let nfcPercent = sumRev > 0 ? Math.round((sumNfc / sumRev) * 100) : 0;
+
+            const formatK = (num) => (num > 999) ? (num/1000).toFixed(1) + 'k' : num;
+
+            // Zápis do KPI karet
+            document.getElementById('kpi-zobrazeni').innerText = formatK(sumViews);
+            document.getElementById('kpi-interakce').innerText = sumInts.toLocaleString();
+            document.getElementById('kpi-recenze').innerText = sumRev.toLocaleString();
+            document.getElementById('kpi-hodnoceni').innerHTML = `<i class="fa-solid fa-star"></i> ${avgRating}`;
+            document.getElementById('kpi-odpovedi').innerText = `${avgResp}%`;
+            document.getElementById('kpi-nfc').innerText = sumNfc.toLocaleString();
+            document.getElementById('kpi-nfc-percent').innerText = `${nfcPercent} % všech`;
+
+            // Zápis do grafů viditelnosti (Kde vás zákazníci vidí)
+            let pctSearch = Math.round((sumSearch / sumViews) * 100);
+            let pctMaps = 100 - pctSearch;
+            document.getElementById('bar-vyhledavani-val').innerText = `${pctSearch}% (${formatK(sumSearch)})`;
+            document.getElementById('bar-vyhledavani').style.width = `${pctSearch}%`;
+            document.getElementById('bar-mapy-val').innerText = `${pctMaps}% (${formatK(sumMaps)})`;
+            document.getElementById('bar-mapy').style.width = `${pctMaps}%`;
+
+            document.getElementById('val-mobile').innerText = `${avgMob} %`;
+            document.getElementById('val-desktop').innerText = `${avgDesk} %`;
+
+            // Zápis do Akcí (Interakce)
+            document.getElementById('act-web').innerText = sumWeb.toLocaleString();
+            document.getElementById('act-trasa').innerText = sumDir.toLocaleString();
+            document.getElementById('act-hovory').innerText = sumCall.toLocaleString();
+
+            document.getElementById('bar-act-web').style.width = `${(sumWeb/sumInts)*100}%`;
+            document.getElementById('bar-act-trasa').style.width = `${(sumDir/sumInts)*100}%`;
+            document.getElementById('bar-act-hovory').style.width = `${(sumCall/sumInts)*100}%`;
+
+            // Aktualizace textu "Chytrý souhrn"
+            if(sourceSelection.length === 1) {
+                document.getElementById('insight-text').innerHTML = `Pobočka <strong>${sourceSelection[0]}</strong> si vede skvěle. S průměrným hodnocením ${avgRating} hvězdiček patří k nadprůměru sítě.`;
+            } else if (sourceSelection.length === branches.length) {
+                document.getElementById('insight-text').innerHTML = `Celkově vaše pobočky vykazují růst zobrazení o 12 %. Největší objevitelnost má <strong>Praha 13</strong>, skvěle si vede i <strong>Brno</strong>.`;
+            } else {
+                 document.getElementById('insight-text').innerHTML = `Pro ${sourceSelection.length} vybraných poboček byla přepočtena data. Společně vygenerovaly <strong>${formatK(sumViews)} zobrazení</strong> a ${sumInts.toLocaleString()} interakcí.`;
+            }
+
+            // Aktualizace grafů (Tab 2)
+            if (trendChart && doughnutChart && barChart) {
+                updateChartDataObj(sumViews, sumInts, pctSearch, pctMaps);
+            }
+        }
+        
+        function updateChartDataObj(totalViews, totalInts, pctSearch, pctMaps) {
+            // Škálování dat grafů podle celkového počtu, aby to vypadalo dynamicky
+            const baseViews = [120, 190, 150, 210, 280, 230, 310];
+            const baseInts = [30, 45, 35, 50, 65, 58, 72];
+            
+            const scaleV = totalViews / 10000;
+            const scaleI = totalInts / 1000;
+            
+            trendChart.data.datasets[0].data = baseViews.map(v => Math.round(v * scaleV));
+            trendChart.data.datasets[1].data = baseInts.map(i => Math.round(i * scaleI));
+            trendChart.update();
+            
+            doughnutChart.data.datasets[0].data = [pctSearch, pctMaps, 10];
+            doughnutChart.update();
+            
+            barChart.data.datasets[0].data = baseInts.map(i => Math.round(i * scaleI * 1.5));
+            barChart.update();
+        }
+
+        function filterList() {
+            const input = document.getElementById('branch-search-input');
+            const filter = input.value.toLowerCase();
+            const nodes = document.querySelectorAll('.filter-opt');
+            nodes.forEach(node => {
+                const text = node.innerText.toLowerCase();
+                node.style.display = text.includes(filter) ? "" : "none";
+            });
+        }
+
+        // Zavření dropdownu klikem jinam
+        document.addEventListener('click', function(e) {
+            const wrapper = document.getElementById('filter-wrapper');
+            if (wrapper && !wrapper.contains(e.target)) {
+                document.getElementById('branch-dropdown').classList.add('hidden');
+            }
+            const compWrapper = document.getElementById('compare-dropdown').parentElement;
+            if (compWrapper && !compWrapper.contains(e.target)) {
+                document.getElementById('compare-dropdown').classList.add('hidden');
+            }
+        });
+
+        // Toasty
+        let toastTimeout;
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = message;
+            toast.classList.remove('opacity-0', 'translate-y-4');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'translate-y-4');
+            }, 3000);
+        }
+
+        // --- CHART.JS INICIALIZACE ---
+        let trendChart, doughnutChart, barChart, compareChart;
+
+        function initCharts() {
+            if(trendChart) return; // Už inicializováno
+            
+            Chart.defaults.font.family = 'Inter';
+            Chart.defaults.color = '#6b7280';
+            
+            // 1. Line Chart
+            const ctxTrend = document.getElementById('trendChart').getContext('2d');
+            const gradientBlue = ctxTrend.createLinearGradient(0, 0, 0, 300);
+            gradientBlue.addColorStop(0, 'rgba(59, 130, 246, 0.3)');
+            gradientBlue.addColorStop(1, 'rgba(59, 130, 246, 0)');
+            
+            trendChart = new Chart(ctxTrend, {
+                type: 'line',
+                data: {
+                    labels: ['1.6', '5.6', '10.6', '15.6', '20.6', '25.6', '30.6'],
+                    datasets: [
+                        { label: 'Zobrazení', data: [120, 190, 150, 210, 280, 230, 310], borderColor: '#3b82f6', backgroundColor: gradientBlue, fill: true, tension: 0.4 },
+                        { label: 'Interakce', data: [30, 45, 35, 50, 65, 58, 72], borderColor: '#16a34a', backgroundColor: 'transparent', tension: 0.4 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid: { color: '#f3f4f6' } } } }
+            });
+
+            // 2. Doughnut Chart (Akvizice)
+            const ctxDoughnut = document.getElementById('doughnutChart').getContext('2d');
+            doughnutChart = new Chart(ctxDoughnut, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Vyhledávání kategorie', 'Přímé hledání značky', 'Ostatní'],
+                    datasets: [{ data: [65, 25, 10], backgroundColor: ['#16a34a', '#3b82f6', '#e5e7eb'], borderWidth: 0 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } } } }
+            });
+
+            // 3. Bar Chart (Akce)
+            const ctxBar = document.getElementById('barChart').getContext('2d');
+            barChart = new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: ['Po', 'Út', 'St', 'Čt', 'Pá', 'So', 'Ne'],
+                    datasets: [{ label: 'Akce celkem', data: [120, 150, 140, 180, 200, 90, 80], backgroundColor: '#16a34a', borderRadius: 4 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid: { color: '#f3f4f6' } } } }
+            });
+        }
+
+        // --- POROVNÁVÁNÍ (TAB 3) ---
+        function toggleCompareDropdown() {
+            document.getElementById('compare-dropdown').classList.toggle('hidden');
+            renderCompareCheckboxes();
+        }
+
+        function renderCompareCheckboxes() {
+            const container = document.getElementById('compare-dropdown');
+            let html = '';
+            branches.forEach(b => {
+                const checked = compareSelection.includes(b) ? 'checked' : '';
+                html += `
+                <label class="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer transition">
+                    <input type="checkbox" value="${b}" onchange="updateCompareSelection(this)" class="w-4 h-4 rounded text-brand-600 focus:ring-brand-500" ${checked}>
+                    <span class="text-sm text-gray-700">${b}</span>
+                </label>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function updateCompareSelection(checkbox) {
+            if (checkbox.checked) {
+                if (compareSelection.length >= 10) {
+                    checkbox.checked = false;
+                    showToast('Lze porovnávat maximálně 10 poboček.');
+                    return;
+                }
+                compareSelection.push(checkbox.value);
+            } else {
+                compareSelection = compareSelection.filter(b => b !== checkbox.value);
+            }
+            document.getElementById('compare-count-label').innerText = `Vybráno ${compareSelection.length} poboček`;
+            updateCompareChart();
+        }
+
+        function initCompareCharts() {
+            if(compareChart) return;
+            const ctx = document.getElementById('compareChart').getContext('2d');
+            compareChart = new Chart(ctx, {
+                type: 'bar',
+                data: getCompareData(),
+                options: { 
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { position: 'top', align: 'end' } },
+                    scales: { x: { grid: { display: false } }, y: { grid: { color: '#f3f4f6' } } }
+                }
+            });
+        }
+
+        function getCompareData() {
+            // Simulace dat pro vybrané pobočky
+            const views = compareSelection.map(() => Math.floor(Math.random() * 5000 + 1000));
+            const ints = compareSelection.map(() => Math.floor(Math.random() * 500 + 100));
+            return {
+                labels: compareSelection.length > 0 ? compareSelection : ['Žádná data'],
+                datasets: [
+                    { label: 'Zobrazení', data: views, backgroundColor: '#3b82f6', borderRadius: 4 },
+                    { label: 'Interakce', data: ints, backgroundColor: '#16a34a', borderRadius: 4 }
+                ]
+            };
+        }
+
+        function updateCompareChart() {
+            if(compareChart) {
+                compareChart.data = getCompareData();
+                compareChart.update();
+            }
+        }
+
+        // Načtení dat při startu
+        window.onload = function() {
+            renderSourceCheckboxes();
+            refreshDashboardData(); // Spustit načtení dat
+        };
     </script>
 </body>
 </html>
