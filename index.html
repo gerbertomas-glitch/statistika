@@ -1236,20 +1236,33 @@
             };
             
             document.getElementById('chart-main-value').innerText = totalVal.toLocaleString();
-            document.getElementById('chart-main-label').innerText = metricLabels[activeChartMetric] + " ";
-            document.getElementById('chart-main-label').insertAdjacentHTML('beforeend', '<i class="fa-solid fa-circle-info text-gray-400 text-xs ml-1"></i>');
+            document.getElementById('chart-main-label').innerText = metricLabels[activeChartMetric];
 
-            // Dynamická úprava osy X podle zvoleného období
+            // Dynamická úprava osy X podle zvoleného období (Nyní dynamicky mění počet bodů v grafu)
             const periodSelect = document.getElementById('period-select');
-            let chartLabels = ['leden', 'únor', 'březen', 'duben', 'květen', 'červen'];
+            let chartLabels = [];
+            let distribution = [];
+            
             if (periodSelect) {
                 switch(periodSelect.value) {
-                    case '30d': chartLabels = ['Před 30 d.', 'Před 24 d.', 'Před 18 d.', 'Před 12 d.', 'Před 6 d.', 'Dnes']; break;
-                    case 'tm': chartLabels = ['1.', '6.', '12.', '18.', '24.', '30.']; break;
-                    case 'mm': chartLabels = ['1.', '6.', '12.', '18.', '24.', '30.']; break;
-                    case 'tr': chartLabels = ['leden', 'únor', 'březen', 'duben', 'květen', 'červen']; break;
-                    case 'mr': chartLabels = ['led', 'bře', 'kvě', 'čvc', 'zář', 'lis']; break;
-                    case 'all': chartLabels = ['21', '22', '23', '24', '25', '26']; break;
+                    case '30d': 
+                        chartLabels = ['Před 30 d.', 'Před 24 d.', 'Před 18 d.', 'Před 12 d.', 'Před 6 d.', 'Dnes']; 
+                        distribution = [0.15, 0.15, 0.18, 0.12, 0.25, 0.15];
+                        break;
+                    case 'tm': 
+                    case 'mm': 
+                        chartLabels = ['1.', '6.', '12.', '18.', '24.', '30.']; 
+                        distribution = [0.10, 0.20, 0.15, 0.25, 0.15, 0.15];
+                        break;
+                    case 'tr': 
+                    case 'mr': 
+                        chartLabels = ['Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen', 'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec']; 
+                        distribution = [0.05, 0.06, 0.08, 0.09, 0.10, 0.12, 0.11, 0.09, 0.08, 0.07, 0.09, 0.06];
+                        break;
+                    case 'all': 
+                        chartLabels = ['2021', '2022', '2023', '2024', '2025', '2026']; 
+                        distribution = [0.05, 0.10, 0.15, 0.20, 0.25, 0.25];
+                        break;
                     case 'custom': 
                         const dF = document.getElementById('date-from').value;
                         const dT = document.getElementById('date-to').value;
@@ -1260,12 +1273,12 @@
                         } else {
                             chartLabels = ['Začátek', '', '', '', '', 'Konec'];
                         }
+                        distribution = [0.15, 0.15, 0.18, 0.12, 0.25, 0.15];
                         break;
                 }
             }
-            trendChart.data.labels = chartLabels;
 
-            const distribution = [0.22, 0.15, 0.18, 0.25, 0.15, 0.05]; 
+            trendChart.data.labels = chartLabels;
             let trendDataArray = distribution.map(factor => Math.round(totalVal * factor));
             
             trendChart.data.datasets[0].data = trendDataArray;
