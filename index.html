@@ -513,7 +513,20 @@
                         <div class="p-6">
                             <div class="mb-8">
                                 <h2 class="text-4xl font-normal text-gray-900 tracking-tight" id="chart-main-value">413</h2>
-                                <p class="text-sm text-gray-800 mt-2 flex items-center gap-2" id="chart-main-label">Interakce s Firemním profilem <i class="fa-solid fa-circle-info text-gray-400 text-xs ml-1"></i></p>
+                                <div class="text-sm text-gray-800 mt-2 flex items-center gap-2 w-max relative group cursor-help">
+                                    <span id="chart-main-label">Interakce s Firemním profilem</span>
+                                    <i class="fa-solid fa-circle-info text-gray-500 text-sm"></i>
+                                    
+                                    <!-- Nový Google Style Tooltip -->
+                                    <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 w-64 bg-white border border-gray-200 rounded-xl p-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20 shadow-xl cursor-default text-left">
+                                        <p class="font-bold text-sm text-gray-900 mb-1">Co jsou interakce?</p>
+                                        <p class="text-xs text-gray-600 font-normal leading-relaxed mb-3">Interakce je, když vám z vašeho Firemního profilu na Googlu někdo zavolá, zašle zprávu, provede rezervaci, zeptá se na trasu atd.</p>
+                                        <a href="#" class="text-sm font-medium text-blue-600 hover:text-blue-800 transition">Další informace</a>
+                                        
+                                        <!-- Zobáček tooltipu -->
+                                        <div class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-white border-b border-r border-gray-200 rotate-45"></div>
+                                    </div>
+                                </div>
                                 <p class="text-xs mt-1" id="chart-trend-container">
                                     <!-- Trend se doplní přes JS -->
                                 </p>
@@ -529,10 +542,24 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Objevování (Kruhový graf) -->
                         <div class="card-minimal p-6 flex flex-col">
-                            <h3 class="text-sm font-medium text-gray-900 mb-6 flex items-center gap-1.5">Jak vás uživatelé objevili <i class="fa-solid fa-circle-info text-gray-400 text-xs"></i></h3>
+                            <div class="flex items-center gap-2 mb-6 w-max relative group cursor-help">
+                                <h3 class="text-sm font-medium text-gray-900">Jak vás uživatelé objevili</h3>
+                                <i class="fa-solid fa-circle-info text-gray-500 text-sm"></i>
+                                
+                                <!-- Nový Google Style Tooltip -->
+                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 w-64 bg-white border border-gray-200 rounded-xl p-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20 shadow-xl cursor-default text-left">
+                                    <p class="text-xs text-gray-600 font-normal leading-relaxed">Zobrazuje počet unikátních zobrazení vašeho profilu napříč službami Google Vyhledávání a Google Mapy v daném období.</p>
+                                    
+                                    <!-- Zobáček tooltipu -->
+                                    <div class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-white border-b border-r border-gray-200 rotate-45"></div>
+                                </div>
+                            </div>
                             
                             <div class="mb-8">
-                                <h2 class="text-3xl font-normal text-gray-900" id="discovery-total-value">2 067</h2>
+                                <div class="flex items-baseline gap-3 mb-1">
+                                    <h2 class="text-3xl font-normal text-gray-900" id="discovery-total-value">2 067</h2>
+                                    <div id="discovery-trend-container" class="text-sm font-bold"></div>
+                                </div>
                                 <p class="text-sm text-gray-600 mt-1 flex items-center gap-1.5"><i class="fa-regular fa-eye"></i> Počet lidí, kteří si prohlédli váš Firemní profil</p>
                             </div>
                             
@@ -553,10 +580,24 @@
                         
                         <!-- Vyhledávací dotazy -->
                         <div class="card-minimal p-6 flex flex-col">
-                            <h3 class="text-sm font-medium text-gray-900 mb-6 flex items-center gap-1.5">Vyhledávací dotazy <i class="fa-solid fa-circle-info text-gray-400 text-xs"></i></h3>
+                            <div class="flex items-center gap-2 mb-6 w-max relative group cursor-help">
+                                <h3 class="text-sm font-medium text-gray-900">Vyhledávací dotazy</h3>
+                                <i class="fa-solid fa-circle-info text-gray-500 text-sm"></i>
+                                
+                                <!-- Nový Google Style Tooltip -->
+                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 w-64 bg-white border border-gray-200 rounded-xl p-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20 shadow-xl cursor-default text-left">
+                                    <p class="text-xs text-gray-600 font-normal leading-relaxed">Klíčová slova a přesné fráze, po jejichž zadání uživatelé do vyhledávače narazili na váš profil.</p>
+                                    
+                                    <!-- Zobáček tooltipu -->
+                                    <div class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-white border-b border-r border-gray-200 rotate-45"></div>
+                                </div>
+                            </div>
                             
                             <div class="mb-8">
-                                <h2 class="text-3xl font-normal text-gray-900" id="queries-total-value">123</h2>
+                                <div class="flex items-baseline gap-3 mb-1">
+                                    <h2 class="text-3xl font-normal text-gray-900" id="queries-total-value">123</h2>
+                                    <div id="queries-trend-container" class="text-sm font-bold"></div>
+                                </div>
                                 <p class="text-sm text-gray-600 mt-1 flex items-center gap-1.5"><i class="fa-solid fa-magnifying-glass text-xs"></i> Vyhledávání, která spustila zobrazení vašeho Firemního profilu</p>
                             </div>
                             
@@ -571,7 +612,7 @@
                                 </div>
                                 
                                 <div class="mt-6 pt-4 border-t border-gray-100 text-center">
-                                    <button onclick="showToast('Otevírám kompletní seznam slov...')" class="text-sm font-medium text-blue-600 hover:text-blue-800 transition border border-gray-200 rounded px-6 py-2 bg-white shadow-sm">Další informace</button>
+                                    <button id="btn-more-queries" onclick="toggleQueries()" class="text-sm font-medium text-blue-600 hover:text-blue-800 transition border border-gray-200 rounded px-6 py-2 bg-white shadow-sm">Další informace</button>
                                 </div>
                             </div>
                         </div>
@@ -740,6 +781,7 @@
         let activeChartMetric = 'overview';
         let trendChart, doughnutChart, compareChart;
         let toastTimeout;
+        let isQueriesExpanded = false;
 
         // TABS Logika a Menu
         function toggleMenu(menuId) {
@@ -1053,7 +1095,8 @@
                 s_mob: sumSearch * (avgMob/100),
                 s_desk: sumSearch * (avgDesk/100),
                 m_mob: sumMaps * (avgMob/100),
-                m_desk: sumMaps * (avgDesk/100)
+                m_desk: sumMaps * (avgDesk/100),
+                searches: sumSearch + sumMaps
             };
 
             // Aktualizace grafů (Tab 2 a 3)
@@ -1221,6 +1264,15 @@
             updateDetailedCharts();
         }
 
+        function toggleQueries() {
+            isQueriesExpanded = !isQueriesExpanded;
+            const btn = document.getElementById('btn-more-queries');
+            if (btn) {
+                btn.innerText = isQueriesExpanded ? 'Méně informací' : 'Další informace';
+            }
+            updateDetailedCharts();
+        }
+
         function updateDetailedCharts() {
             if(!trendChart) return;
 
@@ -1238,7 +1290,7 @@
             document.getElementById('chart-main-value').innerText = totalVal.toLocaleString();
             document.getElementById('chart-main-label').innerText = metricLabels[activeChartMetric];
 
-            // Dynamická úprava osy X podle zvoleného období (Nyní dynamicky mění počet bodů v grafu)
+            // Dynamická úprava osy X podle zvoleného období
             const periodSelect = document.getElementById('period-select');
             let chartLabels = [];
             let distribution = [];
@@ -1251,8 +1303,11 @@
                         break;
                     case 'tm': 
                     case 'mm': 
-                        chartLabels = ['1.', '6.', '12.', '18.', '24.', '30.']; 
-                        distribution = [0.10, 0.20, 0.15, 0.25, 0.15, 0.15];
+                        // Generování dnů v měsíci pro detailní graf
+                        chartLabels = Array.from({length: 30}, (_, i) => (i + 1) + '.');
+                        let baseDist = [0.03,0.04,0.02,0.03,0.05,0.06,0.02, 0.03,0.04,0.03,0.03,0.05,0.04,0.02, 0.02,0.03,0.04,0.05,0.04,0.02,0.02, 0.03,0.04,0.04,0.03,0.05,0.04,0.03,0.02,0.01];
+                        let sumBase = baseDist.reduce((a,b) => a+b, 0);
+                        distribution = baseDist.map(v => v/sumBase);
                         break;
                     case 'tr': 
                     case 'mr': 
@@ -1284,21 +1339,27 @@
             trendChart.data.datasets[0].data = trendDataArray;
             trendChart.update();
 
+            // Výpočet trendů
             let mockPrevPeriod = Math.round(totalVal * (0.8 + (Math.random() * 0.4)));
             let diff = totalVal - mockPrevPeriod;
             let pct = mockPrevPeriod > 0 ? Math.round((diff / mockPrevPeriod) * 100) : 0;
             
-            let trendHtml = '';
-            if(pct >= 0) {
-                trendHtml = `<span class="text-green-600 font-bold"><i class="fa-solid fa-arrow-trend-up"></i> +${pct}%</span> vs předchozí období`;
-            } else {
-                trendHtml = `<span class="text-red-600 font-bold"><i class="fa-solid fa-arrow-trend-down"></i> ${pct}%</span> vs předchozí období`;
-            }
+            let trendHtml = pct >= 0 
+                ? `<span class="text-green-600 font-bold"><i class="fa-solid fa-arrow-trend-up"></i> +${pct}%</span> vs předchozí období`
+                : `<span class="text-red-600 font-bold"><i class="fa-solid fa-arrow-trend-down"></i> ${pct}%</span> vs předchozí období`;
             document.getElementById('chart-trend-container').innerHTML = trendHtml;
 
-            // 2. UPDATE KRUHOVÉHO GRAFU
+            // 2. UPDATE KRUHOVÉHO GRAFU & OBJEVOVÁNÍ
             let views = chartDataStore.views;
             document.getElementById('discovery-total-value').innerText = views.toLocaleString();
+            
+            let mockPrevDisc = Math.round(views * (0.8 + (Math.random() * 0.4)));
+            let diffDisc = views - mockPrevDisc;
+            let pctDisc = mockPrevDisc > 0 ? Math.round((diffDisc / mockPrevDisc) * 100) : 0;
+            let discTrendHtml = pctDisc >= 0 
+                ? `<span class="text-green-600"><i class="fa-solid fa-arrow-trend-up"></i> +${pctDisc}%</span>` 
+                : `<span class="text-red-600"><i class="fa-solid fa-arrow-trend-down"></i> ${pctDisc}%</span>`;
+            document.getElementById('discovery-trend-container').innerHTML = discTrendHtml;
             
             let v1 = Math.round(chartDataStore.s_mob || 0);
             let v2 = Math.round(chartDataStore.s_desk || 0);
@@ -1343,14 +1404,19 @@
                 "seo optimalizace ceník", 
                 "správa sociálních sítí",
                 "grafické studio",
-                "brand identita"
+                "brand identita",
+                "tvorba loga",
+                "ppc reklama",
+                "seo konzultant",
+                "online marketing",
+                "webdesign"
             ];
 
             let qHtml = '';
             let remaining = searches;
             queryKeywords.forEach((kw, idx) => {
-                if(idx > 4) return;
-                let qVol = Math.round(remaining * (0.4 - (idx * 0.05)));
+                if(!isQueriesExpanded && idx > 4) return;
+                let qVol = Math.round(remaining * (0.4 - (idx * 0.03)));
                 if (qVol < 15 && idx > 2) qVol = "< 15";
                 
                 qHtml += `
@@ -1362,7 +1428,7 @@
                         <span class="text-sm font-medium text-gray-900">${qVol}</span>
                     </li>
                 `;
-                if(typeof qVol === 'number') remaining -= qVol;
+                if(typeof qVol === 'number' && qVol > 0) remaining -= qVol;
             });
 
             document.getElementById('search-queries-list').innerHTML = qHtml;
