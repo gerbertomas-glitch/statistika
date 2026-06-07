@@ -198,13 +198,13 @@
                             <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Období</label>
                             <div class="relative flex items-center bg-white border border-gray-300 rounded-lg px-3 py-2 cursor-pointer">
                                 <i class="fa-regular fa-calendar text-gray-400 mr-2.5"></i>
-                                <select class="text-sm font-medium text-gray-900 bg-transparent border-none focus:outline-none w-full appearance-none cursor-pointer">
-                                    <option>Posledních 30 dní</option>
-                                    <option>Tento měsíc</option>
-                                    <option>Minulý měsíc</option>
-                                    <option>Tento rok</option>
-                                    <option>Minulý rok</option>
-                                    <option>Celé období (Vše)</option>
+                                <select id="period-select" onchange="refreshDashboardData()" class="text-sm font-medium text-gray-900 bg-transparent border-none focus:outline-none w-full appearance-none cursor-pointer">
+                                    <option value="30d">Posledních 30 dní</option>
+                                    <option value="tm">Tento měsíc</option>
+                                    <option value="mm">Minulý měsíc</option>
+                                    <option value="tr">Tento rok</option>
+                                    <option value="mr">Minulý rok</option>
+                                    <option value="all">Celé období (Vše)</option>
                                 </select>
                                 <i class="fa-solid fa-chevron-down text-gray-400 ml-2 text-xs pointer-events-none absolute right-3"></i>
                             </div>
@@ -373,30 +373,6 @@
                         </div>
                     </div>
                     
-                    <!-- CSS HEATMAPA HOVORŮ -->
-                    <div class="card-minimal p-6">
-                        <div class="flex justify-between items-end mb-4">
-                            <div>
-                                <h3 class="text-sm font-bold text-gray-900">Kdy zákazníci nejčastěji volají</h3>
-                                <p class="text-xs text-gray-500 mt-1">Heatmapa hovorů za zvolené období.</p>
-                            </div>
-                        </div>
-                        <div class="overflow-x-auto hide-scrollbar">
-                            <div class="min-w-[600px]">
-                                <div class="grid grid-cols-8 gap-1 mb-2 text-center text-[10px] font-bold text-gray-400">
-                                    <div>ČAS</div><div>Po</div><div>Út</div><div>St</div><div>Čt</div><div>Pá</div><div>So</div><div>Ne</div>
-                                </div>
-                                <div class="grid grid-cols-8 gap-1 text-center text-xs">
-                                    <div class="flex items-center justify-end pr-3 text-gray-500 font-medium text-[10px]">Dopoledne</div>
-                                    <div class="bg-brand-100 rounded py-3"></div><div class="bg-brand-200 rounded py-3"></div><div class="bg-brand-500 rounded py-3"></div><div class="bg-brand-300 rounded py-3"></div><div class="bg-brand-400 rounded py-3"></div><div class="bg-gray-50 rounded py-3"></div><div class="bg-gray-50 rounded py-3"></div>
-                                    
-                                    <div class="flex items-center justify-end pr-3 text-gray-500 font-medium text-[10px] mt-1">Odpoledne</div>
-                                    <div class="bg-brand-500 rounded py-3 mt-1"></div><div class="bg-brand-400 rounded py-3 mt-1"></div><div class="bg-brand-600 rounded py-3 mt-1"></div><div class="bg-brand-500 rounded py-3 mt-1"></div><div class="bg-brand-300 rounded py-3 mt-1"></div><div class="bg-gray-100 rounded py-3 mt-1"></div><div class="bg-gray-50 rounded py-3 mt-1"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
 
                 <!-- TAB 2: DETAILNÍ GRAFY A TRENDY -->
@@ -713,6 +689,20 @@
                 return;
             }
 
+            // Nastavení násobitele podle vybraného období
+            const periodSelect = document.getElementById('period-select');
+            let multiplier = 1.0;
+            if (periodSelect) {
+                switch(periodSelect.value) {
+                    case '30d': multiplier = 1.0; break;
+                    case 'tm': multiplier = 0.5; break; // Půlka aktuálního měsíce
+                    case 'mm': multiplier = 1.1; break; // Minulý měsíc (celý)
+                    case 'tr': multiplier = 6.0; break; // Tento rok
+                    case 'mr': multiplier = 12.5; break; // Minulý rok
+                    case 'all': multiplier = 35.0; break; // Celé období
+                }
+            }
+
             let sumViews = 0, sumInts = 0, sumRev = 0, sumNfc = 0;
             let sumRatingWeight = 0, sumResp = 0;
             let sumSearch = 0, sumMaps = 0, sumWeb = 0, sumDir = 0, sumCall = 0;
@@ -720,20 +710,31 @@
 
             sourceSelection.forEach(b => {
                 let d = mockDatabase[b];
-                sumViews += d.views;
-                sumInts += d.interactions;
-                sumRev += d.reviews;
-                sumNfc += d.nfc;
-                sumRatingWeight += (d.rating * d.reviews);
+                sumViews += d.views * multiplier;
+                sumInts += d.interactions * multiplier;
+                sumRev += d.reviews * multiplier;
+                sumNfc += d.nfc * multiplier;
+                sumRatingWeight += (d.rating * (d.reviews * multiplier));
                 sumResp += d.respRate;
-                sumSearch += d.search;
-                sumMaps += d.maps;
-                sumWeb += d.web;
-                sumDir += d.dir;
-                sumCall += d.call;
-                sumMob += (d.mob * d.views);
-                sumDesk += (d.desk * d.views);
+                sumSearch += d.search * multiplier;
+                sumMaps += d.maps * multiplier;
+                sumWeb += d.web * multiplier;
+                sumDir += d.dir * multiplier;
+                sumCall += d.call * multiplier;
+                sumMob += (d.mob * (d.views * multiplier));
+                sumDesk += (d.desk * (d.views * multiplier));
             });
+
+            // Zaokrouhlení po pronásobení
+            sumViews = Math.round(sumViews);
+            sumInts = Math.round(sumInts);
+            sumRev = Math.round(sumRev);
+            sumNfc = Math.round(sumNfc);
+            sumSearch = Math.round(sumSearch);
+            sumMaps = Math.round(sumMaps);
+            sumWeb = Math.round(sumWeb);
+            sumDir = Math.round(sumDir);
+            sumCall = Math.round(sumCall);
 
             // Výpočty průměrů a procent
             let avgRating = (sumRev > 0) ? (sumRatingWeight / sumRev).toFixed(1) : "0.0";
