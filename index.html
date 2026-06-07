@@ -758,6 +758,7 @@
                             <div id="compare-dropdown" class="absolute left-0 top-full mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-xl z-50 hidden flex-col overflow-hidden">
                                 <div class="p-3 border-b border-gray-100 bg-gray-50 shrink-0">
                                     <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Vyberte pobočky k porovnání (max 10)</p>
+                                    <input type="text" id="compare-branch-search" onkeyup="filterCompareBranches()" onclick="event.stopPropagation();" class="w-full bg-white border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-brand-500 mb-2" placeholder="Hledat pobočku...">
                                     <div class="max-h-60 overflow-y-auto custom-scrollbar pr-2 flex flex-col gap-1" id="compare-dropdown-list">
                                         <!-- Generováno JS -->
                                     </div>
@@ -1799,7 +1800,11 @@
         let compM1 = 'views', compM2 = 'interactions', compM3 = 'reviews', compM4 = 'nfc_scans';
 
         function toggleCompareDropdown() {
-            document.getElementById('compare-dropdown').classList.toggle('hidden');
+            const dropdown = document.getElementById('compare-dropdown');
+            dropdown.classList.toggle('hidden');
+            if (!dropdown.classList.contains('hidden')) {
+                document.getElementById('compare-branch-search').focus();
+            }
             renderCompareCheckboxes();
         }
 
@@ -1810,12 +1815,22 @@
             branches.forEach(b => {
                 const checked = compareSelection.includes(b) ? 'checked' : '';
                 html += `
-                <label class="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer transition">
+                <label class="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer transition compare-filter-opt">
                     <input type="checkbox" value="${b}" onchange="updateCompareSelection(this)" class="w-4 h-4 rounded text-brand-600 focus:ring-brand-500" ${checked}>
                     <span class="text-sm text-gray-700">${b}</span>
                 </label>`;
             });
             container.innerHTML = html;
+        }
+
+        function filterCompareBranches() {
+            const input = document.getElementById('compare-branch-search');
+            const filter = input.value.toLowerCase();
+            const nodes = document.querySelectorAll('.compare-filter-opt');
+            nodes.forEach(node => {
+                const text = node.innerText.toLowerCase();
+                node.style.display = text.includes(filter) ? "" : "none";
+            });
         }
 
         function updateCompareSelection(checkbox) {
