@@ -4,13 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Statistiky GBP | View</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome pro ikony -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts: Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Chart.js pro detailní grafy -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <script>
@@ -60,27 +56,22 @@
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Progress bars animation */
         @keyframes fillBar { from { width: 0; } }
         .animate-bar { animation: fillBar 1s ease-out forwards; }
         
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
 
-        /* Leaderboard styling */
-        .medal-1 { color: #16a34a; } /* Brand green pro 1. místo */
-        .medal-2 { color: #6b7280; } /* Šedá */
-        .medal-3 { color: #9ca3af; } /* Světle šedá */
+        .medal-1 { color: #fbbf24; text-shadow: 0 2px 4px rgba(251, 191, 36, 0.3); }
+        .medal-2 { color: #9ca3af; text-shadow: 0 2px 4px rgba(156, 163, 175, 0.3); }
+        .medal-3 { color: #b45309; text-shadow: 0 2px 4px rgba(180, 83, 9, 0.3); }
     </style>
 </head>
 <body class="font-sans text-gray-900 h-screen flex overflow-hidden antialiased">
 
-    <!-- Mobilní overlay -->
     <div id="mobile-overlay" onclick="toggleMobileMenu()" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-30 hidden md:hidden transition-opacity opacity-0 duration-300"></div>
 
-    <!-- LEVÉ MENU -->
     <aside id="sidebar" class="w-64 bg-surface border-r border-border flex flex-col flex-shrink-0 z-40 fixed inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300">
-        <!-- Logo -->
         <div class="h-16 flex items-center justify-between px-6 border-b border-border shrink-0">
             <img src="https://viewcz.com/images/svg/head-logo.svg" alt="View Logo" class="h-8 object-contain">
             <button onclick="toggleMobileMenu()" class="md:hidden text-gray-400 hover:text-gray-600">
@@ -88,7 +79,6 @@
             </button>
         </div>
 
-        <!-- Navigace -->
         <nav class="flex-1 overflow-y-auto py-6 px-4 flex flex-col gap-1 custom-scrollbar">
             <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Menu</p>
             
@@ -140,10 +130,8 @@
         </nav>
     </aside>
 
-    <!-- HLAVNÍ OBSAH -->
     <div class="flex-1 flex flex-col h-screen overflow-hidden min-w-0">
         
-        <!-- HORNÍ LIŠTA -->
         <header class="h-16 bg-surface border-b border-border flex items-center justify-between px-4 sm:px-8 z-20 shrink-0">
             <div class="flex items-center gap-3">
                 <button onclick="toggleMobileMenu()" class="md:hidden text-gray-500 hover:text-gray-700 transition">
@@ -166,10 +154,8 @@
             </div>
         </header>
 
-        <!-- HLAVNÍ PLOCHA DASHBOARDU -->
         <main class="flex-1 overflow-y-auto relative bg-gray-100 custom-scrollbar flex flex-col">
             
-            <!-- TOP FIXNÍ FILTRY -->
             <div class="bg-white border-b border-gray-200 px-4 sm:px-8 py-4 shrink-0 z-10 sticky top-0 shadow-sm">
                 <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     
@@ -181,7 +167,6 @@
                             <i class="fa-solid fa-chevron-down text-gray-400 ml-2 text-xs"></i>
                         </div>
 
-                        <!-- Našeptávač / Výběr s Checkboxy -->
                         <div id="branch-dropdown" class="absolute left-0 top-full mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-xl z-50 hidden flex-col overflow-hidden">
                             <div class="p-2 border-b border-gray-100 bg-gray-50 shrink-0">
                                 <input type="text" id="branch-search-input" onkeyup="filterList()" onclick="event.stopPropagation();" class="w-full bg-white border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-brand-500 mb-2" placeholder="Hledat pobočku...">
@@ -197,7 +182,6 @@
                     </div>
 
                     <div class="flex items-end gap-3 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
-                        <!-- NOVÁ POLE PRO VLASTNÍ OBDOBÍ (Skrytá ve výchozím stavu) -->
                         <div id="custom-date-fields" class="hidden items-end gap-2 animate-fade-in shrink-0">
                             <div class="relative min-w-[120px]">
                                 <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Od</label>
@@ -249,31 +233,27 @@
                 </div>
             </div>
 
-            <!-- OBSAH TABŮ -->
             <div class="p-4 sm:p-8 max-w-7xl mx-auto w-full">
                 
-                <!-- TAB 1: ZÁKLADNÍ PŘEHLED -->
                 <div id="tab-prehled" class="space-y-6 block">
                     
-                    <!-- SMART INSIGHTS -->
-                    <div class="bg-white border border-green-200 rounded-xl p-5 flex gap-4 items-center shadow-sm relative overflow-hidden" id="insights-box">
+                    <div class="bg-white border border-gray-200 rounded-xl p-5 flex gap-4 items-center shadow-sm relative overflow-hidden" id="insights-box">
                         <div class="absolute left-0 top-0 w-1.5 h-full bg-brand-500"></div>
                         <div class="w-10 h-10 rounded-full bg-green-50 border border-green-100 flex items-center justify-center text-brand-600 shrink-0 shadow-sm">
                             <i class="fa-solid fa-wand-magic-sparkles"></i>
                         </div>
                         <div class="relative z-10 flex-1 pl-1">
                             <h4 class="font-bold text-gray-900 text-sm">Inteligentní přehled</h4>
-                            <p class="text-sm text-gray-600 mt-1 leading-relaxed" id="insight-text">Celkově vaše pobočky vykazují stabilní růst zobrazení (+12 %). Největší skokan je pobočka <strong>Brno</strong>. Naopak pobočky <strong>Plzeň</strong> a <strong>Ostrava</strong> zaznamenaly mírný propad v hledání na mapách.</p>
+                            <p class="text-sm text-gray-600 mt-1 leading-relaxed" id="insight-text"></p>
                         </div>
                     </div>
 
-                    <!-- EXECUTIVE KPI CARDS -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                         <div class="card-minimal p-5 flex flex-col justify-between">
                             <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Zobrazení</p>
                             <div class="flex items-end justify-between">
                                 <div class="flex items-center gap-2">
-                                    <p class="text-2xl font-bold text-gray-900" id="kpi-zobrazeni">142.5k</p>
+                                    <p class="text-2xl font-bold text-gray-900" id="kpi-zobrazeni">0</p>
                                     <span class="text-[10px] font-bold text-brand-600 bg-green-50 px-1.5 py-0.5 rounded flex items-center"><i class="fa-solid fa-arrow-trend-up mr-1"></i> 12%</span>
                                 </div>
                             </div>
@@ -282,7 +262,7 @@
                             <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Interakce</p>
                             <div class="flex items-end justify-between">
                                 <div class="flex items-center gap-2">
-                                    <p class="text-2xl font-bold text-gray-900" id="kpi-interakce">12,142</p>
+                                    <p class="text-2xl font-bold text-gray-900" id="kpi-interakce">0</p>
                                     <span class="text-[10px] font-bold text-brand-600 bg-green-50 px-1.5 py-0.5 rounded flex items-center"><i class="fa-solid fa-arrow-trend-up mr-1"></i> 5%</span>
                                 </div>
                             </div>
@@ -291,8 +271,8 @@
                             <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Nové Recenze</p>
                             <div class="flex items-end justify-between">
                                 <div class="flex items-center gap-2">
-                                    <p class="text-2xl font-bold text-gray-900" id="kpi-recenze">324</p>
-                                    <div id="kpi-hodnoceni" class="text-gray-600 text-xs font-bold bg-gray-50 px-1.5 py-0.5 rounded border border-gray-200"><i class="fa-solid fa-star text-yellow-400"></i> 4.8</div>
+                                    <p class="text-2xl font-bold text-gray-900" id="kpi-recenze">0</p>
+                                    <div id="kpi-hodnoceni" class="text-gray-600 text-xs font-bold bg-gray-50 px-1.5 py-0.5 rounded border border-gray-200"></div>
                                 </div>
                             </div>
                         </div>
@@ -300,7 +280,7 @@
                             <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Street View</p>
                             <div class="flex items-end justify-between">
                                 <div class="flex items-center gap-2">
-                                    <p class="text-2xl font-bold text-gray-900" id="kpi-sv">24.5k</p>
+                                    <p class="text-2xl font-bold text-gray-900" id="kpi-sv">0</p>
                                     <span class="text-[10px] font-bold text-brand-600 bg-green-50 px-1.5 py-0.5 rounded flex items-center"><i class="fa-solid fa-arrow-trend-up mr-1"></i> 8%</span>
                                 </div>
                             </div>
@@ -309,48 +289,42 @@
                             <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-wifi mr-1 text-gray-700"></i> NFC Recenze</p>
                             <div class="flex items-end justify-between">
                                 <div class="flex items-center gap-2">
-                                    <p class="text-2xl font-bold text-gray-900" id="kpi-nfc">185</p>
-                                    <span id="kpi-nfc-percent" class="text-[10px] font-bold text-gray-500">57 % všech</span>
+                                    <p class="text-2xl font-bold text-gray-900" id="kpi-nfc">0</p>
+                                    <span id="kpi-nfc-percent" class="text-[10px] font-bold text-gray-500"></span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- ROZPAD DAT (CSS BARY) & TOP 3 ŽEBŘÍČKY -->
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         
                         <!-- KARTA 1: ZOBRAZENÍ -->
                         <div class="card-minimal p-6 flex flex-col">
                             <h3 class="text-sm font-bold text-gray-900 mb-6">Kde vás zákazníci vidí (Zobrazení)</h3>
-                            
                             <div class="mb-6">
                                 <div class="flex justify-between text-xs font-medium text-gray-600 mb-2">
                                     <span>Vyhledávání Google</span>
-                                    <span class="font-bold text-gray-900" id="bar-vyhledavani-val">65% (92.6k)</span>
+                                    <span class="font-bold text-gray-900" id="bar-vyhledavani-val"></span>
                                 </div>
-                                <div class="h-2 bg-gray-100 rounded-full overflow-hidden"><div id="bar-vyhledavani" class="bg-gray-800 h-full animate-bar" style="width: 65%"></div></div>
+                                <div class="h-2 bg-gray-100 rounded-full overflow-hidden"><div id="bar-vyhledavani" class="bg-gray-800 h-full animate-bar"></div></div>
                             </div>
-                            
                             <div>
                                 <div class="flex justify-between text-xs font-medium text-gray-600 mb-2">
                                     <span>Mapy Google</span>
-                                    <span class="font-bold text-gray-900" id="bar-mapy-val">35% (49.9k)</span>
+                                    <span class="font-bold text-gray-900" id="bar-mapy-val"></span>
                                 </div>
-                                <div class="h-2 bg-gray-100 rounded-full overflow-hidden"><div id="bar-mapy" class="bg-gray-400 h-full animate-bar" style="width: 35%"></div></div>
+                                <div class="h-2 bg-gray-100 rounded-full overflow-hidden"><div id="bar-mapy" class="bg-gray-400 h-full animate-bar"></div></div>
                             </div>
-                            
                             <div class="mt-6 pt-4 border-t border-gray-100 flex gap-6">
                                 <div class="flex-1">
                                     <p class="text-[10px] uppercase font-bold text-gray-400 mb-1"><i class="fa-solid fa-mobile-screen mr-1"></i> Mobil</p>
-                                    <p class="text-lg font-bold text-gray-900" id="val-mobile">78 %</p>
+                                    <p class="text-lg font-bold text-gray-900" id="val-mobile"></p>
                                 </div>
                                 <div class="flex-1">
                                     <p class="text-[10px] uppercase font-bold text-gray-400 mb-1"><i class="fa-solid fa-desktop mr-1"></i> Počítač</p>
-                                    <p class="text-lg font-bold text-gray-900" id="val-desktop">22 %</p>
+                                    <p class="text-lg font-bold text-gray-900" id="val-desktop"></p>
                                 </div>
                             </div>
-
-                            <!-- TOP 3 Zobrazení -->
                             <div id="top3-views-container" class="mt-auto pt-6 hidden">
                                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3"><i class="fa-solid fa-ranking-star mr-1 text-gray-300"></i> TOP 3 - Zobrazení</p>
                                 <div id="top3-views-list" class="space-y-2"></div>
@@ -360,108 +334,124 @@
                         <!-- KARTA 2: INTERAKCE -->
                         <div class="card-minimal p-6 flex flex-col">
                             <h3 class="text-sm font-bold text-gray-900 mb-6">Akce zákazníků (Interakce)</h3>
-                            
                             <div class="space-y-4">
                                 <div>
                                     <div class="flex items-center gap-3 mb-1">
                                         <div class="w-6 h-6 rounded bg-gray-100 text-gray-700 flex items-center justify-center text-xs shrink-0"><i class="fa-solid fa-globe"></i></div>
                                         <div class="flex-1 flex justify-between text-xs font-medium text-gray-600">
                                             <span>Návštěvy webu</span>
-                                            <span class="font-bold text-gray-900" id="act-web">6,420</span>
+                                            <span class="font-bold text-gray-900" id="act-web"></span>
                                         </div>
                                     </div>
-                                    <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden ml-9"><div id="bar-act-web" class="bg-gray-800 h-full transition-all duration-500" style="width: 55%"></div></div>
+                                    <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden ml-9"><div id="bar-act-web" class="bg-gray-800 h-full transition-all duration-500"></div></div>
                                 </div>
-                                
                                 <div>
                                     <div class="flex items-center gap-3 mb-1">
                                         <div class="w-6 h-6 rounded bg-gray-100 text-gray-700 flex items-center justify-center text-xs shrink-0"><i class="fa-solid fa-diamond-turn-right"></i></div>
                                         <div class="flex-1 flex justify-between text-xs font-medium text-gray-600">
                                             <span>Žádosti o trasu</span>
-                                            <span class="font-bold text-gray-900" id="act-trasa">3,812</span>
+                                            <span class="font-bold text-gray-900" id="act-trasa"></span>
                                         </div>
                                     </div>
-                                    <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden ml-9"><div id="bar-act-trasa" class="bg-gray-500 h-full transition-all duration-500" style="width: 32%"></div></div>
+                                    <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden ml-9"><div id="bar-act-trasa" class="bg-gray-500 h-full transition-all duration-500"></div></div>
                                 </div>
-                                
                                 <div>
                                     <div class="flex items-center gap-3 mb-1">
                                         <div class="w-6 h-6 rounded bg-gray-100 text-gray-700 flex items-center justify-center text-xs shrink-0"><i class="fa-solid fa-phone"></i></div>
                                         <div class="flex-1 flex justify-between text-xs font-medium text-gray-600">
                                             <span>Telefonní hovory</span>
-                                            <span class="font-bold text-gray-900" id="act-hovory">1,910</span>
+                                            <span class="font-bold text-gray-900" id="act-hovory"></span>
                                         </div>
                                     </div>
-                                    <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden ml-9"><div id="bar-act-hovory" class="bg-gray-300 h-full transition-all duration-500" style="width: 15%"></div></div>
+                                    <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden ml-9"><div id="bar-act-hovory" class="bg-gray-300 h-full transition-all duration-500"></div></div>
                                 </div>
                             </div>
-
-                            <!-- TOP 3 Interakce -->
                             <div id="top3-ints-container" class="mt-auto pt-6 hidden">
                                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3"><i class="fa-solid fa-ranking-star mr-1 text-gray-300"></i> TOP 3 - Interakce</p>
                                 <div id="top3-ints-list" class="space-y-2"></div>
                             </div>
                         </div>
 
-                        <!-- KARTA 3: ZDROJE RECENZÍ A NFC -->
+                        <!-- KARTA 3: VIRTUÁLNÍ PROHLÍDKA A FOTO -->
+                        <div class="card-minimal p-6 flex flex-col">
+                            <h3 class="text-sm font-bold text-gray-900 mb-6">Zobrazení fotografií a prohlídek</h3>
+                            <div class="mb-6">
+                                <div class="flex justify-between text-xs font-medium text-gray-600 mb-2">
+                                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-street-view text-gray-700"></i> Virtuální prohlídka (Street View)</span>
+                                    <span class="font-bold text-gray-900" id="bar-sv-val"></span>
+                                </div>
+                                <div class="h-2 bg-gray-100 rounded-full overflow-hidden"><div id="bar-sv" class="bg-gray-800 h-full animate-bar"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs font-medium text-gray-600 mb-2">
+                                    <span class="flex items-center gap-1.5"><i class="fa-regular fa-images text-gray-500"></i> Běžné fotografie</span>
+                                    <span class="font-bold text-gray-900" id="bar-foto-val"></span>
+                                </div>
+                                <div class="h-2 bg-gray-100 rounded-full overflow-hidden"><div id="bar-foto" class="bg-gray-400 h-full animate-bar"></div></div>
+                            </div>
+                            <div id="top3-sv-container" class="mt-auto pt-6 hidden">
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3"><i class="fa-solid fa-ranking-star mr-1 text-gray-300"></i> TOP 3 - Street View</p>
+                                <div id="top3-sv-list" class="space-y-2"></div>
+                            </div>
+                        </div>
+
+                        <!-- KARTA 4: ZDROJE RECENZÍ A NFC -->
                         <div class="card-minimal p-6 flex flex-col">
                             <h3 class="text-sm font-bold text-gray-900 mb-6">Zdroje nových recenzí</h3>
-                            
                             <div class="mb-6">
                                 <div class="flex justify-between text-xs font-medium text-gray-600 mb-2">
                                     <span class="flex items-center gap-1.5"><i class="fa-solid fa-wifi text-gray-700"></i> Získáno přes NFC produkty</span>
-                                    <span class="font-bold text-gray-900" id="bar-nfc-val">57% (185)</span>
+                                    <span class="font-bold text-gray-900" id="bar-nfc-val"></span>
                                 </div>
-                                <div class="h-2 bg-gray-100 rounded-full overflow-hidden"><div id="bar-nfc-ratio" class="bg-brand-500 h-full animate-bar" style="width: 57%"></div></div>
+                                <div class="h-2 bg-gray-100 rounded-full overflow-hidden"><div id="bar-nfc-ratio" class="bg-brand-500 h-full animate-bar"></div></div>
                             </div>
-                            
                             <div>
                                 <div class="flex justify-between text-xs font-medium text-gray-600 mb-2">
                                     <span class="flex items-center gap-1.5"><i class="fa-brands fa-google text-gray-700"></i> Běžnou cestou (Organicky)</span>
-                                    <span class="font-bold text-gray-900" id="bar-org-val">43% (139)</span>
+                                    <span class="font-bold text-gray-900" id="bar-org-val"></span>
                                 </div>
-                                <div class="h-2 bg-gray-100 rounded-full overflow-hidden"><div id="bar-org-ratio" class="bg-gray-800 h-full animate-bar" style="width: 43%"></div></div>
+                                <div class="h-2 bg-gray-100 rounded-full overflow-hidden"><div id="bar-org-ratio" class="bg-gray-800 h-full animate-bar"></div></div>
                             </div>
-                            
-                            <!-- TOP 3 NFC -->
                             <div id="top3-nfc-container" class="mt-auto pt-6 hidden">
                                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3"><i class="fa-solid fa-ranking-star mr-1 text-gray-300"></i> TOP 3 - Přes NFC</p>
                                 <div id="top3-nfc-list" class="space-y-2"></div>
                             </div>
                         </div>
 
-                        <!-- KARTA 4: ZÍSKANÉ RECENZE A HODNOCENÍ -->
+                        <!-- KARTA 5: ZÍSKANÉ RECENZE -->
                         <div class="card-minimal p-6 flex flex-col">
-                            <h3 class="text-sm font-bold text-gray-900 mb-6">Získané recenze a hodnocení</h3>
-                            
-                            <div class="mt-2 mb-6 grid grid-cols-2 gap-4">
-                                <div>
-                                    <p class="text-[10px] uppercase font-bold text-gray-400 mb-1">Nové recenze</p>
-                                    <p class="text-3xl font-bold text-gray-900" id="detail-rev-val">324</p>
-                                </div>
-                                <div>
-                                    <p class="text-[10px] uppercase font-bold text-gray-400 mb-1">Průměr</p>
-                                    <div class="flex items-center gap-1.5">
-                                        <p class="text-3xl font-bold text-gray-900" id="detail-rating-val">4.8</p>
-                                        <i class="fa-solid fa-star text-yellow-400 text-lg"></i>
-                                    </div>
-                                </div>
+                            <h3 class="text-sm font-bold text-gray-900 mb-6">Získané recenze</h3>
+                            <div class="mb-6">
+                                <p class="text-[10px] uppercase font-bold text-gray-400 mb-1">Nové recenze</p>
+                                <p class="text-3xl font-bold text-gray-900" id="detail-rev-val"></p>
                             </div>
-                            
-                            <!-- TOP 3 Recenze -->
                             <div id="top3-rev-container" class="mt-auto pt-6 hidden border-t border-gray-100">
                                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3"><i class="fa-solid fa-ranking-star mr-1 text-gray-300"></i> TOP 3 - Nové recenze</p>
                                 <div id="top3-rev-list" class="space-y-2"></div>
                             </div>
                         </div>
 
+                        <!-- KARTA 6: HODNOCENÍ -->
+                        <div class="card-minimal p-6 flex flex-col">
+                            <h3 class="text-sm font-bold text-gray-900 mb-6">Průměrné hodnocení</h3>
+                            <div class="mb-6">
+                                <p class="text-[10px] uppercase font-bold text-gray-400 mb-1">Průměr</p>
+                                <div class="flex items-center gap-2">
+                                    <p class="text-3xl font-bold text-gray-900" id="detail-rating-val"></p>
+                                    <i class="fa-solid fa-star text-yellow-400 text-xl"></i>
+                                </div>
+                            </div>
+                            <div id="top3-rating-container" class="mt-auto pt-6 hidden border-t border-gray-100">
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3"><i class="fa-solid fa-ranking-star mr-1 text-gray-300"></i> TOP 3 - Nejlepší hodnocení</p>
+                                <div id="top3-rating-list" class="space-y-2"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- TAB 2: DETAILNÍ GRAFY A TRENDY -->
                 <div id="tab-grafy" class="hidden space-y-6">
                     
-                    <!-- Liniový graf s přepínáním -->
                     <div class="card-minimal p-0 overflow-hidden">
                         <div class="px-6 pt-6 border-b border-gray-200">
                             <div class="flex overflow-x-auto hide-scrollbar gap-6">
@@ -472,61 +462,49 @@
                                 <button onclick="changeChartMetric('clicks')" id="btn-metric-clicks" class="whitespace-nowrap pb-3 border-b-2 font-medium text-sm transition-colors border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">Prokliky na web</button>
                             </div>
                         </div>
-                        
                         <div class="p-6">
                             <div class="mb-8">
-                                <h2 class="text-4xl font-normal text-gray-900 tracking-tight" id="chart-main-value">413</h2>
+                                <h2 class="text-4xl font-normal text-gray-900 tracking-tight" id="chart-main-value">0</h2>
                                 <div class="text-sm text-gray-800 mt-2 flex items-center gap-2 w-max relative group cursor-help">
                                     <span id="chart-main-label">Interakce s Firemním profilem</span>
                                     <i class="fa-solid fa-circle-info text-gray-400 text-xs"></i>
-                                    <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-56 bg-gray-900 text-white text-[10px] rounded py-1.5 px-2.5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 font-normal leading-relaxed text-center shadow-lg pointer-events-none">
-                                        Co jsou interakce?<br>Interakce je, když vám z vašeho Firemního profilu na Googlu někdo zavolá, zašle zprávu, provede rezervaci, zeptá se na trasu atd.<br><span class="text-blue-400 mt-1 block">Další informace</span>
-                                        <svg class="absolute text-gray-900 h-2 left-1/2 top-full transform -translate-x-1/2 -mt-px" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"/></svg>
+                                    <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-56 bg-white border border-gray-200 text-gray-900 text-[11px] rounded-lg p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20 font-normal leading-relaxed text-left shadow-xl pointer-events-none">
+                                        Zobrazuje vybrané typy interakcí zákazníků s vaším profilem v daném časovém rozmezí.
+                                        <svg class="absolute text-white border-b border-r border-gray-200 h-3 w-3 left-1/2 top-full transform -translate-x-1/2 -mt-1.5 rotate-45" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 255,255 255,0"/></svg>
                                     </div>
                                 </div>
-                                <p class="text-xs mt-1" id="chart-trend-container">
-                                    <!-- Trend se doplní přes JS -->
-                                </p>
+                                <p class="text-xs mt-1" id="chart-trend-container"></p>
                             </div>
-                            
                             <div class="relative h-72 w-full">
                                 <canvas id="trendChart"></canvas>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Karty objevování a dotazů -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Objevování (Kruhový graf) -->
+                        <!-- Objevování -->
                         <div class="card-minimal p-6 flex flex-col">
                             <h3 class="text-sm font-medium text-gray-900 mb-6 flex items-center gap-1.5 w-max relative group cursor-help">
                                 Jak vás uživatelé objevili 
                                 <i class="fa-solid fa-circle-info text-gray-400 text-xs"></i>
-                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-56 bg-gray-900 text-white text-[10px] rounded py-1.5 px-2.5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 font-normal leading-relaxed text-center shadow-lg pointer-events-none">
+                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-56 bg-white border border-gray-200 text-gray-900 text-[11px] rounded-lg p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20 font-normal leading-relaxed text-left shadow-xl pointer-events-none">
                                     Počet unikátních zobrazení vašeho profilu napříč službami Google.
-                                    <svg class="absolute text-gray-900 h-2 left-1/2 top-full transform -translate-x-1/2 -mt-px" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"/></svg>
+                                    <svg class="absolute text-white border-b border-r border-gray-200 h-3 w-3 left-1/2 top-full transform -translate-x-1/2 -mt-1.5 rotate-45" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 255,255 255,0"/></svg>
                                 </div>
                             </h3>
-                            
                             <div class="mb-8">
                                 <div class="flex items-baseline gap-3 mb-1">
-                                    <h2 class="text-3xl font-normal text-gray-900" id="discovery-total-value">2 067</h2>
+                                    <h2 class="text-3xl font-normal text-gray-900" id="discovery-total-value">0</h2>
                                     <div id="discovery-trend-container" class="text-sm font-bold"></div>
                                 </div>
                                 <p class="text-sm text-gray-600 mt-1 flex items-center gap-1.5"><i class="fa-regular fa-eye"></i> Počet lidí, kteří si prohlédli váš Firemní profil</p>
                             </div>
-                            
                             <div class="flex-1">
                                 <h4 class="font-medium text-gray-900 text-sm">Rozdělení podle platforem a zařízení</h4>
                                 <p class="text-xs text-gray-500 mb-6">Platformy a zařízení, na kterých lidé našli váš profil</p>
-                                
                                 <div class="flex items-center gap-8">
-                                    <div class="relative w-36 h-36 shrink-0">
-                                        <canvas id="doughnutChart"></canvas>
-                                    </div>
-                                    <div class="space-y-4 flex-1" id="doughnut-legend">
-                                        <!-- Legenda se vygeneruje přes JS -->
-                                    </div>
+                                    <div class="relative w-36 h-36 shrink-0"><canvas id="doughnutChart"></canvas></div>
+                                    <div class="space-y-4 flex-1" id="doughnut-legend"></div>
                                 </div>
                             </div>
                         </div>
@@ -536,30 +514,24 @@
                             <h3 class="text-sm font-medium text-gray-900 mb-6 flex items-center gap-1.5 w-max relative group cursor-help">
                                 Vyhledávací dotazy 
                                 <i class="fa-solid fa-circle-info text-gray-400 text-xs"></i>
-                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-56 bg-gray-900 text-white text-[10px] rounded py-1.5 px-2.5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 font-normal leading-relaxed text-center shadow-lg pointer-events-none">
+                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-56 bg-white border border-gray-200 text-gray-900 text-[11px] rounded-lg p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20 font-normal leading-relaxed text-left shadow-xl pointer-events-none">
                                     Klíčová slova a fráze, po jejichž zadání uživatelé narazili na váš profil.
-                                    <svg class="absolute text-gray-900 h-2 left-1/2 top-full transform -translate-x-1/2 -mt-px" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"/></svg>
+                                    <svg class="absolute text-white border-b border-r border-gray-200 h-3 w-3 left-1/2 top-full transform -translate-x-1/2 -mt-1.5 rotate-45" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 255,255 255,0"/></svg>
                                 </div>
                             </h3>
-                            
                             <div class="mb-8">
                                 <div class="flex items-baseline gap-3 mb-1">
-                                    <h2 class="text-3xl font-normal text-gray-900" id="queries-total-value">123</h2>
+                                    <h2 class="text-3xl font-normal text-gray-900" id="queries-total-value">0</h2>
                                     <div id="queries-trend-container" class="text-sm font-bold"></div>
                                 </div>
                                 <p class="text-sm text-gray-600 mt-1 flex items-center gap-1.5"><i class="fa-solid fa-magnifying-glass text-xs"></i> Vyhledávání, která spustila zobrazení vašeho profilu</p>
                             </div>
-                            
                             <div class="flex-1 flex flex-col">
                                 <h4 class="font-medium text-gray-900 text-sm">Přehled vyhledání</h4>
                                 <p class="text-xs text-gray-500 mb-4">Nejčastější vyhledávací dotazy v síti Google</p>
-                                
                                 <div class="space-y-3 flex-1 overflow-hidden transition-all duration-300 max-h-[140px]" id="queries-list-container">
-                                    <ul id="search-queries-list" class="space-y-3">
-                                        <!-- Dotazy z JS -->
-                                    </ul>
+                                    <ul id="search-queries-list" class="space-y-3"></ul>
                                 </div>
-                                
                                 <div class="mt-6 pt-4 border-t border-gray-100 text-center">
                                     <button id="btn-more-queries" onclick="toggleQueries()" class="text-sm font-medium text-blue-600 hover:text-blue-800 transition border border-gray-200 rounded px-6 py-2 bg-white shadow-sm">Další informace</button>
                                 </div>
@@ -567,19 +539,17 @@
                         </div>
                     </div>
 
-                    <!-- KARTY PROHLÍDKY A RECENZÍ SEŘAZENÉ POD SEBOU -->
-                    <div class="grid grid-cols-1 gap-6 mt-6">
-                        <!-- PŘIDANÁ KARTA 1: ZOBRAZENÍ VIRTUÁLNÍ PROHLÍDKY -->
+                    <!-- SV A RECENZE GRAFY -->
+                    <div class="grid grid-cols-1 gap-6">
                         <div class="card-minimal p-6 flex flex-col">
                             <h3 class="text-sm font-medium text-gray-900 mb-6 flex items-center gap-1.5 w-max relative group cursor-help">
                                 Zobrazení virtuální prohlídky
                                 <i class="fa-solid fa-circle-info text-gray-400 text-xs"></i>
-                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-56 bg-gray-900 text-white text-[10px] rounded py-1.5 px-2.5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 font-normal leading-relaxed text-center shadow-lg pointer-events-none">
+                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-56 bg-white border border-gray-200 text-gray-900 text-[11px] rounded-lg p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20 font-normal leading-relaxed text-left shadow-xl pointer-events-none">
                                     Počet zobrazení vaší virtuální prohlídky (Street View) na Google Mapách a ve Vyhledávání.
-                                    <svg class="absolute text-gray-900 h-2 left-1/2 top-full transform -translate-x-1/2 -mt-px" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"/></svg>
+                                    <svg class="absolute text-white border-b border-r border-gray-200 h-3 w-3 left-1/2 top-full transform -translate-x-1/2 -mt-1.5 rotate-45" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 255,255 255,0"/></svg>
                                 </div>
                             </h3>
-                            
                             <div class="mb-8">
                                 <div class="flex items-baseline gap-3 mb-1">
                                     <h2 class="text-3xl font-normal text-gray-900" id="sv-chart-value">0</h2>
@@ -587,42 +557,125 @@
                                 </div>
                                 <p class="text-sm text-gray-600 mt-1 flex items-center gap-1.5"><i class="fa-solid fa-street-view text-xs"></i> Zobrazení Street View celkem</p>
                             </div>
-                            
                             <div class="relative h-72 w-full mt-auto">
                                 <canvas id="photoChart"></canvas>
                             </div>
                         </div>
 
-                        <!-- PŘIDANÁ KARTA 2: VÝVOJ RECENZÍ A HODNOCENÍ -->
                         <div class="card-minimal p-6 flex flex-col">
                             <div class="flex justify-between items-start mb-6">
                                 <h3 class="text-sm font-medium text-gray-900 flex items-center gap-1.5 w-max relative group cursor-help">
                                     Vývoj počtu recenzí a hodnocení
                                     <i class="fa-solid fa-circle-info text-gray-400 text-xs"></i>
-                                    <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-56 bg-gray-900 text-white text-[10px] rounded py-1.5 px-2.5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 font-normal leading-relaxed text-center shadow-lg pointer-events-none">
+                                    <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-56 bg-white border border-gray-200 text-gray-900 text-[11px] rounded-lg p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20 font-normal leading-relaxed text-left shadow-xl pointer-events-none">
                                         Počet nově získaných recenzí v daném období a vaše průměrné hodnocení hvězdičkami.
-                                        <svg class="absolute text-gray-900 h-2 left-1/2 top-full transform -translate-x-1/2 -mt-px" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"/></svg>
+                                        <svg class="absolute text-white border-b border-r border-gray-200 h-3 w-3 left-1/2 top-full transform -translate-x-1/2 -mt-1.5 rotate-45" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 255,255 255,0"/></svg>
                                     </div>
                                 </h3>
-                                
                                 <div class="flex flex-col items-end">
                                     <div class="flex items-center gap-1.5">
-                                        <span class="text-3xl font-bold text-gray-900" id="review-chart-rating-value">4.8</span>
+                                        <span class="text-3xl font-bold text-gray-900" id="review-chart-rating-value">0.0</span>
                                         <i class="fa-solid fa-star text-yellow-400 text-2xl"></i>
                                     </div>
                                     <p class="text-[10px] text-gray-500 uppercase tracking-wider mt-1 font-bold">Průměr</p>
                                 </div>
                             </div>
-                            
                             <div class="mb-8 -mt-4">
                                 <div class="flex items-baseline gap-3 mb-1">
                                     <h2 class="text-3xl font-normal text-gray-900" id="review-chart-count-value">0</h2>
                                 </div>
                                 <p class="text-sm text-gray-600 mt-1 flex items-center gap-1.5"><i class="fa-regular fa-comment text-xs"></i> Nové recenze celkem</p>
                             </div>
-                            
                             <div class="relative h-72 w-full mt-auto">
                                 <canvas id="reviewChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- NFC ANALYTIKA S DETAILNÍ TABULKOU -->
+                    <div class="mt-10 pt-8 border-t border-gray-200">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                            <div>
+                                <h3 class="font-bold text-gray-900 text-lg flex items-center gap-2"><i class="fa-solid fa-wifi text-brand-500"></i> Analytika NFC produktů</h3>
+                                <p class="text-xs text-gray-500 mt-1">Sledujte výkon vašich chytrých vizitek a stojánků v reálném čase.</p>
+                            </div>
+                            <div class="relative min-w-[250px]">
+                                <div class="relative flex items-center bg-white border border-gray-300 rounded-lg px-3 py-2 cursor-pointer transition-colors hover:border-brand-500">
+                                    <i class="fa-solid fa-filter text-gray-400 mr-2.5 text-xs"></i>
+                                    <select id="nfc-product-select" onchange="renderNfcTable(); updateDetailedCharts();" class="text-sm font-medium text-gray-900 bg-transparent border-none focus:outline-none w-full appearance-none cursor-pointer">
+                                        <option value="all">Všechny NFC produkty</option>
+                                        <option value="stojan">NFC Stojánky</option>
+                                        <option value="vizitka">NFC Vizitky (Zaměstnanci)</option>
+                                        <option value="samolepka">NFC Plakety / Samolepky</option>
+                                    </select>
+                                    <i class="fa-solid fa-chevron-down text-gray-400 ml-2 text-xs pointer-events-none absolute right-3"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- KPI NFC -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                            <div class="card-minimal p-5 flex flex-col justify-between border-l-4 border-l-brand-500">
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Celkem načtení (Pípnutí)</p>
+                                <div class="flex items-end justify-between">
+                                    <p class="text-3xl font-bold text-gray-900" id="nfc-total-taps">0</p>
+                                    <i class="fa-solid fa-mobile-screen-button text-2xl text-gray-200"></i>
+                                </div>
+                            </div>
+                            <div class="card-minimal p-5 flex flex-col justify-between">
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Získáno recenzí z NFC</p>
+                                <div class="flex items-end justify-between">
+                                    <p class="text-3xl font-bold text-gray-900" id="nfc-total-reviews">0</p>
+                                    <i class="fa-regular fa-comment text-2xl text-gray-200"></i>
+                                </div>
+                            </div>
+                            <div class="card-minimal p-5 flex flex-col justify-between">
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Průměrný Konverzní poměr</p>
+                                <div class="flex items-end justify-between">
+                                    <p class="text-3xl font-bold text-gray-900" id="nfc-conversion">0%</p>
+                                    <i class="fa-solid fa-filter-circle-dollar text-2xl text-gray-200"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tabulka výkonu jednotlivých NFC -->
+                        <div class="card-minimal p-0 overflow-hidden mb-6 flex flex-col">
+                            <div class="p-5 border-b border-gray-100 bg-gray-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                <div>
+                                    <h3 class="font-bold text-gray-900 text-sm"><i class="fa-solid fa-list-ol text-brand-500 mr-2"></i> Výkon jednotlivých NFC produktů</h3>
+                                    <p class="text-xs text-gray-500 mt-1">Detailní přehled skenů a získaných recenzí podle umístění nebo zaměstnance.</p>
+                                </div>
+                                <div class="relative w-full sm:w-64">
+                                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs"></i>
+                                    <input type="text" id="nfc-table-search" onkeyup="renderNfcTable()" class="w-full bg-white border border-gray-300 rounded-lg px-3 py-1.5 pl-8 text-xs text-gray-900 focus:outline-none focus:border-brand-500 transition shadow-sm" placeholder="Hledat (např. Recepce, Petr)...">
+                                </div>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="bg-white border-b border-gray-100">
+                                            <th class="py-3 px-5 text-[10px] font-bold text-gray-400 uppercase tracking-wider">Název / Umístění</th>
+                                            <th class="py-3 px-5 text-[10px] font-bold text-gray-400 uppercase tracking-wider">Typ produktu</th>
+                                            <th class="py-3 px-5 text-[10px] font-bold text-gray-400 uppercase tracking-wider">Pobočka</th>
+                                            <th class="py-3 px-5 text-[10px] font-bold text-gray-400 uppercase tracking-wider text-right">Pípnutí</th>
+                                            <th class="py-3 px-5 text-[10px] font-bold text-gray-400 uppercase tracking-wider text-right">Recenze</th>
+                                            <th class="py-3 px-5 text-[10px] font-bold text-gray-400 uppercase tracking-wider text-right">Konverze</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="nfc-table-body" class="divide-y divide-gray-50">
+                                        <!-- JS injects here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="card-minimal p-6 flex flex-col">
+                            <h3 class="text-sm font-medium text-gray-900 mb-6 flex items-center gap-1.5 w-max relative group cursor-help">
+                                Vývoj využití NFC produktů
+                                <i class="fa-solid fa-circle-info text-gray-400 text-xs"></i>
+                            </h3>
+                            <div class="relative h-72 w-full mt-auto">
+                                <canvas id="nfcTrendChart"></canvas>
                             </div>
                         </div>
                     </div>
@@ -631,7 +684,6 @@
 
                 <!-- TAB 3: POROVNÁNÍ POBOČEK -->
                 <div id="tab-porovnani" class="hidden space-y-6">
-                    
                     <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                         <div>
                             <h3 class="font-bold text-gray-900">Vyberte pobočky k porovnání</h3>
@@ -642,27 +694,56 @@
                                 <span class="text-sm font-medium text-gray-700" id="compare-count-label">Vybráno 5 poboček</span>
                                 <i class="fa-solid fa-chevron-down text-gray-400 ml-auto text-xs"></i>
                             </div>
-                            <div id="compare-dropdown" class="absolute left-0 top-full mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-xl z-50 hidden max-h-60 overflow-y-auto custom-scrollbar p-2">
-                                <!-- Generováno JS -->
-                            </div>
+                            <div id="compare-dropdown" class="absolute left-0 top-full mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-xl z-50 hidden max-h-60 overflow-y-auto custom-scrollbar p-2"></div>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        
-                        <!-- Žebříček (Leaderboard) -->
                         <div class="card-minimal p-0 overflow-hidden flex flex-col">
                             <div class="p-5 border-b border-gray-100 bg-gray-50">
                                 <h3 class="font-bold text-gray-900 text-sm"><i class="fa-solid fa-trophy text-yellow-500 mr-2"></i> Žebříček (Dle interakcí)</h3>
                             </div>
                             <div class="flex-1 overflow-y-auto custom-scrollbar p-2">
                                 <ul class="space-y-1" id="leaderboard-list">
-                                    <!-- Leaderboard HTML -->
+                                    <li class="flex items-center justify-between p-3 rounded-lg bg-yellow-50/50 border border-yellow-100">
+                                        <div class="flex items-center gap-3">
+                                            <span class="font-bold text-lg w-5 text-center medal-1">1.</span>
+                                            <div><p class="text-sm font-bold text-gray-900">Brno</p><p class="text-[10px] text-gray-500">Hodnocení 4.9</p></div>
+                                        </div>
+                                        <span class="font-bold text-gray-900 text-sm">3,420</span>
+                                    </li>
+                                    <li class="flex items-center justify-between p-3 rounded-lg bg-gray-50 border border-gray-100">
+                                        <div class="flex items-center gap-3">
+                                            <span class="font-bold text-lg w-5 text-center medal-2">2.</span>
+                                            <div><p class="text-sm font-bold text-gray-900">Praha 13</p><p class="text-[10px] text-gray-500">Hodnocení 4.8</p></div>
+                                        </div>
+                                        <span class="font-bold text-gray-900 text-sm">2,810</span>
+                                    </li>
+                                    <li class="flex items-center justify-between p-3 rounded-lg bg-orange-50/30 border border-orange-50">
+                                        <div class="flex items-center gap-3">
+                                            <span class="font-bold text-lg w-5 text-center medal-3">3.</span>
+                                            <div><p class="text-sm font-bold text-gray-900">Ostrava</p><p class="text-[10px] text-gray-500">Hodnocení 4.5</p></div>
+                                        </div>
+                                        <span class="font-bold text-gray-900 text-sm">1,940</span>
+                                    </li>
+                                    <li class="flex items-center justify-between p-3">
+                                        <div class="flex items-center gap-3">
+                                            <span class="font-bold text-sm text-gray-400 w-5 text-center">4.</span>
+                                            <p class="text-sm font-medium text-gray-700">Liberec</p>
+                                        </div>
+                                        <span class="font-medium text-gray-700 text-sm">1,402</span>
+                                    </li>
+                                    <li class="flex items-center justify-between p-3">
+                                        <div class="flex items-center gap-3">
+                                            <span class="font-bold text-sm text-gray-400 w-5 text-center">5.</span>
+                                            <p class="text-sm font-medium text-gray-700">Plzeň</p>
+                                        </div>
+                                        <span class="font-medium text-gray-700 text-sm">950</span>
+                                    </li>
                                 </ul>
                             </div>
                         </div>
 
-                        <!-- Graf porovnání -->
                         <div class="card-minimal p-6 lg:col-span-2 flex flex-col">
                             <div class="flex justify-between items-start mb-4">
                                 <div>
@@ -670,11 +751,8 @@
                                     <p class="text-xs text-gray-500 mt-1">Zobrazení vs Interakce u vybraných poboček.</p>
                                 </div>
                             </div>
-                            <div class="flex-1 relative h-72 w-full">
-                                <canvas id="compareChart"></canvas>
-                            </div>
+                            <div class="flex-1 relative h-72 w-full"><canvas id="compareChart"></canvas></div>
                         </div>
-
                     </div>
                 </div>
 
@@ -685,7 +763,7 @@
                             <i class="fa-solid fa-users-gear"></i>
                         </div>
                         <h3 class="font-bold text-gray-900 text-lg mb-2">Správa skupin a týmů</h3>
-                        <p class="text-sm text-gray-500 max-w-lg mx-auto mb-6">Sdružujte pobočky do logických celků (např. regiony, manažeři) a analyzujte jejich souhrnný výkon proti sobě.</p>
+                        <p class="text-sm text-gray-500 max-w-lg mx-auto mb-6">Sdružujte pobočky do logických celků a analyzujte jejich souhrnný výkon proti sobě.</p>
                         <button class="bg-brand-500 text-white px-6 py-2.5 rounded-lg text-sm font-bold hover:bg-brand-600 transition shadow-sm" onclick="showToast('Otevírám tvůrce skupin...')">Vytvořit novou skupinu</button>
                     </div>
 
@@ -725,11 +803,15 @@
         </main>
     </div>
 
+    <!-- TOAST NOTIFIKACE -->
+    <div id="toast" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-5 py-3 rounded-lg shadow-xl opacity-0 pointer-events-none transition-all duration-300 z-50 flex items-center gap-3">
+        <i class="fa-solid fa-circle-check text-brand-500"></i>
+        <span id="toast-message" class="text-sm font-medium">Akce byla úspěšná</span>
+    </div>
+
     <script>
-        // Data pro pobočky
         const branches = ['Praha 13', 'Liberec', 'Brno', 'Ostrava', 'Plzeň', 'Olomouc', 'České Budějovice', 'Hradec Králové', 'Pardubice', 'Zlín'];
         
-        // Simulovaná databáze
         const mockDatabase = {
             'Praha 13': { views: 45200, interactions: 4120, reviews: 85, rating: 4.8, sv: 15200, photos: 22000, nfc: 45, search: 30000, maps: 15200, mob: 80, desk: 20, web: 2100, dir: 1200, call: 820 },
             'Liberec': { views: 18500, interactions: 1500, reviews: 32, rating: 4.6, sv: 4500, photos: 8000, nfc: 15, search: 12000, maps: 6500, mob: 75, desk: 25, web: 800, dir: 400, call: 300 },
@@ -743,20 +825,47 @@
             'Zlín': { views: 13500, interactions: 1050, reviews: 20, rating: 4.8, sv: 4000, photos: 6500, nfc: 11, search: 8500, maps: 5000, mob: 79, desk: 21, web: 500, dir: 380, call: 170 }
         };
 
-        // Globální proměnné
+        // Databáze konkrétních NFC produktů (dle příkladu z banky/poboček)
+        const mockNfcProducts = [
+            { id: 1, name: 'Recepce', type: 'Stojánek', typeVal: 'stojan', branch: 'Praha 13', taps: 145, reviews: 20 },
+            { id: 2, name: 'Vstup', type: 'Stojánek', typeVal: 'stojan', branch: 'Praha 13', taps: 210, reviews: 15 },
+            { id: 3, name: 'Bankéř Petr', type: 'Vizitka', typeVal: 'vizitka', branch: 'Praha 13', taps: 85, reviews: 30 },
+            { id: 4, name: 'Bankéřka Milena', type: 'Vizitka', typeVal: 'vizitka', branch: 'Praha 13', taps: 110, reviews: 38 },
+            { id: 5, name: 'Bankéř Honza', type: 'Vizitka', typeVal: 'vizitka', branch: 'Praha 13', taps: 60, reviews: 12 },
+            { id: 6, name: 'Toalety', type: 'Plaketa (Samolepka)', typeVal: 'samolepka', branch: 'Praha 13', taps: 45, reviews: 1 },
+            { id: 7, name: 'Pokladna', type: 'Plaketa (Samolepka)', typeVal: 'samolepka', branch: 'Praha 13', taps: 130, reviews: 22 },
+            { id: 8, name: 'Recepce', type: 'Stojánek', typeVal: 'stojan', branch: 'Brno', taps: 310, reviews: 45 },
+            { id: 9, name: 'Vstup', type: 'Stojánek', typeVal: 'stojan', branch: 'Brno', taps: 280, reviews: 18 },
+            { id: 10, name: 'Toalety', type: 'Plaketa (Samolepka)', typeVal: 'samolepka', branch: 'Brno', taps: 65, reviews: 2 },
+            { id: 11, name: 'Bankéřka Jana', type: 'Vizitka', typeVal: 'vizitka', branch: 'Liberec', taps: 95, reviews: 25 }
+        ];
+
         let compareSelection = ['Praha 13', 'Liberec', 'Brno', 'Ostrava', 'Plzeň'];
         let sourceSelection = [...branches]; 
-        let chartDataStore = { overview: 0, calls: 0, bookings: 0, directions: 0, clicks: 0, views: 0, avgRating: "0.0", sv: 0, reviews: 0 };
+        let chartDataStore = { overview: 0, calls: 0, bookings: 0, directions: 0, clicks: 0, views: 0 };
         let activeChartMetric = 'overview';
-        let trendChart, doughnutChart, photoChart, reviewChart, compareChart;
+        let trendChart, doughnutChart, photoChart, reviewChart, compareChart, nfcTrendChart;
         let toastTimeout;
 
-        // TABS Logika a Menu
+        // UI Funkce
         function toggleMenu(menuId) {
             const submenu = document.getElementById(menuId);
             if(submenu) {
                 submenu.classList.toggle('max-h-0'); submenu.classList.toggle('opacity-0');
                 submenu.classList.toggle('max-h-40'); submenu.classList.toggle('opacity-100'); submenu.classList.toggle('py-1');
+            }
+        }
+
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobile-overlay');
+            sidebar.classList.toggle('-translate-x-full');
+            if (overlay.classList.contains('hidden')) {
+                overlay.classList.remove('hidden');
+                setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            } else {
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
             }
         }
 
@@ -772,7 +881,19 @@
             document.getElementById('btn-' + tabId).className = 'whitespace-nowrap py-3 px-5 border-b-2 font-bold text-sm transition-colors border-brand-500 text-brand-600';
         }
 
-        // --- ZDROJ DAT (ZAŠKRTÁVÁTKA) ---
+        function toggleQueries() {
+            const container = document.getElementById('queries-list-container');
+            const btn = document.getElementById('btn-more-queries');
+            if (container.classList.contains('max-h-[140px]')) {
+                container.classList.remove('max-h-[140px]');
+                btn.innerText = 'Méně informací';
+            } else {
+                container.classList.add('max-h-[140px]');
+                btn.innerText = 'Další informace';
+            }
+        }
+
+        // Filtrování
         function toggleBranchDropdown() {
             const dropdown = document.getElementById('branch-dropdown');
             if (dropdown.classList.contains('hidden')) {
@@ -860,6 +981,7 @@
             if (period === 'custom') {
                 customFields.classList.remove('hidden');
                 customFields.classList.add('flex');
+                
                 const today = new Date().toISOString().split('T')[0];
                 if (!document.getElementById('date-from').value) document.getElementById('date-from').value = today;
                 if (!document.getElementById('date-to').value) document.getElementById('date-to').value = today;
@@ -870,7 +992,7 @@
             refreshDashboardData();
         }
 
-        // --- ZÁKLADNÍ VÝPOČTY (Refresh dat) ---
+        // --- HLAVNÍ LOGIKA DAT ---
         function refreshDashboardData() {
             if (sourceSelection.length === 0) {
                 document.getElementById('kpi-zobrazeni').innerText = '0';
@@ -940,7 +1062,6 @@
 
             const formatK = (num) => (num > 999) ? (num/1000).toFixed(1) + 'k' : num;
 
-            // Zápis do karet v prvním tabu
             if(document.getElementById('kpi-zobrazeni')) document.getElementById('kpi-zobrazeni').innerText = formatK(sumViews);
             if(document.getElementById('kpi-interakce')) document.getElementById('kpi-interakce').innerText = sumInts.toLocaleString();
             if(document.getElementById('kpi-recenze')) document.getElementById('kpi-recenze').innerText = sumRev.toLocaleString();
@@ -988,6 +1109,22 @@
                 document.getElementById('bar-act-hovory').className = (sumCall === maxAct && maxAct > 0) ? 'h-full transition-all duration-500 bg-brand-500' : 'h-full transition-all duration-500 bg-gray-300';
             }
 
+            let totalVisual = sumSv + sumPhotos;
+            let pctSv = totalVisual > 0 ? Math.round((sumSv / totalVisual) * 100) : 0;
+            let pctPhotos = 100 - pctSv;
+            if(document.getElementById('bar-sv-val')) document.getElementById('bar-sv-val').innerText = `${pctSv}% (${formatK(sumSv)})`;
+            if(document.getElementById('bar-foto-val')) document.getElementById('bar-foto-val').innerText = `${pctPhotos}% (${formatK(sumPhotos)})`;
+            
+            let maxVis = Math.max(sumSv, sumPhotos);
+            if(document.getElementById('bar-sv')) {
+                document.getElementById('bar-sv').style.width = `${pctSv}%`;
+                document.getElementById('bar-sv').className = (sumSv === maxVis && maxVis > 0) ? 'h-full animate-bar bg-brand-500' : 'h-full animate-bar bg-gray-300';
+            }
+            if(document.getElementById('bar-foto')) {
+                document.getElementById('bar-foto').style.width = `${pctPhotos}%`;
+                document.getElementById('bar-foto').className = (sumPhotos === maxVis && maxVis > 0) ? 'h-full animate-bar bg-brand-500' : 'h-full animate-bar bg-gray-300';
+            }
+
             let orgReviews = sumRev - sumNfc;
             if(document.getElementById('bar-nfc-val')) document.getElementById('bar-nfc-val').innerText = `${nfcPercent}% (${sumNfc})`;
             if(document.getElementById('bar-org-val')) document.getElementById('bar-org-val').innerText = `${orgPercent}% (${orgReviews})`;
@@ -1002,7 +1139,6 @@
                 document.getElementById('bar-org-ratio').className = (orgReviews === maxNfc && maxNfc > 0) ? 'h-full animate-bar bg-brand-500' : 'h-full animate-bar bg-gray-300';
             }
 
-            // TOP 3 Dynamický rendering
             renderTop3('views', 'top3-views-container', 'top3-views-list', true);
             renderTop3('interactions', 'top3-ints-container', 'top3-ints-list', false);
             renderTop3('sv', 'top3-sv-container', 'top3-sv-list', true);
@@ -1020,7 +1156,6 @@
                 }
             }
 
-            // Uložení globálních dat pro detailní grafy
             chartDataStore = {
                 overview: sumInts,
                 calls: sumCall,
@@ -1038,13 +1173,15 @@
                 avgRating: avgRating
             };
 
-            // Aktualizace grafů (Tab 2 a 3)
-            if (trendChart && doughnutChart && photoChart && reviewChart) {
+            if (trendChart && doughnutChart) {
                 updateDetailedCharts();
             }
             if (compareChart) {
                 updateCompareChart();
             }
+            
+            // Render NFC Table
+            renderNfcTable();
         }
 
         function renderTop3(metricKey, containerId, listId, isK = false, isRating = false) {
@@ -1104,20 +1241,7 @@
             list.innerHTML = html;
         }
 
-        // Toggles pro vyhledávací dotazy
-        function toggleQueries() {
-            const container = document.getElementById('queries-list-container');
-            const btn = document.getElementById('btn-more-queries');
-            if (container.classList.contains('max-h-[140px]')) {
-                container.classList.remove('max-h-[140px]');
-                btn.innerText = 'Méně informací';
-            } else {
-                container.classList.add('max-h-[140px]');
-                btn.innerText = 'Další informace';
-            }
-        }
-
-        // --- CHART.JS A DETAILNÍ GRAFY LOGIKA ---
+        // --- CHART.JS INICIALIZACE A LOGIKA ---
         function initCharts() {
             if(trendChart) return; 
             
@@ -1149,44 +1273,24 @@
                     }]
                 },
                 options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
+                    responsive: true, maintainAspectRatio: false, 
                     plugins: { legend: { display: false } }, 
-                    scales: { 
-                        x: { grid: { display: false } }, 
-                        y: { 
-                            grid: { color: '#f3f4f6', drawBorder: false, borderDash: [5, 5] },
-                            beginAtZero: true,
-                            ticks: { maxTicksLimit: 5 }
-                        } 
-                    } 
+                    scales: { x: { grid: { display: false } }, y: { grid: { color: '#f3f4f6', drawBorder: false, borderDash: [5, 5] }, beginAtZero: true, ticks: { maxTicksLimit: 5 } } } 
                 }
             });
 
-            // 2. Doughnut Chart (Objevování podle Google)
+            // 2. Doughnut Chart
             const ctxDoughnut = document.getElementById('doughnutChart').getContext('2d');
             doughnutChart = new Chart(ctxDoughnut, {
                 type: 'doughnut',
                 data: {
                     labels: ['Vyhledávání Google – mobil', 'Vyhledávání Google – počítač', 'Mapy Google – mobil', 'Mapy Google – počítač'],
-                    datasets: [{ 
-                        data: [0, 0, 0, 0], 
-                        backgroundColor: ['#f59e0b', '#3b82f6', '#ef4444', '#22c55e'],
-                        borderWidth: 0 
-                    }]
+                    datasets: [{ data: [0, 0, 0, 0], backgroundColor: ['#f59e0b', '#3b82f6', '#ef4444', '#22c55e'], borderWidth: 0 }]
                 },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    cutout: '75%', 
-                    plugins: { 
-                        legend: { display: false },
-                        tooltip: { enabled: true }
-                    } 
-                }
+                options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false }, tooltip: { enabled: true } } }
             });
 
-            // 3. Line Chart (Virtuální prohlídka) - Sjednocený vizuál
+            // 3. Line Chart (Virtuální prohlídka)
             const ctxPhoto = document.getElementById('photoChart').getContext('2d');
             const gradientBlueSV = ctxPhoto.createLinearGradient(0, 0, 0, 300);
             gradientBlueSV.addColorStop(0, 'rgba(59, 130, 246, 0.2)'); 
@@ -1196,58 +1300,41 @@
                 type: 'line',
                 data: {
                     labels: ['leden', 'únor', 'březen', 'duben', 'květen', 'červen'],
-                    datasets: [
-                        { 
-                            label: 'Zobrazení virtuální prohlídky', 
-                            data: [0, 0, 0, 0, 0, 0], 
-                            borderColor: '#3b82f6', 
-                            backgroundColor: gradientBlueSV, 
-                            fill: true, 
-                            tension: 0, 
-                            pointBackgroundColor: '#ffffff',
-                            pointBorderColor: '#3b82f6',
-                            pointBorderWidth: 2,
-                            pointRadius: 4,
-                            pointHoverRadius: 6
-                        }
-                    ]
+                    datasets: [{ 
+                        label: 'Zobrazení virtuální prohlídky', data: [0, 0, 0, 0, 0, 0], borderColor: '#3b82f6', backgroundColor: gradientBlueSV, fill: true, tension: 0, 
+                        pointBackgroundColor: '#ffffff', pointBorderColor: '#3b82f6', pointBorderWidth: 2, pointRadius: 4, pointHoverRadius: 6
+                    }]
                 },
-                options: { 
-                    responsive: true, maintainAspectRatio: false, 
-                    plugins: { legend: { display: false } }, 
-                    scales: { 
-                        x: { grid: { display: false } }, 
-                        y: { 
-                            grid: { color: '#f3f4f6', drawBorder: false, borderDash: [5, 5] },
-                            beginAtZero: true,
-                            ticks: { maxTicksLimit: 5 }
-                        } 
-                    } 
-                }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid: { color: '#f3f4f6', drawBorder: false, borderDash: [5, 5] }, beginAtZero: true, ticks: { maxTicksLimit: 5 } } } }
             });
 
-            // 4. Bar Chart (Recenze) - Sjednocený vizuál
+            // 4. Bar Chart (Recenze)
             const ctxReview = document.getElementById('reviewChart').getContext('2d');
             reviewChart = new Chart(ctxReview, {
                 type: 'bar',
                 data: {
                     labels: ['leden', 'únor', 'březen', 'duben', 'květen', 'červen'],
-                    datasets: [
-                        { label: 'Počet recenzí', data: [0, 0, 0, 0, 0, 0], backgroundColor: '#3b82f6', borderRadius: 4, barPercentage: 0.6 }
-                    ]
+                    datasets: [{ label: 'Počet recenzí', data: [0, 0, 0, 0, 0, 0], backgroundColor: '#3b82f6', borderRadius: 4, barPercentage: 0.6 }]
                 },
-                options: { 
-                    responsive: true, maintainAspectRatio: false, 
-                    plugins: { legend: { display: false } }, 
-                    scales: { 
-                        x: { grid: { display: false } }, 
-                        y: { 
-                            beginAtZero: true,
-                            grid: { color: '#f3f4f6', drawBorder: false, borderDash: [5, 5] },
-                            ticks: { maxTicksLimit: 5 }
-                        } 
-                    } 
-                }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: '#f3f4f6', drawBorder: false, borderDash: [5, 5] }, ticks: { maxTicksLimit: 5 } } } }
+            });
+
+            // 5. Line Chart (NFC Trend)
+            const ctxNfc = document.getElementById('nfcTrendChart').getContext('2d');
+            const gradientGreenNfc = ctxNfc.createLinearGradient(0, 0, 0, 300);
+            gradientGreenNfc.addColorStop(0, 'rgba(22, 163, 74, 0.2)'); 
+            gradientGreenNfc.addColorStop(1, 'rgba(22, 163, 74, 0)');
+            
+            nfcTrendChart = new Chart(ctxNfc, {
+                type: 'line',
+                data: {
+                    labels: ['leden', 'únor', 'březen', 'duben', 'květen', 'červen'],
+                    datasets: [{ 
+                        label: 'Pípnutí NFC', data: [0, 0, 0, 0, 0, 0], borderColor: '#16a34a', backgroundColor: gradientGreenNfc, fill: true, tension: 0, 
+                        pointBackgroundColor: '#ffffff', pointBorderColor: '#16a34a', pointBorderWidth: 2, pointRadius: 4, pointHoverRadius: 6
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid: { color: '#f3f4f6', drawBorder: false, borderDash: [5, 5] }, beginAtZero: true, ticks: { maxTicksLimit: 5 } } } }
             });
 
             updateDetailedCharts();
@@ -1260,19 +1347,15 @@
                 const btn = document.getElementById('btn-metric-' + m);
                 if(btn) btn.className = 'whitespace-nowrap pb-3 border-b-2 font-medium text-sm transition-colors border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300';
             });
-            
             const activeBtn = document.getElementById('btn-metric-' + metric);
             if(activeBtn) activeBtn.className = 'whitespace-nowrap pb-3 border-b-2 font-bold text-sm transition-colors border-blue-500 text-blue-600';
-
             updateDetailedCharts();
         }
 
         function updateDetailedCharts() {
             if(!trendChart) return;
 
-            // 1. UPDATE LINIÉHO GRAFU
             const totalVal = chartDataStore[activeChartMetric];
-            
             let metricLabels = {
                 overview: 'Interakce s Firemním profilem',
                 calls: 'Hovory z Firemního profilu',
@@ -1282,9 +1365,7 @@
             };
             
             document.getElementById('chart-main-value').innerText = totalVal.toLocaleString();
-            document.getElementById('chart-main-label').innerText = metricLabels[activeChartMetric];
-
-            // Dynamická úprava osy X podle zvoleného období a chytřejší distribuce
+            
             const periodSelect = document.getElementById('period-select');
             let chartLabels = [];
             let distribution = [];
@@ -1328,37 +1409,31 @@
 
             trendChart.data.labels = chartLabels;
             let trendDataArray = distribution.map(factor => Math.round(totalVal * factor));
-            
             trendChart.data.datasets[0].data = trendDataArray;
             trendChart.update();
 
-            // Výpočet trendů
             let mockPrevPeriod = Math.round(totalVal * (0.8 + (Math.random() * 0.4)));
             let diff = totalVal - mockPrevPeriod;
             let pct = mockPrevPeriod > 0 ? Math.round((diff / mockPrevPeriod) * 100) : 0;
-            
             let trendHtml = pct >= 0 
                 ? `<span class="text-green-600 font-bold"><i class="fa-solid fa-arrow-trend-up"></i> +${pct}%</span> vs předchozí období`
-                : `<span class="text-red-600 font-bold"><i class="fa-solid fa-arrow-trend-down"></i> ${pct}%</span> vs předchozí období`;
+                : `<span class="text-red-600 font-bold"><i class="fa-solid fa-arrow-trend-down"></i> ${Math.abs(pct)}%</span> vs předchozí období`;
             document.getElementById('chart-trend-container').innerHTML = trendHtml;
 
-            // 2. UPDATE KRUHOVÉHO GRAFU & OBJEVOVÁNÍ
+            // Objevování
             let views = chartDataStore.views;
             document.getElementById('discovery-total-value').innerText = views.toLocaleString();
-            
             let mockPrevDisc = Math.round(views * (0.8 + (Math.random() * 0.4)));
             let diffDisc = views - mockPrevDisc;
             let pctDisc = mockPrevDisc > 0 ? Math.round((diffDisc / mockPrevDisc) * 100) : 0;
-            let discTrendHtml = pctDisc >= 0 
+            document.getElementById('discovery-trend-container').innerHTML = pctDisc >= 0 
                 ? `<span class="text-green-600"><i class="fa-solid fa-arrow-trend-up"></i> +${pctDisc}%</span>` 
-                : `<span class="text-red-600"><i class="fa-solid fa-arrow-trend-down"></i> ${pctDisc}%</span>`;
-            document.getElementById('discovery-trend-container').innerHTML = discTrendHtml;
+                : `<span class="text-red-600"><i class="fa-solid fa-arrow-trend-down"></i> ${Math.abs(pctDisc)}%</span>`;
             
             let v1 = Math.round(chartDataStore.s_mob || 0);
             let v2 = Math.round(chartDataStore.s_desk || 0);
             let v3 = Math.round(chartDataStore.m_mob || 0);
             let v4 = Math.round(chartDataStore.m_desk || 0);
-            
             doughnutChart.data.datasets[0].data = [v1, v2, v3, v4];
             doughnutChart.update();
 
@@ -1368,99 +1443,177 @@
             let pct4 = views > 0 ? Math.round((v4/views)*100) : 0;
 
             document.getElementById('doughnut-legend').innerHTML = `
-                <div>
-                    <p class="text-sm font-bold text-gray-900 flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> ${v1.toLocaleString()} • ${pct1} %</p>
-                    <p class="text-xs text-gray-500 ml-4.5">Vyhledávání Google – mobil</p>
-                </div>
-                <div>
-                    <p class="text-sm font-bold text-gray-900 flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> ${v2.toLocaleString()} • ${pct2} %</p>
-                    <p class="text-xs text-gray-500 ml-4.5">Vyhledávání Google – počítač</p>
-                </div>
-                <div>
-                    <p class="text-sm font-bold text-gray-900 flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> ${v3.toLocaleString()} • ${pct3} %</p>
-                    <p class="text-xs text-gray-500 ml-4.5">Mapy Google – mobil</p>
-                </div>
-                <div>
-                    <p class="text-sm font-bold text-gray-900 flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-green-500"></span> ${v4.toLocaleString()} • ${pct4} %</p>
-                    <p class="text-xs text-gray-500 ml-4.5">Mapy Google – počítač</p>
-                </div>
+                <div><p class="text-sm font-bold text-gray-900 flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> ${v1.toLocaleString()} • ${pct1} %</p><p class="text-xs text-gray-500 ml-4.5">Vyhledávání Google – mobil</p></div>
+                <div><p class="text-sm font-bold text-gray-900 flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> ${v2.toLocaleString()} • ${pct2} %</p><p class="text-xs text-gray-500 ml-4.5">Vyhledávání Google – počítač</p></div>
+                <div><p class="text-sm font-bold text-gray-900 flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> ${v3.toLocaleString()} • ${pct3} %</p><p class="text-xs text-gray-500 ml-4.5">Mapy Google – mobil</p></div>
+                <div><p class="text-sm font-bold text-gray-900 flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-green-500"></span> ${v4.toLocaleString()} • ${pct4} %</p><p class="text-xs text-gray-500 ml-4.5">Mapy Google – počítač</p></div>
             `;
 
-            // 3. UPDATE VYHLEDÁVACÍCH DOTAZŮ
+            // Dotazy
             let searches = chartDataStore.searches || (v1 + v2);
             document.getElementById('queries-total-value').innerText = searches.toLocaleString();
-
             let mockPrevSearch = Math.round(searches * (0.8 + (Math.random() * 0.4)));
             let diffSearch = searches - mockPrevSearch;
             let pctSearchTop = mockPrevSearch > 0 ? Math.round((diffSearch / mockPrevSearch) * 100) : 0;
-            let searchTrendHtml = pctSearchTop >= 0 
+            document.getElementById('queries-trend-container').innerHTML = pctSearchTop >= 0 
                 ? `<span class="text-green-600"><i class="fa-solid fa-arrow-trend-up"></i> +${pctSearchTop}%</span>` 
                 : `<span class="text-red-600"><i class="fa-solid fa-arrow-trend-down"></i> ${Math.abs(pctSearchTop)}%</span>`;
-            document.getElementById('queries-trend-container').innerHTML = searchTrendHtml;
 
-            const queryKeywords = [
-                "marketingová agentura praha", 
-                "tvorba webových stránek", 
-                "reklama na internetu", 
-                "seo optimalizace ceník", 
-                "správa sociálních sítí",
-                "grafické studio",
-                "brand identita",
-                "marketingové poradenství",
-                "online marketing",
-                "výkonnostní marketing",
-                "reklamní kampaň",
-                "ppc specialisté"
-            ];
-
+            const queryKeywords = ["marketingová agentura praha", "tvorba webových stránek", "reklama na internetu", "seo optimalizace ceník", "správa sociálních sítí", "grafické studio", "brand identita", "marketingové poradenství", "online marketing", "výkonnostní marketing", "reklamní kampaň", "ppc specialisté"];
             let qHtml = '';
             let remaining = searches;
             queryKeywords.forEach((kw, idx) => {
                 let qVol = Math.round(remaining * (0.4 - (idx * 0.03)));
                 if (qVol < 15 && idx > 2) qVol = "< 15";
-                
                 qHtml += `
                     <li class="flex justify-between items-center py-1">
-                        <div class="flex gap-4">
-                            <span class="text-sm text-gray-500 w-4">${idx + 1}.</span>
-                            <span class="text-sm text-gray-900">${kw}</span>
-                        </div>
+                        <div class="flex gap-4"><span class="text-sm text-gray-500 w-4">${idx + 1}.</span><span class="text-sm text-gray-900">${kw}</span></div>
                         <span class="text-sm font-medium text-gray-900">${qVol}</span>
                     </li>
                 `;
                 if(typeof qVol === 'number') remaining -= qVol;
             });
-
             document.getElementById('search-queries-list').innerHTML = qHtml;
-            document.getElementById('queries-list-container').classList.add('max-h-[140px]'); // Výchozí sbalení na Top 4-5
 
-            // 4. UPDATE PŘIDANÝCH GRAFŮ FOTEK A RECENZÍ
-            
-            // Virtuální prohlídka (Zobrazení)
+            // SV a Recenze
             let svTotal = chartDataStore.sv || 0;
             document.getElementById('sv-chart-value').innerText = svTotal.toLocaleString();
-            
             let mockPrevSv = Math.round(svTotal * (0.8 + (Math.random() * 0.4)));
             let diffSv = svTotal - mockPrevSv;
-            let pctSv = mockPrevSv > 0 ? Math.round((diffSv / mockPrevSv) * 100) : 0;
-            document.getElementById('sv-chart-trend').innerHTML = pctSv >= 0 
-                ? `<span class="text-green-600"><i class="fa-solid fa-arrow-trend-up"></i> +${pctSv}%</span>` 
-                : `<span class="text-red-600"><i class="fa-solid fa-arrow-trend-down"></i> ${Math.abs(pctSv)}%</span>`;
+            let pctSvTop = mockPrevSv > 0 ? Math.round((diffSv / mockPrevSv) * 100) : 0;
+            document.getElementById('sv-chart-trend').innerHTML = pctSvTop >= 0 ? `<span class="text-green-600"><i class="fa-solid fa-arrow-trend-up"></i> +${pctSvTop}%</span>` : `<span class="text-red-600"><i class="fa-solid fa-arrow-trend-down"></i> ${Math.abs(pctSvTop)}%</span>`;
 
             photoChart.data.labels = chartLabels;
-            let svDataArray = distribution.map(factor => Math.round(svTotal * factor));
-            photoChart.data.datasets[0].data = svDataArray;
+            photoChart.data.datasets[0].data = distribution.map(factor => Math.round(svTotal * factor));
             photoChart.update();
 
-            // Vývoj recenzí
             let revTotal = chartDataStore.reviews || 0;
             document.getElementById('review-chart-count-value').innerText = revTotal.toLocaleString();
             document.getElementById('review-chart-rating-value').innerText = parseFloat(chartDataStore.avgRating).toFixed(1);
 
             reviewChart.data.labels = chartLabels;
-            let revDataArray = distribution.map(factor => Math.round(revTotal * factor));
-            reviewChart.data.datasets[0].data = revDataArray;
+            reviewChart.data.datasets[0].data = distribution.map(factor => Math.round(revTotal * factor));
             reviewChart.update();
+            
+            // NFC Tabulka (Update po změně období)
+            renderNfcTable();
+            
+            // Oživení NFC Trendu
+            if (nfcTrendChart) {
+                // Přepočítá počet tapnutí podle násobitele filtru
+                let periodMultiplier = 1;
+                if (periodSelect) {
+                    switch(periodSelect.value) {
+                        case '30d': periodMultiplier = 1.0; break;
+                        case 'tm': periodMultiplier = 0.5; break;
+                        case 'mm': periodMultiplier = 1.1; break;
+                        case 'tr': periodMultiplier = 6.0; break;
+                        case 'mr': periodMultiplier = 12.5; break;
+                        case 'all': periodMultiplier = 35.0; break;
+                        case 'custom': periodMultiplier = 2.4; break;
+                    }
+                }
+                
+                // Určíme typ NFC z filtru
+                const nfcSelect = document.getElementById('nfc-product-select');
+                const selectedType = nfcSelect ? nfcSelect.value : 'all';
+                
+                // Sečteme pípnutí pro vybrané pobočky a vybraný typ v základním stavu
+                let baseTaps = mockNfcProducts
+                    .filter(p => sourceSelection.includes(p.branch))
+                    .filter(p => selectedType === 'all' || p.typeVal === selectedType)
+                    .reduce((sum, p) => sum + p.taps, 0);
+                    
+                let currentNfcTaps = Math.round(baseTaps * periodMultiplier);
+                
+                nfcTrendChart.data.labels = chartLabels;
+                nfcTrendChart.data.datasets[0].data = distribution.map(factor => Math.round(currentNfcTaps * factor));
+                nfcTrendChart.update();
+            }
+        }
+
+        function renderNfcTable() {
+            const tbody = document.getElementById('nfc-table-body');
+            if(!tbody) return;
+            
+            const searchInput = document.getElementById('nfc-table-search');
+            const query = searchInput ? searchInput.value.toLowerCase() : '';
+            
+            const nfcSelect = document.getElementById('nfc-product-select');
+            const selectedType = nfcSelect ? nfcSelect.value : 'all';
+            
+            const periodSelect = document.getElementById('period-select');
+            let multiplier = 1.0;
+            if (periodSelect) {
+                switch(periodSelect.value) {
+                    case '30d': multiplier = 1.0; break;
+                    case 'tm': multiplier = 0.5; break;
+                    case 'mm': multiplier = 1.1; break;
+                    case 'tr': multiplier = 6.0; break;
+                    case 'mr': multiplier = 12.5; break;
+                    case 'all': multiplier = 35.0; break;
+                    case 'custom': multiplier = 2.4; break;
+                }
+            }
+
+            // Filtrace podle poboček, typu a textu
+            let filteredProducts = mockNfcProducts.filter(p => {
+                const branchMatch = sourceSelection.includes(p.branch);
+                const typeMatch = selectedType === 'all' || p.typeVal === selectedType;
+                const searchMatch = p.name.toLowerCase().includes(query) || p.branch.toLowerCase().includes(query);
+                return branchMatch && typeMatch && searchMatch;
+            });
+            
+            // Spočítáme hodnoty pro zobrazení
+            let displayProducts = filteredProducts.map(p => {
+                return {
+                    ...p,
+                    displayTaps: Math.round(p.taps * multiplier),
+                    displayReviews: Math.round(p.reviews * multiplier)
+                }
+            });
+            
+            // Seřazení podle počtu pípnutí (nejlepší nahoře)
+            displayProducts.sort((a, b) => b.displayTaps - a.displayTaps);
+
+            let html = '';
+            let totalTaps = 0;
+            let totalReviews = 0;
+
+            displayProducts.forEach(p => {
+                totalTaps += p.displayTaps;
+                totalReviews += p.displayReviews;
+                let conv = p.displayTaps > 0 ? Math.round((p.displayReviews / p.displayTaps) * 100) : 0;
+                
+                let iconHtml = '';
+                if(p.typeVal === 'stojan') iconHtml = '<i class="fa-solid fa-desktop text-blue-500 bg-blue-50 p-1.5 rounded"></i>';
+                if(p.typeVal === 'vizitka') iconHtml = '<i class="fa-regular fa-id-badge text-purple-500 bg-purple-50 p-1.5 rounded"></i>';
+                if(p.typeVal === 'samolepka') iconHtml = '<i class="fa-solid fa-note-sticky text-orange-500 bg-orange-50 p-1.5 rounded"></i>';
+
+                html += `
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="py-3 px-5 text-sm font-bold text-gray-900">${p.name}</td>
+                        <td class="py-3 px-5 text-sm text-gray-600 flex items-center gap-2">${iconHtml} ${p.type}</td>
+                        <td class="py-3 px-5 text-sm text-gray-500"><i class="fa-solid fa-location-dot text-gray-300 mr-1"></i> ${p.branch}</td>
+                        <td class="py-3 px-5 text-sm font-bold text-gray-900 text-right">${p.displayTaps.toLocaleString()}</td>
+                        <td class="py-3 px-5 text-sm font-bold text-brand-600 text-right">${p.displayReviews.toLocaleString()}</td>
+                        <td class="py-3 px-5 text-sm font-bold text-gray-500 text-right">${conv}%</td>
+                    </tr>
+                `;
+            });
+            
+            if (displayProducts.length === 0) {
+                html = `<tr><td colspan="6" class="py-8 text-center text-sm text-gray-500">Žádné produkty nevyhovují filtru.</td></tr>`;
+            }
+
+            tbody.innerHTML = html;
+            
+            // Aktualizace KPI
+            if(document.getElementById('nfc-total-taps')) document.getElementById('nfc-total-taps').innerText = totalTaps.toLocaleString();
+            if(document.getElementById('nfc-total-reviews')) document.getElementById('nfc-total-reviews').innerText = totalReviews.toLocaleString();
+            
+            let totalConv = totalTaps > 0 ? Math.round((totalReviews / totalTaps) * 100) : 0;
+            if(document.getElementById('nfc-conversion')) document.getElementById('nfc-conversion').innerText = totalConv + '%';
         }
 
         // --- POROVNÁVÁNÍ (TAB 3) ---
@@ -1522,18 +1675,8 @@
             return {
                 labels: compareSelection.length > 0 ? compareSelection : ['Žádná data'],
                 datasets: [
-                    { 
-                        label: 'Zobrazení', 
-                        data: views, 
-                        backgroundColor: views.map(v => (v === maxViews && maxViews > 0) ? '#16a34a' : '#1f2937'), 
-                        borderRadius: 4 
-                    },
-                    { 
-                        label: 'Interakce', 
-                        data: ints, 
-                        backgroundColor: ints.map(v => (v === maxInts && maxInts > 0) ? '#22c55e' : '#9ca3af'), 
-                        borderRadius: 4 
-                    }
+                    { label: 'Zobrazení', data: views, backgroundColor: views.map(v => (v === maxViews && maxViews > 0) ? '#16a34a' : '#1f2937'), borderRadius: 4 },
+                    { label: 'Interakce', data: ints, backgroundColor: ints.map(v => (v === maxInts && maxInts > 0) ? '#22c55e' : '#9ca3af'), borderRadius: 4 }
                 ]
             };
         }
