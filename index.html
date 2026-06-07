@@ -289,7 +289,7 @@
                             </div>
                         </div>
                         <div class="card-minimal p-5 flex flex-col justify-between">
-                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-wifi mr-1 text-brand-500"></i> NFC Recenze</p>
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-wifi mr-1 text-gray-700"></i> NFC Recenze</p>
                             <div class="flex items-end justify-between">
                                 <div class="flex items-center gap-2">
                                     <p class="text-2xl font-bold text-gray-900" id="kpi-nfc">185</p>
@@ -388,7 +388,7 @@
 
                         <!-- KARTA 3: VIRTUÁLNÍ PROHLÍDKA A FOTO -->
                         <div class="card-minimal p-6 flex flex-col">
-                            <h3 class="text-sm font-bold text-gray-900 mb-6">Prohlížení podniku (Vizuál)</h3>
+                            <h3 class="text-sm font-bold text-gray-900 mb-6">Zobrazení fotografií a prohlídek</h3>
                             
                             <div class="mb-6">
                                 <div class="flex justify-between text-xs font-medium text-gray-600 mb-2">
@@ -419,7 +419,7 @@
                             
                             <div class="mb-6">
                                 <div class="flex justify-between text-xs font-medium text-gray-600 mb-2">
-                                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-wifi text-brand-500"></i> Získáno přes NFC produkty</span>
+                                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-wifi text-gray-700"></i> Získáno přes NFC produkty</span>
                                     <span class="font-bold text-gray-900" id="bar-nfc-val">57% (185)</span>
                                 </div>
                                 <div class="h-2 bg-gray-100 rounded-full overflow-hidden"><div id="bar-nfc-ratio" class="bg-brand-500 h-full animate-bar" style="width: 57%"></div></div>
@@ -437,6 +437,41 @@
                             <div id="top3-nfc-container" class="mt-auto pt-6 hidden">
                                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3"><i class="fa-solid fa-ranking-star mr-1 text-gray-300"></i> TOP 3 - Přes NFC</p>
                                 <div id="top3-nfc-list" class="space-y-2"></div>
+                            </div>
+                        </div>
+
+                        <!-- KARTA 5: ZÍSKANÉ RECENZE -->
+                        <div class="card-minimal p-6 flex flex-col">
+                            <h3 class="text-sm font-bold text-gray-900 mb-6">Získané recenze</h3>
+                            
+                            <div class="mb-6">
+                                <p class="text-[10px] uppercase font-bold text-gray-400 mb-1">Nové recenze</p>
+                                <p class="text-3xl font-bold text-gray-900" id="detail-rev-val">324</p>
+                            </div>
+                            
+                            <!-- TOP 3 Recenze -->
+                            <div id="top3-rev-container" class="mt-auto pt-6 hidden border-t border-gray-100">
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3"><i class="fa-solid fa-ranking-star mr-1 text-gray-300"></i> TOP 3 - Nové recenze</p>
+                                <div id="top3-rev-list" class="space-y-2"></div>
+                            </div>
+                        </div>
+
+                        <!-- KARTA 6: HODNOCENÍ -->
+                        <div class="card-minimal p-6 flex flex-col">
+                            <h3 class="text-sm font-bold text-gray-900 mb-6">Průměrné hodnocení</h3>
+                            
+                            <div class="mb-6">
+                                <p class="text-[10px] uppercase font-bold text-gray-400 mb-1">Průměr</p>
+                                <div class="flex items-center gap-2">
+                                    <p class="text-3xl font-bold text-gray-900" id="detail-rating-val">4.8</p>
+                                    <i class="fa-solid fa-star text-yellow-400 text-xl"></i>
+                                </div>
+                            </div>
+                            
+                            <!-- TOP 3 Hodnocení -->
+                            <div id="top3-rating-container" class="mt-auto pt-6 hidden border-t border-gray-100">
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3"><i class="fa-solid fa-ranking-star mr-1 text-gray-300"></i> TOP 3 - Nejlepší hodnocení</p>
+                                <div id="top3-rating-list" class="space-y-2"></div>
                             </div>
                         </div>
 
@@ -821,10 +856,18 @@
             document.getElementById('kpi-zobrazeni').innerText = formatK(sumViews);
             document.getElementById('kpi-interakce').innerText = sumInts.toLocaleString();
             document.getElementById('kpi-recenze').innerText = sumRev.toLocaleString();
-            document.getElementById('kpi-hodnoceni').innerHTML = `<i class="fa-solid fa-star"></i> ${avgRating}`;
+            document.getElementById('kpi-hodnoceni').innerHTML = `<i class="fa-solid fa-star text-yellow-400"></i> ${avgRating}`;
             document.getElementById('kpi-sv').innerText = formatK(sumSv);
             document.getElementById('kpi-nfc').innerText = sumNfc.toLocaleString();
             document.getElementById('kpi-nfc-percent').innerText = `${nfcPercent} % všech`;
+
+            // Zápis detailní karty Recenze
+            if (document.getElementById('detail-rev-val')) {
+                document.getElementById('detail-rev-val').innerText = sumRev.toLocaleString();
+            }
+            if (document.getElementById('detail-rating-val')) {
+                document.getElementById('detail-rating-val').innerText = avgRating;
+            }
 
             // Zápis do grafů viditelnosti
             let pctSearch = sumViews > 0 ? Math.round((sumSearch / sumViews) * 100) : 0;
@@ -879,7 +922,7 @@
             document.getElementById('bar-org-ratio').className = (orgReviews === maxNfc && maxNfc > 0) ? 'h-full animate-bar bg-brand-500' : 'h-full animate-bar bg-gray-300';
 
             // TOP 3 Dynamický rendering
-            function renderTop3(metricKey, containerId, listId, isK = false) {
+            function renderTop3(metricKey, containerId, listId, isK = false, isRating = false) {
                 const container = document.getElementById(containerId);
                 const list = document.getElementById(listId);
                 if (!container || !list) return;
@@ -891,7 +934,9 @@
                 container.classList.remove('hidden');
 
                 let branchData = sourceSelection.map(b => {
-                    return { name: b, value: mockDatabase[b][metricKey] * multiplier };
+                    // Hodnocení se nesmí násobit objemovým koeficientem
+                    let val = isRating ? mockDatabase[b][metricKey] : mockDatabase[b][metricKey] * multiplier;
+                    return { name: b, value: val };
                 });
 
                 branchData.sort((a, b) => b.value - a.value);
@@ -899,15 +944,23 @@
 
                 let html = '';
                 top3.forEach((item, index) => {
-                    let medal = index === 0 ? 'text-yellow-500' : (index === 1 ? 'text-gray-400' : 'text-amber-600');
-                    let val = isK ? formatK(Math.round(item.value)) : Math.round(item.value).toLocaleString();
+                    // Decentní barvy pro TOP 3 (místo zlaté/stříbrné)
+                    let medal = index === 0 ? 'text-gray-700' : (index === 1 ? 'text-gray-500' : 'text-gray-400');
+                    
+                    let valStr = '';
+                    if (isRating) {
+                        valStr = item.value.toFixed(1) + ' <i class="fa-solid fa-star text-yellow-400 text-[10px] ml-0.5"></i>';
+                    } else {
+                        valStr = isK ? formatK(Math.round(item.value)) : Math.round(item.value).toLocaleString();
+                    }
+
                     html += `
                         <div class="flex items-center justify-between text-sm py-0.5">
                             <div class="flex items-center gap-2 truncate pr-2">
                                 <span class="font-bold ${medal} w-4 text-right">${index + 1}.</span>
-                                <span class="text-gray-700 font-medium truncate">${item.name}</span>
+                                <span class="text-gray-600 font-medium truncate">${item.name}</span>
                             </div>
-                            <span class="font-bold text-gray-900">${val}</span>
+                            <span class="font-bold text-gray-900">${valStr}</span>
                         </div>
                     `;
                 });
@@ -918,6 +971,8 @@
             renderTop3('interactions', 'top3-ints-container', 'top3-ints-list', false);
             renderTop3('sv', 'top3-sv-container', 'top3-sv-list', true);
             renderTop3('nfc', 'top3-nfc-container', 'top3-nfc-list', false);
+            renderTop3('reviews', 'top3-rev-container', 'top3-rev-list', false);
+            renderTop3('rating', 'top3-rating-container', 'top3-rating-list', false, true);
 
             // Aktualizace textu "Chytrý souhrn"
             if(sourceSelection.length === 1) {
