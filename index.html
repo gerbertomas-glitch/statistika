@@ -68,9 +68,9 @@
         .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
 
         /* Leaderboard styling */
-        .medal-1 { color: #fbbf24; text-shadow: 0 2px 4px rgba(251, 191, 36, 0.3); }
-        .medal-2 { color: #9ca3af; text-shadow: 0 2px 4px rgba(156, 163, 175, 0.3); }
-        .medal-3 { color: #b45309; text-shadow: 0 2px 4px rgba(180, 83, 9, 0.3); }
+        .medal-1 { color: #16a34a; } /* Brand green pro 1. místo */
+        .medal-2 { color: #6b7280; } /* Šedá */
+        .medal-3 { color: #9ca3af; } /* Světle šedá */
     </style>
 </head>
 <body class="font-sans text-gray-900 h-screen flex overflow-hidden antialiased">
@@ -403,34 +403,7 @@
                             </div>
                         </div>
 
-                        <!-- KARTA 3: VIRTUÁLNÍ PROHLÍDKA A FOTO -->
-                        <div class="card-minimal p-6 flex flex-col">
-                            <h3 class="text-sm font-bold text-gray-900 mb-6">Zobrazení fotografií a prohlídek</h3>
-                            
-                            <div class="mb-6">
-                                <div class="flex justify-between text-xs font-medium text-gray-600 mb-2">
-                                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-street-view text-gray-700"></i> Virtuální prohlídka (Street View)</span>
-                                    <span class="font-bold text-gray-900" id="bar-sv-val">45% (15.2k)</span>
-                                </div>
-                                <div class="h-2 bg-gray-100 rounded-full overflow-hidden"><div id="bar-sv" class="bg-gray-800 h-full animate-bar" style="width: 45%"></div></div>
-                            </div>
-                            
-                            <div>
-                                <div class="flex justify-between text-xs font-medium text-gray-600 mb-2">
-                                    <span class="flex items-center gap-1.5"><i class="fa-regular fa-images text-gray-500"></i> Běžné fotografie</span>
-                                    <span class="font-bold text-gray-900" id="bar-foto-val">55% (22k)</span>
-                                </div>
-                                <div class="h-2 bg-gray-100 rounded-full overflow-hidden"><div id="bar-foto" class="bg-gray-400 h-full animate-bar" style="width: 55%"></div></div>
-                            </div>
-                            
-                            <!-- TOP 3 Street View -->
-                            <div id="top3-sv-container" class="mt-auto pt-6 hidden">
-                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3"><i class="fa-solid fa-ranking-star mr-1 text-gray-300"></i> TOP 3 - Street View</p>
-                                <div id="top3-sv-list" class="space-y-2"></div>
-                            </div>
-                        </div>
-
-                        <!-- KARTA 4: ZDROJE RECENZÍ A NFC -->
+                        <!-- KARTA 3: ZDROJE RECENZÍ A NFC -->
                         <div class="card-minimal p-6 flex flex-col">
                             <h3 class="text-sm font-bold text-gray-900 mb-6">Zdroje nových recenzí</h3>
                             
@@ -457,38 +430,28 @@
                             </div>
                         </div>
 
-                        <!-- KARTA 5: ZÍSKANÉ RECENZE -->
+                        <!-- KARTA 4: ZÍSKANÉ RECENZE A HODNOCENÍ -->
                         <div class="card-minimal p-6 flex flex-col">
-                            <h3 class="text-sm font-bold text-gray-900 mb-6">Získané recenze</h3>
+                            <h3 class="text-sm font-bold text-gray-900 mb-6">Získané recenze a hodnocení</h3>
                             
-                            <div class="mb-6">
-                                <p class="text-[10px] uppercase font-bold text-gray-400 mb-1">Nové recenze</p>
-                                <p class="text-3xl font-bold text-gray-900" id="detail-rev-val">324</p>
+                            <div class="mt-2 mb-6 grid grid-cols-2 gap-4">
+                                <div>
+                                    <p class="text-[10px] uppercase font-bold text-gray-400 mb-1">Nové recenze</p>
+                                    <p class="text-3xl font-bold text-gray-900" id="detail-rev-val">324</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] uppercase font-bold text-gray-400 mb-1">Průměr</p>
+                                    <div class="flex items-center gap-1.5">
+                                        <p class="text-3xl font-bold text-gray-900" id="detail-rating-val">4.8</p>
+                                        <i class="fa-solid fa-star text-yellow-400 text-lg"></i>
+                                    </div>
+                                </div>
                             </div>
                             
                             <!-- TOP 3 Recenze -->
                             <div id="top3-rev-container" class="mt-auto pt-6 hidden border-t border-gray-100">
                                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3"><i class="fa-solid fa-ranking-star mr-1 text-gray-300"></i> TOP 3 - Nové recenze</p>
                                 <div id="top3-rev-list" class="space-y-2"></div>
-                            </div>
-                        </div>
-
-                        <!-- KARTA 6: HODNOCENÍ -->
-                        <div class="card-minimal p-6 flex flex-col">
-                            <h3 class="text-sm font-bold text-gray-900 mb-6">Průměrné hodnocení</h3>
-                            
-                            <div class="mb-6">
-                                <p class="text-[10px] uppercase font-bold text-gray-400 mb-1">Průměr</p>
-                                <div class="flex items-center gap-2">
-                                    <p class="text-3xl font-bold text-gray-900" id="detail-rating-val">4.8</p>
-                                    <i class="fa-solid fa-star text-yellow-400 text-xl"></i>
-                                </div>
-                            </div>
-                            
-                            <!-- TOP 3 Hodnocení -->
-                            <div id="top3-rating-container" class="mt-auto pt-6 hidden border-t border-gray-100">
-                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3"><i class="fa-solid fa-ranking-star mr-1 text-gray-300"></i> TOP 3 - Nejlepší hodnocení</p>
-                                <div id="top3-rating-list" class="space-y-2"></div>
                             </div>
                         </div>
 
@@ -515,16 +478,10 @@
                                 <h2 class="text-4xl font-normal text-gray-900 tracking-tight" id="chart-main-value">413</h2>
                                 <div class="text-sm text-gray-800 mt-2 flex items-center gap-2 w-max relative group cursor-help">
                                     <span id="chart-main-label">Interakce s Firemním profilem</span>
-                                    <i class="fa-solid fa-circle-info text-gray-500 text-sm"></i>
-                                    
-                                    <!-- Nový Google Style Tooltip -->
-                                    <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 w-64 bg-white border border-gray-200 rounded-xl p-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20 shadow-xl cursor-default text-left">
-                                        <p class="font-bold text-sm text-gray-900 mb-1">Co jsou interakce?</p>
-                                        <p class="text-xs text-gray-600 font-normal leading-relaxed mb-3">Interakce je, když vám z vašeho Firemního profilu na Googlu někdo zavolá, zašle zprávu, provede rezervaci, zeptá se na trasu atd.</p>
-                                        <a href="#" class="text-sm font-medium text-blue-600 hover:text-blue-800 transition">Další informace</a>
-                                        
-                                        <!-- Zobáček tooltipu -->
-                                        <div class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-white border-b border-r border-gray-200 rotate-45"></div>
+                                    <i class="fa-solid fa-circle-info text-gray-400 text-xs"></i>
+                                    <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-56 bg-gray-900 text-white text-[10px] rounded py-1.5 px-2.5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 font-normal leading-relaxed text-center shadow-lg pointer-events-none">
+                                        Co jsou interakce?<br>Interakce je, když vám z vašeho Firemního profilu na Googlu někdo zavolá, zašle zprávu, provede rezervaci, zeptá se na trasu atd.<br><span class="text-blue-400 mt-1 block">Další informace</span>
+                                        <svg class="absolute text-gray-900 h-2 left-1/2 top-full transform -translate-x-1/2 -mt-px" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"/></svg>
                                     </div>
                                 </div>
                                 <p class="text-xs mt-1" id="chart-trend-container">
@@ -542,18 +499,14 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Objevování (Kruhový graf) -->
                         <div class="card-minimal p-6 flex flex-col">
-                            <div class="flex items-center gap-2 mb-6 w-max relative group cursor-help">
-                                <h3 class="text-sm font-medium text-gray-900">Jak vás uživatelé objevili</h3>
-                                <i class="fa-solid fa-circle-info text-gray-500 text-sm"></i>
-                                
-                                <!-- Nový Google Style Tooltip -->
-                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 w-64 bg-white border border-gray-200 rounded-xl p-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20 shadow-xl cursor-default text-left">
-                                    <p class="text-xs text-gray-600 font-normal leading-relaxed">Zobrazuje počet unikátních zobrazení vašeho profilu napříč službami Google Vyhledávání a Google Mapy v daném období.</p>
-                                    
-                                    <!-- Zobáček tooltipu -->
-                                    <div class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-white border-b border-r border-gray-200 rotate-45"></div>
+                            <h3 class="text-sm font-medium text-gray-900 mb-6 flex items-center gap-1.5 w-max relative group cursor-help">
+                                Jak vás uživatelé objevili 
+                                <i class="fa-solid fa-circle-info text-gray-400 text-xs"></i>
+                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-56 bg-gray-900 text-white text-[10px] rounded py-1.5 px-2.5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 font-normal leading-relaxed text-center shadow-lg pointer-events-none">
+                                    Počet unikátních zobrazení vašeho profilu napříč službami Google.
+                                    <svg class="absolute text-gray-900 h-2 left-1/2 top-full transform -translate-x-1/2 -mt-px" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"/></svg>
                                 </div>
-                            </div>
+                            </h3>
                             
                             <div class="mb-8">
                                 <div class="flex items-baseline gap-3 mb-1">
@@ -580,32 +533,28 @@
                         
                         <!-- Vyhledávací dotazy -->
                         <div class="card-minimal p-6 flex flex-col">
-                            <div class="flex items-center gap-2 mb-6 w-max relative group cursor-help">
-                                <h3 class="text-sm font-medium text-gray-900">Vyhledávací dotazy</h3>
-                                <i class="fa-solid fa-circle-info text-gray-500 text-sm"></i>
-                                
-                                <!-- Nový Google Style Tooltip -->
-                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 w-64 bg-white border border-gray-200 rounded-xl p-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20 shadow-xl cursor-default text-left">
-                                    <p class="text-xs text-gray-600 font-normal leading-relaxed">Klíčová slova a přesné fráze, po jejichž zadání uživatelé do vyhledávače narazili na váš profil.</p>
-                                    
-                                    <!-- Zobáček tooltipu -->
-                                    <div class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-white border-b border-r border-gray-200 rotate-45"></div>
+                            <h3 class="text-sm font-medium text-gray-900 mb-6 flex items-center gap-1.5 w-max relative group cursor-help">
+                                Vyhledávací dotazy 
+                                <i class="fa-solid fa-circle-info text-gray-400 text-xs"></i>
+                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-56 bg-gray-900 text-white text-[10px] rounded py-1.5 px-2.5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 font-normal leading-relaxed text-center shadow-lg pointer-events-none">
+                                    Klíčová slova a fráze, po jejichž zadání uživatelé narazili na váš profil.
+                                    <svg class="absolute text-gray-900 h-2 left-1/2 top-full transform -translate-x-1/2 -mt-px" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"/></svg>
                                 </div>
-                            </div>
+                            </h3>
                             
                             <div class="mb-8">
                                 <div class="flex items-baseline gap-3 mb-1">
                                     <h2 class="text-3xl font-normal text-gray-900" id="queries-total-value">123</h2>
                                     <div id="queries-trend-container" class="text-sm font-bold"></div>
                                 </div>
-                                <p class="text-sm text-gray-600 mt-1 flex items-center gap-1.5"><i class="fa-solid fa-magnifying-glass text-xs"></i> Vyhledávání, která spustila zobrazení vašeho Firemního profilu</p>
+                                <p class="text-sm text-gray-600 mt-1 flex items-center gap-1.5"><i class="fa-solid fa-magnifying-glass text-xs"></i> Vyhledávání, která spustila zobrazení vašeho profilu</p>
                             </div>
                             
                             <div class="flex-1 flex flex-col">
                                 <h4 class="font-medium text-gray-900 text-sm">Přehled vyhledání</h4>
                                 <p class="text-xs text-gray-500 mb-4">Nejčastější vyhledávací dotazy v síti Google</p>
                                 
-                                <div class="space-y-3 flex-1">
+                                <div class="space-y-3 flex-1 overflow-hidden transition-all duration-300 max-h-[140px]" id="queries-list-container">
                                     <ul id="search-queries-list" class="space-y-3">
                                         <!-- Dotazy z JS -->
                                     </ul>
@@ -614,6 +563,66 @@
                                 <div class="mt-6 pt-4 border-t border-gray-100 text-center">
                                     <button id="btn-more-queries" onclick="toggleQueries()" class="text-sm font-medium text-blue-600 hover:text-blue-800 transition border border-gray-200 rounded px-6 py-2 bg-white shadow-sm">Další informace</button>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KARTY PROHLÍDKY A RECENZÍ SEŘAZENÉ POD SEBOU -->
+                    <div class="grid grid-cols-1 gap-6 mt-6">
+                        <!-- PŘIDANÁ KARTA 1: ZOBRAZENÍ VIRTUÁLNÍ PROHLÍDKY -->
+                        <div class="card-minimal p-6 flex flex-col">
+                            <h3 class="text-sm font-medium text-gray-900 mb-6 flex items-center gap-1.5 w-max relative group cursor-help">
+                                Zobrazení virtuální prohlídky
+                                <i class="fa-solid fa-circle-info text-gray-400 text-xs"></i>
+                                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-56 bg-gray-900 text-white text-[10px] rounded py-1.5 px-2.5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 font-normal leading-relaxed text-center shadow-lg pointer-events-none">
+                                    Počet zobrazení vaší virtuální prohlídky (Street View) na Google Mapách a ve Vyhledávání.
+                                    <svg class="absolute text-gray-900 h-2 left-1/2 top-full transform -translate-x-1/2 -mt-px" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"/></svg>
+                                </div>
+                            </h3>
+                            
+                            <div class="mb-8">
+                                <div class="flex items-baseline gap-3 mb-1">
+                                    <h2 class="text-3xl font-normal text-gray-900" id="sv-chart-value">0</h2>
+                                    <div id="sv-chart-trend" class="text-sm font-bold"></div>
+                                </div>
+                                <p class="text-sm text-gray-600 mt-1 flex items-center gap-1.5"><i class="fa-solid fa-street-view text-xs"></i> Zobrazení Street View celkem</p>
+                            </div>
+                            
+                            <div class="relative h-72 w-full mt-auto">
+                                <canvas id="photoChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- PŘIDANÁ KARTA 2: VÝVOJ RECENZÍ A HODNOCENÍ -->
+                        <div class="card-minimal p-6 flex flex-col">
+                            <div class="flex justify-between items-start mb-6">
+                                <h3 class="text-sm font-medium text-gray-900 flex items-center gap-1.5 w-max relative group cursor-help">
+                                    Vývoj počtu recenzí a hodnocení
+                                    <i class="fa-solid fa-circle-info text-gray-400 text-xs"></i>
+                                    <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-56 bg-gray-900 text-white text-[10px] rounded py-1.5 px-2.5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 font-normal leading-relaxed text-center shadow-lg pointer-events-none">
+                                        Počet nově získaných recenzí v daném období a vaše průměrné hodnocení hvězdičkami.
+                                        <svg class="absolute text-gray-900 h-2 left-1/2 top-full transform -translate-x-1/2 -mt-px" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"/></svg>
+                                    </div>
+                                </h3>
+                                
+                                <div class="flex flex-col items-end">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-3xl font-bold text-gray-900" id="review-chart-rating-value">4.8</span>
+                                        <i class="fa-solid fa-star text-yellow-400 text-2xl"></i>
+                                    </div>
+                                    <p class="text-[10px] text-gray-500 uppercase tracking-wider mt-1 font-bold">Průměr</p>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-8 -mt-4">
+                                <div class="flex items-baseline gap-3 mb-1">
+                                    <h2 class="text-3xl font-normal text-gray-900" id="review-chart-count-value">0</h2>
+                                </div>
+                                <p class="text-sm text-gray-600 mt-1 flex items-center gap-1.5"><i class="fa-regular fa-comment text-xs"></i> Nové recenze celkem</p>
+                            </div>
+                            
+                            <div class="relative h-72 w-full mt-auto">
+                                <canvas id="reviewChart"></canvas>
                             </div>
                         </div>
                     </div>
@@ -648,41 +657,7 @@
                             </div>
                             <div class="flex-1 overflow-y-auto custom-scrollbar p-2">
                                 <ul class="space-y-1" id="leaderboard-list">
-                                    <li class="flex items-center justify-between p-3 rounded-lg bg-yellow-50/50 border border-yellow-100">
-                                        <div class="flex items-center gap-3">
-                                            <span class="font-bold text-lg w-5 text-center medal-1">1.</span>
-                                            <div><p class="text-sm font-bold text-gray-900">Brno</p><p class="text-[10px] text-gray-500">Hodnocení 4.9</p></div>
-                                        </div>
-                                        <span class="font-bold text-gray-900 text-sm">3,420</span>
-                                    </li>
-                                    <li class="flex items-center justify-between p-3 rounded-lg bg-gray-50 border border-gray-100">
-                                        <div class="flex items-center gap-3">
-                                            <span class="font-bold text-lg w-5 text-center medal-2">2.</span>
-                                            <div><p class="text-sm font-bold text-gray-900">Praha 13</p><p class="text-[10px] text-gray-500">Hodnocení 4.8</p></div>
-                                        </div>
-                                        <span class="font-bold text-gray-900 text-sm">2,810</span>
-                                    </li>
-                                    <li class="flex items-center justify-between p-3 rounded-lg bg-orange-50/30 border border-orange-50">
-                                        <div class="flex items-center gap-3">
-                                            <span class="font-bold text-lg w-5 text-center medal-3">3.</span>
-                                            <div><p class="text-sm font-bold text-gray-900">Ostrava</p><p class="text-[10px] text-gray-500">Hodnocení 4.5</p></div>
-                                        </div>
-                                        <span class="font-bold text-gray-900 text-sm">1,940</span>
-                                    </li>
-                                    <li class="flex items-center justify-between p-3">
-                                        <div class="flex items-center gap-3">
-                                            <span class="font-bold text-sm text-gray-400 w-5 text-center">4.</span>
-                                            <p class="text-sm font-medium text-gray-700">Liberec</p>
-                                        </div>
-                                        <span class="font-medium text-gray-700 text-sm">1,402</span>
-                                    </li>
-                                    <li class="flex items-center justify-between p-3">
-                                        <div class="flex items-center gap-3">
-                                            <span class="font-bold text-sm text-gray-400 w-5 text-center">5.</span>
-                                            <p class="text-sm font-medium text-gray-700">Plzeň</p>
-                                        </div>
-                                        <span class="font-medium text-gray-700 text-sm">950</span>
-                                    </li>
+                                    <!-- Leaderboard HTML -->
                                 </ul>
                             </div>
                         </div>
@@ -750,17 +725,11 @@
         </main>
     </div>
 
-    <!-- TOAST NOTIFIKACE -->
-    <div id="toast" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-5 py-3 rounded-lg shadow-xl opacity-0 pointer-events-none transition-all duration-300 z-50 flex items-center gap-3">
-        <i class="fa-solid fa-circle-check text-brand-500"></i>
-        <span id="toast-message" class="text-sm font-medium">Akce byla úspěšná</span>
-    </div>
-
     <script>
         // Data pro pobočky
         const branches = ['Praha 13', 'Liberec', 'Brno', 'Ostrava', 'Plzeň', 'Olomouc', 'České Budějovice', 'Hradec Králové', 'Pardubice', 'Zlín'];
         
-        // Simulovaná databáze pro každou pobočku
+        // Simulovaná databáze
         const mockDatabase = {
             'Praha 13': { views: 45200, interactions: 4120, reviews: 85, rating: 4.8, sv: 15200, photos: 22000, nfc: 45, search: 30000, maps: 15200, mob: 80, desk: 20, web: 2100, dir: 1200, call: 820 },
             'Liberec': { views: 18500, interactions: 1500, reviews: 32, rating: 4.6, sv: 4500, photos: 8000, nfc: 15, search: 12000, maps: 6500, mob: 75, desk: 25, web: 800, dir: 400, call: 300 },
@@ -777,11 +746,10 @@
         // Globální proměnné
         let compareSelection = ['Praha 13', 'Liberec', 'Brno', 'Ostrava', 'Plzeň'];
         let sourceSelection = [...branches]; 
-        let chartDataStore = { overview: 0, calls: 0, bookings: 0, directions: 0, clicks: 0, views: 0 };
+        let chartDataStore = { overview: 0, calls: 0, bookings: 0, directions: 0, clicks: 0, views: 0, avgRating: "0.0", sv: 0, reviews: 0 };
         let activeChartMetric = 'overview';
-        let trendChart, doughnutChart, compareChart;
+        let trendChart, doughnutChart, photoChart, reviewChart, compareChart;
         let toastTimeout;
-        let isQueriesExpanded = false;
 
         // TABS Logika a Menu
         function toggleMenu(menuId) {
@@ -789,19 +757,6 @@
             if(submenu) {
                 submenu.classList.toggle('max-h-0'); submenu.classList.toggle('opacity-0');
                 submenu.classList.toggle('max-h-40'); submenu.classList.toggle('opacity-100'); submenu.classList.toggle('py-1');
-            }
-        }
-
-        function toggleMobileMenu() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('mobile-overlay');
-            sidebar.classList.toggle('-translate-x-full');
-            if (overlay.classList.contains('hidden')) {
-                overlay.classList.remove('hidden');
-                setTimeout(() => overlay.classList.remove('opacity-0'), 10);
-            } else {
-                overlay.classList.add('opacity-0');
-                setTimeout(() => overlay.classList.add('hidden'), 300);
             }
         }
 
@@ -898,7 +853,6 @@
             });
         }
 
-        // --- ZMĚNA OBDOBÍ A ZOBRAZENÍ VLASTNÍCH DATUMŮ ---
         function handlePeriodChange() {
             const period = document.getElementById('period-select').value;
             const customFields = document.getElementById('custom-date-fields');
@@ -906,8 +860,6 @@
             if (period === 'custom') {
                 customFields.classList.remove('hidden');
                 customFields.classList.add('flex');
-                
-                // Nastaví výchozí hodnoty na dnešek, pokud nejsou vyplněné
                 const today = new Date().toISOString().split('T')[0];
                 if (!document.getElementById('date-from').value) document.getElementById('date-from').value = today;
                 if (!document.getElementById('date-to').value) document.getElementById('date-to').value = today;
@@ -1036,22 +988,6 @@
                 document.getElementById('bar-act-hovory').className = (sumCall === maxAct && maxAct > 0) ? 'h-full transition-all duration-500 bg-brand-500' : 'h-full transition-all duration-500 bg-gray-300';
             }
 
-            let totalVisual = sumSv + sumPhotos;
-            let pctSv = totalVisual > 0 ? Math.round((sumSv / totalVisual) * 100) : 0;
-            let pctPhotos = 100 - pctSv;
-            if(document.getElementById('bar-sv-val')) document.getElementById('bar-sv-val').innerText = `${pctSv}% (${formatK(sumSv)})`;
-            if(document.getElementById('bar-foto-val')) document.getElementById('bar-foto-val').innerText = `${pctPhotos}% (${formatK(sumPhotos)})`;
-            
-            let maxVis = Math.max(sumSv, sumPhotos);
-            if(document.getElementById('bar-sv')) {
-                document.getElementById('bar-sv').style.width = `${pctSv}%`;
-                document.getElementById('bar-sv').className = (sumSv === maxVis && maxVis > 0) ? 'h-full animate-bar bg-brand-500' : 'h-full animate-bar bg-gray-300';
-            }
-            if(document.getElementById('bar-foto')) {
-                document.getElementById('bar-foto').style.width = `${pctPhotos}%`;
-                document.getElementById('bar-foto').className = (sumPhotos === maxVis && maxVis > 0) ? 'h-full animate-bar bg-brand-500' : 'h-full animate-bar bg-gray-300';
-            }
-
             let orgReviews = sumRev - sumNfc;
             if(document.getElementById('bar-nfc-val')) document.getElementById('bar-nfc-val').innerText = `${nfcPercent}% (${sumNfc})`;
             if(document.getElementById('bar-org-val')) document.getElementById('bar-org-val').innerText = `${orgPercent}% (${orgReviews})`;
@@ -1096,11 +1032,14 @@
                 s_desk: sumSearch * (avgDesk/100),
                 m_mob: sumMaps * (avgMob/100),
                 m_desk: sumMaps * (avgDesk/100),
-                searches: sumSearch + sumMaps
+                searches: sumSearch + sumMaps,
+                sv: sumSv,
+                reviews: sumRev,
+                avgRating: avgRating
             };
 
             // Aktualizace grafů (Tab 2 a 3)
-            if (trendChart && doughnutChart) {
+            if (trendChart && doughnutChart && photoChart && reviewChart) {
                 updateDetailedCharts();
             }
             if (compareChart) {
@@ -1165,17 +1104,17 @@
             list.innerHTML = html;
         }
 
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            if(!toast) return;
-            document.getElementById('toast-message').innerText = message;
-            toast.classList.remove('opacity-0', 'translate-y-4');
-            toast.classList.add('opacity-100', 'translate-y-0');
-            clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => {
-                toast.classList.remove('opacity-100', 'translate-y-0');
-                toast.classList.add('opacity-0', 'translate-y-4');
-            }, 3000);
+        // Toggles pro vyhledávací dotazy
+        function toggleQueries() {
+            const container = document.getElementById('queries-list-container');
+            const btn = document.getElementById('btn-more-queries');
+            if (container.classList.contains('max-h-[140px]')) {
+                container.classList.remove('max-h-[140px]');
+                btn.innerText = 'Méně informací';
+            } else {
+                container.classList.add('max-h-[140px]');
+                btn.innerText = 'Další informace';
+            }
         }
 
         // --- CHART.JS A DETAILNÍ GRAFY LOGIKA ---
@@ -1247,6 +1186,70 @@
                 }
             });
 
+            // 3. Line Chart (Virtuální prohlídka) - Sjednocený vizuál
+            const ctxPhoto = document.getElementById('photoChart').getContext('2d');
+            const gradientBlueSV = ctxPhoto.createLinearGradient(0, 0, 0, 300);
+            gradientBlueSV.addColorStop(0, 'rgba(59, 130, 246, 0.2)'); 
+            gradientBlueSV.addColorStop(1, 'rgba(59, 130, 246, 0)');
+            
+            photoChart = new Chart(ctxPhoto, {
+                type: 'line',
+                data: {
+                    labels: ['leden', 'únor', 'březen', 'duben', 'květen', 'červen'],
+                    datasets: [
+                        { 
+                            label: 'Zobrazení virtuální prohlídky', 
+                            data: [0, 0, 0, 0, 0, 0], 
+                            borderColor: '#3b82f6', 
+                            backgroundColor: gradientBlueSV, 
+                            fill: true, 
+                            tension: 0, 
+                            pointBackgroundColor: '#ffffff',
+                            pointBorderColor: '#3b82f6',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }
+                    ]
+                },
+                options: { 
+                    responsive: true, maintainAspectRatio: false, 
+                    plugins: { legend: { display: false } }, 
+                    scales: { 
+                        x: { grid: { display: false } }, 
+                        y: { 
+                            grid: { color: '#f3f4f6', drawBorder: false, borderDash: [5, 5] },
+                            beginAtZero: true,
+                            ticks: { maxTicksLimit: 5 }
+                        } 
+                    } 
+                }
+            });
+
+            // 4. Bar Chart (Recenze) - Sjednocený vizuál
+            const ctxReview = document.getElementById('reviewChart').getContext('2d');
+            reviewChart = new Chart(ctxReview, {
+                type: 'bar',
+                data: {
+                    labels: ['leden', 'únor', 'březen', 'duben', 'květen', 'červen'],
+                    datasets: [
+                        { label: 'Počet recenzí', data: [0, 0, 0, 0, 0, 0], backgroundColor: '#3b82f6', borderRadius: 4, barPercentage: 0.6 }
+                    ]
+                },
+                options: { 
+                    responsive: true, maintainAspectRatio: false, 
+                    plugins: { legend: { display: false } }, 
+                    scales: { 
+                        x: { grid: { display: false } }, 
+                        y: { 
+                            beginAtZero: true,
+                            grid: { color: '#f3f4f6', drawBorder: false, borderDash: [5, 5] },
+                            ticks: { maxTicksLimit: 5 }
+                        } 
+                    } 
+                }
+            });
+
             updateDetailedCharts();
         }
 
@@ -1261,15 +1264,6 @@
             const activeBtn = document.getElementById('btn-metric-' + metric);
             if(activeBtn) activeBtn.className = 'whitespace-nowrap pb-3 border-b-2 font-bold text-sm transition-colors border-blue-500 text-blue-600';
 
-            updateDetailedCharts();
-        }
-
-        function toggleQueries() {
-            isQueriesExpanded = !isQueriesExpanded;
-            const btn = document.getElementById('btn-more-queries');
-            if (btn) {
-                btn.innerText = isQueriesExpanded ? 'Méně informací' : 'Další informace';
-            }
             updateDetailedCharts();
         }
 
@@ -1290,7 +1284,7 @@
             document.getElementById('chart-main-value').innerText = totalVal.toLocaleString();
             document.getElementById('chart-main-label').innerText = metricLabels[activeChartMetric];
 
-            // Dynamická úprava osy X podle zvoleného období
+            // Dynamická úprava osy X podle zvoleného období a chytřejší distribuce
             const periodSelect = document.getElementById('period-select');
             let chartLabels = [];
             let distribution = [];
@@ -1303,7 +1297,6 @@
                         break;
                     case 'tm': 
                     case 'mm': 
-                        // Generování dnů v měsíci pro detailní graf
                         chartLabels = Array.from({length: 30}, (_, i) => (i + 1) + '.');
                         let baseDist = [0.03,0.04,0.02,0.03,0.05,0.06,0.02, 0.03,0.04,0.03,0.03,0.05,0.04,0.02, 0.02,0.03,0.04,0.05,0.04,0.02,0.02, 0.03,0.04,0.04,0.03,0.05,0.04,0.03,0.02,0.01];
                         let sumBase = baseDist.reduce((a,b) => a+b, 0);
@@ -1394,8 +1387,16 @@
             `;
 
             // 3. UPDATE VYHLEDÁVACÍCH DOTAZŮ
-            let searches = v1 + v2;
+            let searches = chartDataStore.searches || (v1 + v2);
             document.getElementById('queries-total-value').innerText = searches.toLocaleString();
+
+            let mockPrevSearch = Math.round(searches * (0.8 + (Math.random() * 0.4)));
+            let diffSearch = searches - mockPrevSearch;
+            let pctSearchTop = mockPrevSearch > 0 ? Math.round((diffSearch / mockPrevSearch) * 100) : 0;
+            let searchTrendHtml = pctSearchTop >= 0 
+                ? `<span class="text-green-600"><i class="fa-solid fa-arrow-trend-up"></i> +${pctSearchTop}%</span>` 
+                : `<span class="text-red-600"><i class="fa-solid fa-arrow-trend-down"></i> ${Math.abs(pctSearchTop)}%</span>`;
+            document.getElementById('queries-trend-container').innerHTML = searchTrendHtml;
 
             const queryKeywords = [
                 "marketingová agentura praha", 
@@ -1405,17 +1406,16 @@
                 "správa sociálních sítí",
                 "grafické studio",
                 "brand identita",
-                "tvorba loga",
-                "ppc reklama",
-                "seo konzultant",
+                "marketingové poradenství",
                 "online marketing",
-                "webdesign"
+                "výkonnostní marketing",
+                "reklamní kampaň",
+                "ppc specialisté"
             ];
 
             let qHtml = '';
             let remaining = searches;
             queryKeywords.forEach((kw, idx) => {
-                if(!isQueriesExpanded && idx > 4) return;
                 let qVol = Math.round(remaining * (0.4 - (idx * 0.03)));
                 if (qVol < 15 && idx > 2) qVol = "< 15";
                 
@@ -1428,10 +1428,39 @@
                         <span class="text-sm font-medium text-gray-900">${qVol}</span>
                     </li>
                 `;
-                if(typeof qVol === 'number' && qVol > 0) remaining -= qVol;
+                if(typeof qVol === 'number') remaining -= qVol;
             });
 
             document.getElementById('search-queries-list').innerHTML = qHtml;
+            document.getElementById('queries-list-container').classList.add('max-h-[140px]'); // Výchozí sbalení na Top 4-5
+
+            // 4. UPDATE PŘIDANÝCH GRAFŮ FOTEK A RECENZÍ
+            
+            // Virtuální prohlídka (Zobrazení)
+            let svTotal = chartDataStore.sv || 0;
+            document.getElementById('sv-chart-value').innerText = svTotal.toLocaleString();
+            
+            let mockPrevSv = Math.round(svTotal * (0.8 + (Math.random() * 0.4)));
+            let diffSv = svTotal - mockPrevSv;
+            let pctSv = mockPrevSv > 0 ? Math.round((diffSv / mockPrevSv) * 100) : 0;
+            document.getElementById('sv-chart-trend').innerHTML = pctSv >= 0 
+                ? `<span class="text-green-600"><i class="fa-solid fa-arrow-trend-up"></i> +${pctSv}%</span>` 
+                : `<span class="text-red-600"><i class="fa-solid fa-arrow-trend-down"></i> ${Math.abs(pctSv)}%</span>`;
+
+            photoChart.data.labels = chartLabels;
+            let svDataArray = distribution.map(factor => Math.round(svTotal * factor));
+            photoChart.data.datasets[0].data = svDataArray;
+            photoChart.update();
+
+            // Vývoj recenzí
+            let revTotal = chartDataStore.reviews || 0;
+            document.getElementById('review-chart-count-value').innerText = revTotal.toLocaleString();
+            document.getElementById('review-chart-rating-value').innerText = parseFloat(chartDataStore.avgRating).toFixed(1);
+
+            reviewChart.data.labels = chartLabels;
+            let revDataArray = distribution.map(factor => Math.round(revTotal * factor));
+            reviewChart.data.datasets[0].data = revDataArray;
+            reviewChart.update();
         }
 
         // --- POROVNÁVÁNÍ (TAB 3) ---
